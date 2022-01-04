@@ -15,6 +15,7 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 #include "shader.hpp"
+#include "layout.hpp"
 
 using namespace std;
 using namespace glm;
@@ -61,5 +62,7 @@ private:
     //
     Shader shader_UI;
     GLuint VAO_UI, VBO_UI;
-    void initUIShader();
+    Layout layout0;
+    void initUI();
+    void setLayouts();
 };

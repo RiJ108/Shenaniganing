@@ -48,10 +48,14 @@ BOOL Window::init() {
     //**Init and load FreeType (load glyphes)
     initFT();
 
+    //**Init of the UI shader
+    initUI();
+
     return true;
 }
 
 BOOL Window::loop() {
+    setLayouts();
     while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
         currentFrame = glfwGetTime();
@@ -67,12 +71,43 @@ BOOL Window::loop() {
         renderText(shader_TXT, " x = " + to_string(CURSOR_POS.x), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
         renderText(shader_TXT, " y = " + to_string(CURSOR_POS.y), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
 
+        //**UI rendering
+        shader_UI.use();
+        glBindVertexArray(VAO_UI);
+        glDrawArrays(GL_POINTS, 0, layout0.getButtonsSize());
+        glBindVertexArray(0);
+
         //**Refresh buffers and polling
         glfwSwapBuffers(wHandler);
         glfwPollEvents();
     }
+    glDeleteVertexArrays(1, &VAO_UI);
+    glDeleteVertexArrays(1, &VAO_TXT);
+    glDeleteBuffers(1, &VBO_UI);
+    glDeleteBuffers(1, &VBO_TXT);
+
     glfwTerminate();
     return true;
+}
+
+void Window::setLayouts() {
+    layout0.addButton(vec2(0.0f, 0.15f),
+        vec2(0.5f, 0.3f),
+        vec3(0.2f, 1.0f, 0.2f),
+        "Play Button");
+
+    layout0.addButton(vec2(0.0f, -0.1f),
+        vec2(0.2f, 0.1f),
+        vec3(1.0f, 0.2f, 0.2f),
+        "Exit Button");
+
+    layout0.allocData();
+
+    glBindVertexArray(VAO_UI);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_UI);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 7 * layout0.getButtonsSize(), NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 7 * layout0.getButtonsSize(), layout0.data);
 }
 
 void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -80,12 +115,21 @@ void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     CURSOR_POS.y = -2.0f * (ypos - (WINDOW_SIZE.y / 2.0)) / WINDOW_SIZE.y;
 }
 
-void Window::initUIShader() {
+void Window::initUI() {
     shader_UI = Shader("resources/shader/vShaderSourceUI.vs", "resources/shader/gShaderSourceUI.gs", "resources/shader/fShaderSourceUI.fs");
     glGenBuffers(1, &VBO_UI);
     glGenVertexArrays(1, &VAO_UI);
     glBindVertexArray(VAO_UI);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_UI);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Window::initFT() {

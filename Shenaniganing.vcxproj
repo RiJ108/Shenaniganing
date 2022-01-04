@@ -153,6 +153,7 @@
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="layout.hpp" />
     <ClInclude Include="perlinNoise.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="window.hpp" />
