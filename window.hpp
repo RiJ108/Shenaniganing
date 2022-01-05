@@ -34,8 +34,8 @@ public:
     BOOL init();
     BOOL loop();
 
-    static void functionPtrTest(int);
-    static void exitCallBack(int aWHandler);
+    static void functionPtrTest(Window* aWindowPtr);
+    static void exitCallBack(Window* aWindowPtr);
 
 protected:
     void processButtons(int button, int action, int mods);

@@ -143,12 +143,14 @@ void Window::setLayouts() {
     layouts.push_back(*tmp);
 }
 
-void Window::functionPtrTest(int) {
+void Window::functionPtrTest(Window* aWindowPtr) {
     cout << __FUNCTION__ << endl;
 }
 
-void Window::exitCallBack(int aWHandler) {
-    glfwSetWindowShouldClose((GLFWwindow*)aWHandler, true);
+void Window::exitCallBack(Window* aWindowPtr) {
+    cout << __FUNCTION__ << endl;
+    glfwSetWindowShouldClose(aWindowPtr->wHandler, true);
+
 }
 
 Layout* Window::getActiveLayoutPtr() {
@@ -171,10 +173,13 @@ void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int hei
 }
 
 void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods) {
-    //cout << __FUNCTION__ << endl;
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
-    if (windowPtr->layouts.at(0).buttons.at(1).active) {
-        glfwSetWindowShouldClose(aWHandler, true);
+    Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
+    Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
+    if (activeButtonPtr) {
+        cout << __FUNCTION__ << endl;
+        cout << "  " << activeButtonPtr->name << endl;
+        activeButtonPtr->functionPtr(windowPtr);
     }
 }
 
