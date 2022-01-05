@@ -101,7 +101,7 @@ void Window::checkUI() {
         buttonPtr = &layoutActivePtr->buttons.at(i);
         if (buttonPtr->isCursorPosIn(cursorPosX, cursorPosY)) {
             if (!buttonPtr->active) {
-                cout << "Cursor in " << buttonPtr->name << " button." << endl;
+                //cout << "Cursor in " << buttonPtr->name << " button." << endl;
                 glBindBuffer(GL_ARRAY_BUFFER, layoutActivePtr->getVBO());
                 glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->onColor[0]);
                 glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -110,7 +110,7 @@ void Window::checkUI() {
         }
         else {
             if (buttonPtr->active) {
-                cout << "Cursor out " << buttonPtr->name << " button." << endl;
+                //cout << "Cursor out " << buttonPtr->name << " button." << endl;
                 glBindBuffer(GL_ARRAY_BUFFER, layoutActivePtr->getVBO());
                 glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->offColor[0]);
                 glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -161,10 +161,6 @@ Layout* Window::getActiveLayoutPtr() {
     return nullptr;
 }
 
-void Window::processButtons(int button, int action, int mods) {
-    cout << __FUNCTION__ << endl;
-}
-
 void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     windowPtr->srcWidth = width;
@@ -177,7 +173,7 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
     Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
     if (activeButtonPtr) {
-        cout << __FUNCTION__ << endl;
+        //cout << __FUNCTION__ << endl;
         cout << "  " << activeButtonPtr->name << endl;
         activeButtonPtr->functionPtr(windowPtr);
     }

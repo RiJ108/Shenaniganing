@@ -1,5 +1,5 @@
 #pragma once
-#include <functional>
+//#include <functional>
 #include "shader.hpp"
 
 #define BUTTON_NUMBER_OF_FLOAT 7
@@ -8,9 +8,9 @@
 using namespace std;
 using namespace glm;
 
-class Window;
+//class Window;
 
-typedef function<bool(Window&)> FunctionPtr;
+//typedef function<bool(Window&)> FunctionPtr;
 
 typedef struct Button {
 	vec2 position = vec2(0.0f);
