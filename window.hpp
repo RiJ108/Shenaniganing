@@ -16,6 +16,7 @@
 #include FT_FREETYPE_H
 #include "shader.hpp"
 #include "layout.hpp"
+#include "constant.hpp"
 
 using namespace std;
 using namespace glm;
@@ -61,8 +62,13 @@ private:
 
     //
     Shader shader_UI;
-    GLuint VAO_UI, VBO_UI;
-    Layout layout0;
+    GLuint VAO_UI[NUMBER_OF_LAYOUTS];
+    GLuint VBO_UI[NUMBER_OF_LAYOUTS];
+    
+    vector<Layout> layouts;
+    Layout* tmp;
     void initUI();
     void setLayouts();
+    Layout* getActiveLayoutPtr();
+    void checkUI();
 };

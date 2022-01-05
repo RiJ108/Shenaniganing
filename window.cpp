@@ -47,15 +47,14 @@ BOOL Window::init() {
 
     //**Init and load FreeType (load glyphes)
     initFT();
-
-    //**Init of the UI shader
-    initUI();
-
+ 
     return true;
 }
 
 BOOL Window::loop() {
+    initUI();
     setLayouts();
+    Layout* activeLayoutPtr;
     while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
         currentFrame = glfwGetTime();
@@ -72,42 +71,81 @@ BOOL Window::loop() {
         renderText(shader_TXT, " y = " + to_string(CURSOR_POS.y), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
 
         //**UI rendering
-        shader_UI.use();
-        glBindVertexArray(VAO_UI);
-        glDrawArrays(GL_POINTS, 0, layout0.getButtonsSize());
-        glBindVertexArray(0);
+        activeLayoutPtr = getActiveLayoutPtr();
+        if (activeLayoutPtr != nullptr) {
+            shader_UI.use();
+            glBindVertexArray(activeLayoutPtr->getVAO());
+            glDrawArrays(GL_POINTS, 0, activeLayoutPtr->getButtonsSize());
+            glBindVertexArray(0);
+        }
+
+        //**Inputs processing
+        checkUI();
 
         //**Refresh buffers and polling
         glfwSwapBuffers(wHandler);
         glfwPollEvents();
     }
-    glDeleteVertexArrays(1, &VAO_UI);
     glDeleteVertexArrays(1, &VAO_TXT);
-    glDeleteBuffers(1, &VBO_UI);
     glDeleteBuffers(1, &VBO_TXT);
 
     glfwTerminate();
     return true;
 }
 
+void Window::checkUI() {
+    Layout* layoutActivePtr;
+    Button* buttonPtr;
+    layoutActivePtr = getActiveLayoutPtr();
+    for (unsigned int i = 0; i < layoutActivePtr->getButtonsSize(); i++) {
+        buttonPtr = &layoutActivePtr->buttons.at(i);
+        if (buttonPtr->isCursorPosIn(CURSOR_POS.x, CURSOR_POS.y)) {
+            if (!buttonPtr->state) {
+                cout << "Cursor in " << buttonPtr->name << " button." << endl;
+                glBindBuffer(GL_ARRAY_BUFFER, layoutActivePtr->getVBO());
+                glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->onColor[0]);
+                glUnmapBuffer(GL_ARRAY_BUFFER);
+                buttonPtr->state = true;
+            }
+        }
+        else {
+            if (buttonPtr->state) {
+                cout << "Cursor out " << buttonPtr->name << " button." << endl;
+                glBindBuffer(GL_ARRAY_BUFFER, layoutActivePtr->getVBO());
+                glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->offColor[0]);
+                glUnmapBuffer(GL_ARRAY_BUFFER);
+                buttonPtr->state = false;
+            }
+        }
+    }
+}
+
 void Window::setLayouts() {
-    layout0.addButton(vec2(0.0f, 0.15f),
+    tmp = new Layout;
+    tmp->addButton(vec2(0.0f, 0.15f),
         vec2(0.5f, 0.3f),
         vec3(0.2f, 1.0f, 0.2f),
+        vec3(0.2f, 0.2f, 0.2f),
         "Play Button");
 
-    layout0.addButton(vec2(0.0f, -0.1f),
+    tmp->addButton(vec2(0.0f, -0.1f),
         vec2(0.2f, 0.1f),
         vec3(1.0f, 0.2f, 0.2f),
+        vec3(0.2f, 0.2f, 0.2f),
         "Exit Button");
+    tmp->setActive(true);
+    tmp->setIndice(layouts.size());
+    tmp->setAndFillBuffers();
 
-    layout0.allocData();
+    layouts.push_back(*tmp);
+}
 
-    glBindVertexArray(VAO_UI);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_UI);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 7 * layout0.getButtonsSize(), NULL, GL_DYNAMIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 7 * layout0.getButtonsSize(), layout0.data);
+Layout* Window::getActiveLayoutPtr() {
+    for (unsigned int i = 0; i < layouts.size(); i++) {
+        if (layouts.at(i).isActive())
+            return &layouts.at(i);
+    }
+    return nullptr;
 }
 
 void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -117,19 +155,6 @@ void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 void Window::initUI() {
     shader_UI = Shader("resources/shader/vShaderSourceUI.vs", "resources/shader/gShaderSourceUI.gs", "resources/shader/fShaderSourceUI.fs");
-    glGenBuffers(1, &VBO_UI);
-    glGenVertexArrays(1, &VAO_UI);
-    glBindVertexArray(VAO_UI);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_UI);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Window::initFT() {
