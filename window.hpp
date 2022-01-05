@@ -34,6 +34,12 @@ public:
     BOOL init();
     BOOL loop();
 
+    static void functionPtrTest(int);
+    static void exitCallBack(int aWHandler);
+
+protected:
+    void processButtons(int button, int action, int mods);
+
 private:
     //
     GLFWwindow* wHandler;
@@ -42,14 +48,28 @@ private:
 
     //
     int* scrWidthPtr, * scrHeightPtr;
+    int srcWidth = 1280, srcHeight = 720;
     int fpsCap = 60;
     float deltaTime = 0.0f, lastFrame = 0.0f, currentFrame = 0.0f;		// Time management
     float* cursorPosXPtr, * cursorPosYPtr;
-    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-    static Window& getInstance() { static Window instance; return instance; }
-    static void mouse_callback_static(GLFWwindow* window, double xpos, double ypos) { getInstance().mouse_callback(window, xpos, ypos); }
+    float cursorPosX = -1.0f, cursorPosY= -1.0f;
+    static void keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods);
+    static void framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height);
+
+    static Window& getInstance() {
+        static Window instance;
+        return instance; 
+    }
+
+    void mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos);
+    static void mouse_callback_static(GLFWwindow* aWHandler, double xpos, double ypos) {
+        getInstance().mouse_callback(aWHandler, xpos, ypos);
+    }
+
+    void mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods);
+    static void mouse_button_callback_static(GLFWwindow* aWHandler, int button, int action, int mods) {
+        getInstance().mouse_button_callback(aWHandler, button, action, mods);
+    }
 
     //
     Shader shader_TXT;

@@ -14,10 +14,12 @@ typedef struct Button {
 	vec3 onColor = vec3(0.0f);
 	vec3 offColor = vec3(0.0f);
 	
-	bool state = false;
+	bool active = false;
 	int sizeOfData = 2 + 2 + 3;
 	string name = "buttonDefaultName";
 	vec4 boundaries = vec4(0.0f);
+
+	void (*functionPtr)(int);
 
 	void setBoundary() {
 		boundaries.x = position[0] - (size[0] / 2.0f);
@@ -77,6 +79,14 @@ public:
 		else
 			cout << __FUNCTION__ << " -> Allocation failed. No buttons in the layout." << endl;
 	};
+
+	Button* getActiveButton() {
+		for (unsigned int i = 0; i < buttons.size(); i++) {
+			if (buttons.at(i).active)
+				return &buttons.at(i);
+		}
+		return nullptr;
+	}
 
 	// Return as an integer the number of buttons on the vector/the vector size
 	int getButtonsSize() {
