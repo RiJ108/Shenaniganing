@@ -8,7 +8,7 @@
 using namespace std;
 using namespace glm;
 
-//class Window;
+class Window;
 
 //typedef function<bool(Window&)> FunctionPtr;
 

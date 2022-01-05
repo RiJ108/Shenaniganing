@@ -149,7 +149,7 @@
   <ItemGroup>
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Shenaniganing.cpp" />
-    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\glad.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>

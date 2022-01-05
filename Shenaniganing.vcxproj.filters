@@ -24,7 +24,7 @@
     <ClCompile Include="Shenaniganing.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\glad.c">
+    <ClCompile Include="src\glad.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="shader.cpp">
