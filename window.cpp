@@ -196,7 +196,7 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
     if (activeButtonPtr) {
         //cout << __FUNCTION__ << endl;
-        cout << "  " << activeButtonPtr->name << endl;
+        cout << __FUNCTION__ << "  " << activeButtonPtr->name << endl;
         activeButtonPtr->functionPtr(windowPtr);
     }
 }
