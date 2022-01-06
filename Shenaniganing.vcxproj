@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="layout.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Shenaniganing.cpp" />
     <ClCompile Include="src\glad.cpp" />

@@ -55,11 +55,10 @@ BOOL Window::loop() {
     initUI();
     setLayouts();
     Layout* activeLayoutPtr;
-    vec2 scales;
+    Button* buttonPtr;
     float scale = 1.0f;
     float buttonWidthPxl;
     float buttonHeightPxl;
-    float textWidthPxl;
     float textHeightPxl = 35.0f;
     while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
@@ -85,18 +84,13 @@ BOOL Window::loop() {
             glBindVertexArray(0);
             glDisable(GL_DEPTH_TEST);
             for (unsigned int i = 0; i < activeLayoutPtr->buttons.size(); i++) {
-                buttonWidthPxl = activeLayoutPtr->buttons.at(i).size.x * srcWidth * 0.5f;
-                buttonHeightPxl = activeLayoutPtr->buttons.at(i).size.y * srcHeight * 0.5f;
-                textWidthPxl = activeLayoutPtr->buttons.at(i).name.size() * 22.0f;
-                scales.x = buttonWidthPxl / textWidthPxl;
-                scales.y = buttonHeightPxl / textHeightPxl;
-
-                if (scales.x < scales.y) scale = scales.x * 0.7f;
-                else scale = scales.y * 0.7f;
+                buttonPtr = &activeLayoutPtr->buttons.at(i);
+                buttonWidthPxl = buttonPtr->size.x * srcWidth * 0.5f;
+                scale = (0.9f * buttonWidthPxl) / buttonPtr->nameLengthPxl;
 
                 renderText(shader_TXT, activeLayoutPtr->buttons.at(i).name,
-                    (((activeLayoutPtr->buttons.at(i).position.x + 1.0f)/2.0f) * srcWidth) - (textWidthPxl * 0.5f * scale),
-                    (((activeLayoutPtr->buttons.at(i).position.y + 1.0f)/2.0f) * srcHeight) - (textHeightPxl * 0.5f * scale),
+                    (((buttonPtr->position.x + 1.0f)/2.0f) * srcWidth) - (buttonPtr->nameLengthPxl * 0.5f * scale),
+                    (((buttonPtr->position.y + 1.0f)/2.0f) * srcHeight) - (textHeightPxl * 0.5f * scale),
                     scale, vec3(1.0f));
             }
             glEnable(GL_DEPTH_TEST);
@@ -146,15 +140,20 @@ void Window::checkUI() {
 void Window::setLayouts() {
     tmp = new Layout;
     tmp->addButton(vec2(0.0f, 0.15f),
-        vec2(0.5f, 0.3f),
+        vec2(0.5f, 0.25f),
         vec3(0.2f, 1.0f, 0.2f),
         vec3(0.2f, 0.2f, 0.2f),
         "Launch");
+    
     tmp->addButton(vec2(0.0f, -0.1f),
-        vec2(0.2f, 0.1f),
+        vec2(0.2f, 0.175f),
         vec3(1.0f, 0.2f, 0.2f),
         vec3(0.2f, 0.2f, 0.2f),
         "Exit");
+
+    for (unsigned int i = 0; i < tmp->buttons.size(); i++)
+        tmp->buttons.at(i).setStringLengthPxl(Characters);
+
     tmp->setActive(true);
     tmp->setIndice(layouts.size());
     tmp->setAndFillBuffers();
