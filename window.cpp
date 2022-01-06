@@ -55,6 +55,12 @@ BOOL Window::loop() {
     initUI();
     setLayouts();
     Layout* activeLayoutPtr;
+    vec2 scales;
+    float scale = 1.0f;
+    float buttonWidthPxl;
+    float buttonHeightPxl;
+    float textWidthPxl;
+    float textHeightPxl = 35.0f;
     while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
         currentFrame = glfwGetTime();
@@ -67,8 +73,8 @@ BOOL Window::loop() {
 
         //**Data rendering
         renderText(shader_TXT, build + " ms=" + to_string((int)(deltaTime * 1000)), 10.0f, 10.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-        renderText(shader_TXT, " x = " + to_string(CURSOR_POS.x), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-        renderText(shader_TXT, " y = " + to_string(CURSOR_POS.y), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
+        renderText(shader_TXT, " x = " + to_string(cursorPosX), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
+        renderText(shader_TXT, " y = " + to_string(cursorPosY), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
 
         //**UI rendering
         activeLayoutPtr = getActiveLayoutPtr();
@@ -77,6 +83,23 @@ BOOL Window::loop() {
             glBindVertexArray(activeLayoutPtr->getVAO());
             glDrawArrays(GL_POINTS, 0, activeLayoutPtr->getButtonsSize());
             glBindVertexArray(0);
+            glDisable(GL_DEPTH_TEST);
+            for (unsigned int i = 0; i < activeLayoutPtr->buttons.size(); i++) {
+                buttonWidthPxl = activeLayoutPtr->buttons.at(i).size.x * srcWidth * 0.5f;
+                buttonHeightPxl = activeLayoutPtr->buttons.at(i).size.y * srcHeight * 0.5f;
+                textWidthPxl = activeLayoutPtr->buttons.at(i).name.size() * 22.0f;
+                scales.x = buttonWidthPxl / textWidthPxl;
+                scales.y = buttonHeightPxl / textHeightPxl;
+
+                if (scales.x < scales.y) scale = scales.x * 0.7f;
+                else scale = scales.y * 0.7f;
+
+                renderText(shader_TXT, activeLayoutPtr->buttons.at(i).name,
+                    (((activeLayoutPtr->buttons.at(i).position.x + 1.0f)/2.0f) * srcWidth) - (textWidthPxl * 0.5f * scale),
+                    (((activeLayoutPtr->buttons.at(i).position.y + 1.0f)/2.0f) * srcHeight) - (textHeightPxl * 0.5f * scale),
+                    scale, vec3(1.0f));
+            }
+            glEnable(GL_DEPTH_TEST);
         }
 
         //**Inputs processing
@@ -126,12 +149,12 @@ void Window::setLayouts() {
         vec2(0.5f, 0.3f),
         vec3(0.2f, 1.0f, 0.2f),
         vec3(0.2f, 0.2f, 0.2f),
-        "Play Button");
+        "Launch");
     tmp->addButton(vec2(0.0f, -0.1f),
         vec2(0.2f, 0.1f),
         vec3(1.0f, 0.2f, 0.2f),
         vec3(0.2f, 0.2f, 0.2f),
-        "Exit Button");
+        "Exit");
     tmp->setActive(true);
     tmp->setIndice(layouts.size());
     tmp->setAndFillBuffers();
