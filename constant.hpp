@@ -28,7 +28,7 @@ typedef struct Button {
 	string name = "buttonDefaultName";
 	float nameLengthPxl = 0.0f;
 	vec4 boundaries = vec4(0.0f);
-
+	int index = 0;
 	float buttonWidthPxl = 0.0f;
 	float scale;
 

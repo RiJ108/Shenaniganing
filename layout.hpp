@@ -16,21 +16,21 @@ public:
 	// parameter 5: the name/text of the button (string)
 	// return void
 	void addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, string aName);
-	// Fill the data variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
+	// Fill the "data" variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
 	void allocData();
-	// Return the ptr of the button which as is active parameter set to true
+	// Return the pointer of the "button" which as is active parameter set to true
 	Button* getActiveButton();
-	// Return as an integer the size of the buttons vector (Button) of the layout
+	// Return as an integer the size of the "buttons" vector (Button) of the layout
 	int getButtonsSize();
-	// Return the ptr to the data variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
+	// Return the ptr to the "data" variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
 	float* getData();
-	// Return the value if the parameter of the layout, active (bool)
+	// Return the value of the "active" parameter (bool) of the layout
 	bool isActive();
-	// Set the active parameter (bool) of the layout to the given value of the parameter of the function
+	// Set the "active" parameter (bool) of the layout to the given value of the parameter of the function
 	void setActive(bool aState);
-	// Set the indice parameter (int) of the layout to the given value of the parameter of the function
+	// Set the "indice" parameter (int) of the layout to the given value of the parameter of the function
 	void setIndice(int aIndice);
-	// Return as an integer the value of the parameter indice of the layout
+	// Return as an integer the value of the "indice" parameter of the layout
 	int getIndice();
 	// Return as a GLu integer the value of the vertex array object of the layout to render the buttons
 	GLuint getVAO();
@@ -38,6 +38,14 @@ public:
 	GLuint getVBO();
 	// Generate, set and fill the vertex array object and vertex buffer object with the data variable
 	void setAndFillBuffers();
+	// Set the value of the "name" parameter (string) of the layout to the given value of the parameter of the function
+	void setName(string aName);
+	// Return as a string the value of the "name" parameter of the layout
+	string getName();
+	// Function that reset/set to false the "active" and "clicked" parameters of all the Button present in the "buttons" vector (vector<Button>)
+	void resetButtonsStates();
+	// Function that update the color values of the given button in the buffer
+	void updateBufferButtonColor(Button* aButtonPtr);
 	~Layout();
 	vector <Button> buttons;
 

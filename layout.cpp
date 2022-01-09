@@ -11,6 +11,23 @@ void Layout::addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, str
 	buttons.push_back(*tmp);
 };
 
+void Layout::resetButtonsStates() {
+	for (unsigned int i = 0; i < buttons.size(); i++) {
+		if (buttons.at(i).active = true) {
+			buttons.at(i).active = false;
+			updateBufferButtonColor(&buttons.at(i));
+		}
+		buttons.at(i).clicked = false;
+	}
+}
+
+void Layout::updateBufferButtonColor(Button* aButtonPtr) {
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	if (aButtonPtr->active) glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)aButtonPtr->index) + 2) * sizeof(float), sizeof(float) * 3, &aButtonPtr->onColor[0]);
+	else glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)aButtonPtr->index) + 2) * sizeof(float), sizeof(float) * 3, &aButtonPtr->offColor[0]);
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
 void Layout::allocData() {
 	if (buttons.size()) {
 		data = (float*)malloc(sizeof(float) * BUTTON_NUMBER_OF_FLOAT * buttons.size());
@@ -31,6 +48,14 @@ void Layout::allocData() {
 		cout << __FUNCTION__ << " -> Allocation failed. No buttons in the layout." << endl;
 }
 
+void Layout::setName(string aName) {
+	name = aName;
+}
+
+string Layout::getName() {
+	return name;
+}
+
 Button* Layout::getActiveButton() {
 	for (unsigned int i = 0; i < buttons.size(); i++) {
 		if (buttons.at(i).active)
@@ -39,7 +64,6 @@ Button* Layout::getActiveButton() {
 	return nullptr;
 }
 
-// Return as an integer the number of buttons on the vector/the vector size
 int Layout::getButtonsSize() {
 	return buttons.size();
 }
