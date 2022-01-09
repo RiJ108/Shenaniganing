@@ -1,7 +1,5 @@
 #include "window.hpp"
 
-vec2 CURSOR_POS = vec2(-1.0f);
-
 BOOL Window::init() {
     //**Initialization of GLFW
     if (!glfwInit()) {
@@ -14,6 +12,7 @@ BOOL Window::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     //**Creating the window
     wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
@@ -23,13 +22,14 @@ BOOL Window::init() {
         exit(EXIT_FAILURE);
     }
     else cout << __FUNCTION__ << "->GLFW window created." << endl;
-    glfwSetWindowSizeLimits(wHandler, 990, 540, GLFW_DONT_CARE, GLFW_DONT_CARE);
+    //glfwSetWindowSizeLimits(wHandler, 990, 540, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwMakeContextCurrent(wHandler);
     
     //**Set callbacks
     glfwSetWindowUserPointer(wHandler, this);
+    //glfwSetKeyCallback(wHandler, keyCallback);
     glfwSetFramebufferSizeCallback(wHandler, framebuffer_size_callback);
-    glfwSetCursorPosCallback(wHandler, mouse_callback_static);         // Mouse motion callback
+    glfwSetCursorPosCallback(wHandler, mouse_callback_static);
     glfwSetMouseButtonCallback(wHandler, mouse_button_callback_static);
 
     //**Load glad
@@ -47,19 +47,19 @@ BOOL Window::init() {
 
     //**Init and load FreeType (load glyphes)
     initFT();
- 
+
+    //**3D
+    init3DShader();
+
     return true;
 }
 
 BOOL Window::loop() {
     initUI();
     setLayouts();
-    Layout* activeLayoutPtr;
-    Button* buttonPtr;
-    float scale = 1.0f;
-    float buttonWidthPxl;
-    float buttonHeightPxl;
-    float textHeightPxl = 35.0f;
+    objImporter.extract("resources/objects/Ball.obj");
+    objImporter.loadMObject(&testObj);
+    testObj.initAndFillBuffers();
     while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
         currentFrame = glfwGetTime();
@@ -75,29 +75,9 @@ BOOL Window::loop() {
         renderText(shader_TXT, " x = " + to_string(cursorPosX), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
         renderText(shader_TXT, " y = " + to_string(cursorPosY), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
 
-        //**UI rendering
-        activeLayoutPtr = getActiveLayoutPtr();
-        if (activeLayoutPtr != nullptr) {
-            shader_UI.use();
-            glBindVertexArray(activeLayoutPtr->getVAO());
-            glDrawArrays(GL_POINTS, 0, activeLayoutPtr->getButtonsSize());
-            glBindVertexArray(0);
-            glDisable(GL_DEPTH_TEST);
-            for (unsigned int i = 0; i < activeLayoutPtr->buttons.size(); i++) {
-                buttonPtr = &activeLayoutPtr->buttons.at(i);
-                buttonWidthPxl = buttonPtr->size.x * srcWidth * 0.5f;
-                scale = (0.9f * buttonWidthPxl) / buttonPtr->nameLengthPxl;
-
-                renderText(shader_TXT, activeLayoutPtr->buttons.at(i).name,
-                    (((buttonPtr->position.x + 1.0f)/2.0f) * srcWidth) - (buttonPtr->nameLengthPxl * 0.5f * scale),
-                    (((buttonPtr->position.y + 1.0f)/2.0f) * srcHeight) - (textHeightPxl * 0.5f * scale),
-                    scale, vec3(1.0f));
-            }
-            glEnable(GL_DEPTH_TEST);
-        }
-
-        //**Inputs processing
-        checkUI();
+        F();
+        M();
+        G();
 
         //**Refresh buffers and polling
         glfwSwapBuffers(wHandler);
@@ -108,6 +88,72 @@ BOOL Window::loop() {
 
     glfwTerminate();
     return true;
+}
+
+void Window::F() {
+    switch (actualState) {
+    case State::mainMenu:
+        if (layouts.at(0).buttons.at(0).clicked) {
+            nextState = State::inGame;
+            clearClicked();
+        }
+        break;
+
+    case State::inGame:
+        if (glfwGetKey(wHandler, 256) == GLFW_PRESS) {
+            nextState = State::mainMenu;
+        }
+        break;
+    }
+}
+
+void Window::M() {
+    actualState = nextState;
+}
+
+void Window::G() {
+    switch (actualState) {
+    case State::mainMenu:
+        activeLayoutPtr = getActiveLayoutPtr();
+        if (activeLayoutPtr != nullptr) {
+            shader_UI.use();
+            glBindVertexArray(activeLayoutPtr->getVAO());
+            glDrawArrays(GL_POINTS, 0, activeLayoutPtr->getButtonsSize());
+            glBindVertexArray(0);
+            glDisable(GL_DEPTH_TEST);
+            for (unsigned int i = 0; i < activeLayoutPtr->buttons.size(); i++) {
+                buttonPtr = &activeLayoutPtr->buttons.at(i);
+                renderText(shader_TXT, activeLayoutPtr->buttons.at(i).name,
+                    (((buttonPtr->position.x + 1.0f) / 2.0f) * srcWidth) - (buttonPtr->nameLengthPxl * 0.5f * buttonPtr->scale),
+                    (((buttonPtr->position.y + 1.0f) / 2.0f) * srcHeight) - (textHeightPxl * 0.5f * buttonPtr->scale),
+                    buttonPtr->scale, vec3(1.0f));
+            }
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        //**Inputs processing
+        checkUI();
+        break;
+
+    case State::inGame:
+        vec3 position = vec3(-2.0f, 0.5f, -1.0f);
+        vec3 front = vec3(0.0f) - position;
+        vec3 up = vec3(0.0f, 1.0f, 0.0f);
+        //**Setting shader's uniform
+        shader3D.use();
+        shader3D.setVec3("lightPos", vec3(-2.0f * sin(currentFrame * 0.5f), 2.0f * cos(currentFrame * 0.05f), 0.0f));
+        shader3D.setVec3("frontView", vec3(0.0f) - position);
+        shader3D.setMat4("view", lookAt(position, position + front, up));
+        shader3D.setVec3("viewPos", position);
+        shader3D.setMat4("projection", perspective(radians(90.0f), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
+        shader3D.setMat4("model", mat4(1.0f));
+        glBindVertexArray(testObj.getVAO());
+        glDrawArrays(GL_TRIANGLES, 0, testObj.getNbrFaces()*6);
+        glBindVertexArray(0);
+
+        renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
+        break;
+    }
 }
 
 void Window::checkUI() {
@@ -132,6 +178,7 @@ void Window::checkUI() {
                 glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->offColor[0]);
                 glUnmapBuffer(GL_ARRAY_BUFFER);
                 buttonPtr->active = false;
+                buttonPtr->clicked = false;
             }
         }
     }
@@ -151,8 +198,11 @@ void Window::setLayouts() {
         vec3(0.2f, 0.2f, 0.2f),
         "Exit");
 
-    for (unsigned int i = 0; i < tmp->buttons.size(); i++)
+    for (unsigned int i = 0; i < tmp->buttons.size(); i++) {
         tmp->buttons.at(i).setStringLengthPxl(Characters);
+        tmp->buttons.at(i).setButtonWidthPxl(srcWidth);
+        tmp->buttons.at(i).setScale();
+    }
 
     tmp->setActive(true);
     tmp->setIndice(layouts.size());
@@ -183,6 +233,10 @@ Layout* Window::getActiveLayoutPtr() {
     return nullptr;
 }
 
+void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
+    cout << __FUNCTION__ << "->" << key << " is " << action << endl;
+}
+
 void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     windowPtr->srcWidth = width;
@@ -194,13 +248,27 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
-    if (activeButtonPtr) {
-        //cout << __FUNCTION__ << endl;
-        cout << __FUNCTION__ << "  " << activeButtonPtr->name << endl;
-        activeButtonPtr->functionPtr(windowPtr);
+    if (action == GLFW_PRESS) {
+        if (activeButtonPtr) {
+            cout << __FUNCTION__ << " -> " << activeButtonPtr->name << " pressed." << endl;
+            activeButtonPtr->functionPtr(windowPtr);
+            activeButtonPtr->clicked = true;
+        }
+    }
+    else if (action == GLFW_RELEASE) {
+
     }
 }
 
+void Window::clearClicked() {
+    for (unsigned int i = 0; i < layouts.size(); i++) {
+        activeLayoutPtr = &layouts.at(i);
+        for (unsigned int j = 0; j < activeLayoutPtr->buttons.size(); j++) {
+            activeLayoutPtr->buttons.at(j).clicked = false;
+        }
+    }
+}
+    
 void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     int width = windowPtr->srcWidth;
@@ -210,12 +278,21 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
 }
 
 void Window::initUI() {
-    shader_UI = Shader("resources/shader/vShaderSourceUI.vs", "resources/shader/gShaderSourceUI.gs", "resources/shader/fShaderSourceUI.fs");
+    shader_UI = Shader("resources/shaders/vShaderSourceUI.vs", "resources/shaders/gShaderSourceUI.gs", "resources/shaders/fShaderSourceUI.fs");
+}
+
+void Window::init3DShader() {
+    //**Initiate 3D shader
+    shader3D = Shader("./resources/shaders/vShaderSource3D.vs", "resources/shaders/fShaderSource3D.fs");
+    shader3D.use();
+    shader3D.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+    shader3D.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+    shader3D.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
 }
 
 void Window::initFT() {
     //**Initiate 2D shader
-    shader_TXT = Shader("resources/shader/vShaderSourceTXT.vs", "resources/shader/fShaderSourceTXT.fs");
+    shader_TXT = Shader("resources/shaders/vShaderSourceTXT.vs", "resources/shaders/fShaderSourceTXT.fs");
     mat4 proj = ortho(0.0f, static_cast<float>(WINDOW_SIZE.x), 0.0f, static_cast<float>(WINDOW_SIZE.y));
     shader_TXT.use();
     glUniformMatrix4fv(glGetUniformLocation(shader_TXT.id, "projection"), 1, GL_FALSE, value_ptr(proj));

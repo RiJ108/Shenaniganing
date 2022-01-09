@@ -13,11 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Fichiers de ressources\UI">
-      <UniqueIdentifier>{8956ddaf-9ec3-4831-a2ab-df24c78345ee}</UniqueIdentifier>
+    <Filter Include="Fichiers de ressources\shaders">
+      <UniqueIdentifier>{0674fd20-4545-45ce-ae6a-dddc9eae87a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers de ressources\TXT">
+    <Filter Include="Fichiers de ressources\shaders\3D">
+      <UniqueIdentifier>{21426e11-e567-490a-b635-b79040b712fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers de ressources\shaders\TXT">
       <UniqueIdentifier>{0c1a9773-ce13-4f94-9784-5562ddb6c59f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers de ressources\shaders\UI">
+      <UniqueIdentifier>{8956ddaf-9ec3-4831-a2ab-df24c78345ee}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +40,12 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="layout.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="objImporter.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="mobject.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,22 +65,34 @@
     <ClInclude Include="constant.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="objImporter.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="mobject.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shader\fShaderSourceUI.fs">
-      <Filter>Fichiers de ressources\UI</Filter>
+      <Filter>Fichiers de ressources\shaders\UI</Filter>
     </None>
     <None Include="resources\shader\gShaderSourceUI.gs">
-      <Filter>Fichiers de ressources\UI</Filter>
+      <Filter>Fichiers de ressources\shaders\UI</Filter>
     </None>
     <None Include="resources\shader\vShaderSourceUI.vs">
-      <Filter>Fichiers de ressources\UI</Filter>
+      <Filter>Fichiers de ressources\shaders\UI</Filter>
     </None>
     <None Include="resources\shader\vShaderSourceTXT.vs">
-      <Filter>Fichiers de ressources\TXT</Filter>
+      <Filter>Fichiers de ressources\shaders\TXT</Filter>
     </None>
     <None Include="resources\shader\fShaderSourceTXT.fs">
-      <Filter>Fichiers de ressources\TXT</Filter>
+      <Filter>Fichiers de ressources\shaders\TXT</Filter>
+    </None>
+    <None Include="resources\shader\vShaderSource3D.vs">
+      <Filter>Fichiers de ressources\shaders\3D</Filter>
+    </None>
+    <None Include="resources\shader\fShaderSource3D.fs">
+      <Filter>Fichiers de ressources\shaders\3D</Filter>
     </None>
   </ItemGroup>
 </Project>

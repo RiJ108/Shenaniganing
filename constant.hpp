@@ -6,6 +6,8 @@
 
 class Window;
 
+enum class State {mainMenu, inGame};
+
 //Holds all state information relevant to a character as loaded using FreeType
 typedef struct Character {
     unsigned int TextureID; // ID handle of the glyph texture
@@ -21,12 +23,24 @@ typedef struct Button {
 	vec3 offColor = vec3(0.0f);
 
 	bool active = false;
+	bool clicked = false;
 	int sizeOfData = 2 + 2 + 3;
 	string name = "buttonDefaultName";
 	float nameLengthPxl = 0.0f;
 	vec4 boundaries = vec4(0.0f);
 
+	float buttonWidthPxl = 0.0f;
+	float scale;
+
 	void (*functionPtr)(Window* aWindowPtr);
+
+	void setButtonWidthPxl(float aSrcWidth) {
+		buttonWidthPxl = size.x * aSrcWidth * 0.5f;
+	};
+
+	void setScale() {
+		scale = (0.9f * buttonWidthPxl) / nameLengthPxl;
+	};
 
 	void setStringLengthPxl(map<GLchar, Character> aCharMap) {
 		nameLengthPxl = 0.0f;

@@ -148,6 +148,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="layout.cpp" />
+    <ClCompile Include="mobject.cpp" />
+    <ClCompile Include="objImporter.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Shenaniganing.cpp" />
     <ClCompile Include="src\glad.cpp" />
@@ -156,14 +158,18 @@
   <ItemGroup>
     <ClInclude Include="constant.hpp" />
     <ClInclude Include="layout.hpp" />
+    <ClInclude Include="mobject.hpp" />
+    <ClInclude Include="objImporter.hpp" />
     <ClInclude Include="perlinNoise.hpp" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shader\fShaderSource3D.fs" />
     <None Include="resources\shader\fShaderSourceTXT.fs" />
     <None Include="resources\shader\fShaderSourceUI.fs" />
     <None Include="resources\shader\gShaderSourceUI.gs" />
+    <None Include="resources\shader\vShaderSource3D.vs" />
     <None Include="resources\shader\vShaderSourceTXT.vs" />
     <None Include="resources\shader\vShaderSourceUI.vs" />
   </ItemGroup>

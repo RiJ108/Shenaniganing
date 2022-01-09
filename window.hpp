@@ -16,6 +16,8 @@
 #include FT_FREETYPE_H
 #include "shader.hpp"
 #include "layout.hpp"
+#include "objImporter.hpp"
+#include "mobject.hpp"
 #include "constant.hpp"
 
 using namespace std;
@@ -31,10 +33,27 @@ public:
     static void exitCallBack(Window* aWindowPtr);
 
 private:
+    State actualState = State::mainMenu;
+    State nextState = State::mainMenu;
+    Layout* activeLayoutPtr;
+    Button* buttonPtr;
+    float textHeightPxl = 35.0f;
+    void F();
+    void M();
+    void G();
+    void clearClicked();
+
     //
     GLFWwindow* wHandler;
     string build = "Shenaniganing build 0.1 dev";
     ivec2 WINDOW_SIZE = ivec2(1280, 720);
+
+    //
+    Shader shader3D;
+    GLuint VAO_OBJ, VBO_OBJ;
+    ObjImporter objImporter;
+    MObject testObj;
+    void init3DShader();
 
     //
     int* scrWidthPtr, * scrHeightPtr;
@@ -45,21 +64,11 @@ private:
     float cursorPosX = -1.0f, cursorPosY= -1.0f;
     static void keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods);
     static void framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height);
-
-    static Window& getInstance() {
-        static Window instance;
-        return instance; 
-    }
-
+    static Window& getInstance() {static Window instance; return instance;}
     void mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos);
-    static void mouse_callback_static(GLFWwindow* aWHandler, double xpos, double ypos) {
-        getInstance().mouse_callback(aWHandler, xpos, ypos);
-    }
-
+    static void mouse_callback_static(GLFWwindow* aWHandler, double xpos, double ypos) {getInstance().mouse_callback(aWHandler, xpos, ypos);}
     void mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods);
-    static void mouse_button_callback_static(GLFWwindow* aWHandler, int button, int action, int mods) {
-        getInstance().mouse_button_callback(aWHandler, button, action, mods);
-    }
+    static void mouse_button_callback_static(GLFWwindow* aWHandler, int button, int action, int mods) {getInstance().mouse_button_callback(aWHandler, button, action, mods);}
 
     //
     Shader shader_TXT;
