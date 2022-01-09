@@ -33,29 +33,27 @@ public:
     static void exitCallBack(Window* aWindowPtr);
 
 private:
+    //**FSM section
     State actualState = State::mainMenu;
     State nextState = State::mainMenu;
-    Layout* activeLayoutPtr;
+    Layout* layoutPtr;
     Button* buttonPtr;
     float textHeightPxl = 35.0f;
     void F();
     void M();
     void G();
-    void clearClicked();
 
-    //
-    GLFWwindow* wHandler;
-    string build = "Shenaniganing build 0.1 dev";
-    ivec2 WINDOW_SIZE = ivec2(1280, 720);
-
-    //
+    //**3D section
     Shader shader3D;
     GLuint VAO_OBJ, VBO_OBJ;
     ObjImporter objImporter;
     MObject testObj;
     void init3DShader();
 
-    //
+    //**Window section
+    GLFWwindow* wHandler;
+    string build = "Shenaniganing build 0.1 dev";
+    ivec2 WINDOW_SIZE = ivec2(1280, 720);
     int* scrWidthPtr, * scrHeightPtr;
     int srcWidth = 1280, srcHeight = 720;
     int fpsCap = 60;
@@ -70,7 +68,7 @@ private:
     void mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods);
     static void mouse_button_callback_static(GLFWwindow* aWHandler, int button, int action, int mods) {getInstance().mouse_button_callback(aWHandler, button, action, mods);}
 
-    //
+    //**Text section
     Shader shader_TXT;
     GLuint VAO_TXT, VBO_TXT;
     FT_Library ft;
@@ -79,15 +77,17 @@ private:
     void initFT();
     void renderText(Shader& shader, string text, float x, float y, float scale, vec3 color);
 
-    //
+    //**Layout section
     Shader shader_UI;
     GLuint VAO_UI[NUMBER_OF_LAYOUTS];
     GLuint VBO_UI[NUMBER_OF_LAYOUTS];
-    
     vector<Layout> layouts;
     Layout* tmp;
     void initUI();
     void setLayouts();
     Layout* getActiveLayoutPtr();
+    Layout* getLayoutPtr(string aName);
+    void clearClicked();
+    void resetActiveLayout();
     void checkUI();
 };

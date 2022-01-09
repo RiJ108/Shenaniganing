@@ -95,13 +95,15 @@ void Window::F() {
     case State::mainMenu:
         if (layouts.at(0).buttons.at(0).clicked) {
             nextState = State::inGame;
-            clearClicked();
+            getLayoutPtr("mainMenu")->setActive(false);
+            getLayoutPtr("mainMenu")->resetButtonsStates();
         }
         break;
 
     case State::inGame:
         if (glfwGetKey(wHandler, 256) == GLFW_PRESS) {
             nextState = State::mainMenu;
+            getLayoutPtr("mainMenu")->setActive(true);
         }
         break;
     }
@@ -114,22 +116,25 @@ void Window::M() {
 void Window::G() {
     switch (actualState) {
     case State::mainMenu:
-        activeLayoutPtr = getActiveLayoutPtr();
-        if (activeLayoutPtr != nullptr) {
-            shader_UI.use();
-            glBindVertexArray(activeLayoutPtr->getVAO());
-            glDrawArrays(GL_POINTS, 0, activeLayoutPtr->getButtonsSize());
-            glBindVertexArray(0);
-            glDisable(GL_DEPTH_TEST);
-            for (unsigned int i = 0; i < activeLayoutPtr->buttons.size(); i++) {
-                buttonPtr = &activeLayoutPtr->buttons.at(i);
-                renderText(shader_TXT, activeLayoutPtr->buttons.at(i).name,
-                    (((buttonPtr->position.x + 1.0f) / 2.0f) * srcWidth) - (buttonPtr->nameLengthPxl * 0.5f * buttonPtr->scale),
-                    (((buttonPtr->position.y + 1.0f) / 2.0f) * srcHeight) - (textHeightPxl * 0.5f * buttonPtr->scale),
-                    buttonPtr->scale, vec3(1.0f));
-            }
-            glEnable(GL_DEPTH_TEST);
+        layoutPtr = getActiveLayoutPtr();
+        if (layoutPtr == nullptr) {
+            cout << __FUNCTION__ << "->###!! layoutPtr == nullptr !!###" << endl;
+            return;
         }
+
+        shader_UI.use();
+        glBindVertexArray(layoutPtr->getVAO());
+        glDrawArrays(GL_POINTS, 0, layoutPtr->getButtonsSize());
+        glBindVertexArray(0);
+        glDisable(GL_DEPTH_TEST);
+        for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
+            buttonPtr = &layoutPtr->buttons.at(i);
+            renderText(shader_TXT, layoutPtr->buttons.at(i).name,
+                (((buttonPtr->position.x + 1.0f) / 2.0f) * srcWidth) - (buttonPtr->nameLengthPxl * 0.5f * buttonPtr->scale),
+                (((buttonPtr->position.y + 1.0f) / 2.0f) * srcHeight) - (textHeightPxl * 0.5f * buttonPtr->scale),
+                buttonPtr->scale, vec3(1.0f));
+        }
+        glEnable(GL_DEPTH_TEST);
 
         //**Inputs processing
         checkUI();
@@ -157,28 +162,27 @@ void Window::G() {
 }
 
 void Window::checkUI() {
-    Layout* layoutActivePtr;
+    Layout* activeLayoutPtr;
     Button* buttonPtr;
-    layoutActivePtr = getActiveLayoutPtr();
-    for (unsigned int i = 0; i < layoutActivePtr->getButtonsSize(); i++) {
-        buttonPtr = &layoutActivePtr->buttons.at(i);
+    activeLayoutPtr = getActiveLayoutPtr();
+    if (activeLayoutPtr == nullptr) {
+        cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
+        return;
+    }
+    for (unsigned int i = 0; i < activeLayoutPtr->getButtonsSize(); i++) {
+        buttonPtr = &activeLayoutPtr->buttons.at(i);
         if (buttonPtr->isCursorPosIn(cursorPosX, cursorPosY)) {
             if (!buttonPtr->active) {
                 //cout << "Cursor in " << buttonPtr->name << " button." << endl;
-                glBindBuffer(GL_ARRAY_BUFFER, layoutActivePtr->getVBO());
-                glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->onColor[0]);
-                glUnmapBuffer(GL_ARRAY_BUFFER);
                 buttonPtr->active = true;
+                activeLayoutPtr->updateBufferButtonColor(buttonPtr);
             }
         }
         else {
             if (buttonPtr->active) {
                 //cout << "Cursor out " << buttonPtr->name << " button." << endl;
-                glBindBuffer(GL_ARRAY_BUFFER, layoutActivePtr->getVBO());
-                glBufferSubData(GL_ARRAY_BUFFER, ((7 * (float)i) + 2) * sizeof(float), sizeof(float) * 3, &buttonPtr->offColor[0]);
-                glUnmapBuffer(GL_ARRAY_BUFFER);
                 buttonPtr->active = false;
-                buttonPtr->clicked = false;
+                activeLayoutPtr->updateBufferButtonColor(buttonPtr);
             }
         }
     }
@@ -199,6 +203,7 @@ void Window::setLayouts() {
         "Exit");
 
     for (unsigned int i = 0; i < tmp->buttons.size(); i++) {
+        tmp->buttons.at(i).index = i;
         tmp->buttons.at(i).setStringLengthPxl(Characters);
         tmp->buttons.at(i).setButtonWidthPxl(srcWidth);
         tmp->buttons.at(i).setScale();
@@ -207,12 +212,21 @@ void Window::setLayouts() {
     tmp->setActive(true);
     tmp->setIndice(layouts.size());
     tmp->setAndFillBuffers();
+    tmp->setName("mainMenu");
 
     //**
     tmp->buttons.at(0).functionPtr = &Window::functionPtrTest;
     tmp->buttons.at(1).functionPtr = &Window::exitCallBack;
 
     layouts.push_back(*tmp);
+}
+
+Layout* Window::getLayoutPtr(string aName) {
+    for (unsigned int i = 0; i < layouts.size(); i++) {
+        if (layouts.at(i).getName() == aName)
+            return &layouts.at(i);
+    }
+    return nullptr;
 }
 
 void Window::functionPtrTest(Window* aWindowPtr) {
@@ -223,6 +237,14 @@ void Window::exitCallBack(Window* aWindowPtr) {
     cout << __FUNCTION__ << endl;
     glfwSetWindowShouldClose(aWindowPtr->wHandler, true);
 
+}
+
+void Window::resetActiveLayout() {
+    layoutPtr = getActiveLayoutPtr();
+    for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
+        layoutPtr->buttons.at(i).active = false;
+        layoutPtr->buttons.at(i).clicked = false;
+    }
 }
 
 Layout* Window::getActiveLayoutPtr() {
@@ -247,6 +269,10 @@ void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int hei
 void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
+    if (activeLayoutPtr == nullptr) {
+        //cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
+        return;
+    }
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
     if (action == GLFW_PRESS) {
         if (activeButtonPtr) {
@@ -262,9 +288,9 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
 
 void Window::clearClicked() {
     for (unsigned int i = 0; i < layouts.size(); i++) {
-        activeLayoutPtr = &layouts.at(i);
-        for (unsigned int j = 0; j < activeLayoutPtr->buttons.size(); j++) {
-            activeLayoutPtr->buttons.at(j).clicked = false;
+        layoutPtr = &layouts.at(i);
+        for (unsigned int j = 0; j < layoutPtr->buttons.size(); j++) {
+            layoutPtr->buttons.at(j).clicked = false;
         }
     }
 }
