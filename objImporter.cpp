@@ -14,6 +14,7 @@ void ObjImporter::loadMObject(MObject* aMObject) {
 }
 
 void ObjImporter::extract(string path){
+    //**Function that read the file and direct what to do with them
     cout << __FUNCTION__;
     fstream file;
     file.open(path);
@@ -42,8 +43,8 @@ void ObjImporter::extract(string path){
                 switch(line.at(1)){
                     case ' ':
                         coords = (double*)malloc(sizeof(double)*3);
-                        getCoords(line, coords);
-                        Coords.push_back(coords);
+                        getVertices(line, coords);
+                        Vertices.push_back(coords);
                         break;
 
                     case 't':
@@ -62,7 +63,7 @@ void ObjImporter::extract(string path){
 
             case 'f':
                 order = (int*)malloc(sizeof(int)*3);
-                loadFace(line, order);
+                getOrder(line, order);
                 break;
         }
     }
@@ -86,7 +87,7 @@ void ObjImporter::extract(string path){
     cout << __FUNCTION__ << "->Extraction finished." << endl;
 }
 
-void ObjImporter::getCoords(string line, double* coords){
+void ObjImporter::getVertices(string line, double* vertices){
     //Cheap and dirty way of retriving the double for the coordinates form a string
     char c;
     string tmp;
@@ -98,14 +99,14 @@ void ObjImporter::getCoords(string line, double* coords){
             tmp+=c;
         else{
             if(!flag){
-                coords[0] = stod(tmp);
+                vertices[0] = stod(tmp);
                 flag = true;
-            }else coords[1] = stod(tmp);
+            }else vertices[1] = stod(tmp);
             tmp = "";
         }
         index++;
     }
-    coords[2] = stod(tmp);
+    vertices[2] = stod(tmp);
     //cout << "Vertices x: " << vertices[0] << " y: " << vertices[1] << " z: " << vertices[2] << endl;
 }
 
@@ -133,6 +134,7 @@ void ObjImporter::getNormals(string line, double* normals){
 }
 
 void ObjImporter::getTxtCoords(string line, double* txtCoords){
+    //Cheap and dirty way of retriving the double for the textures coordinates form a string
     char c;
     string tmp;
     int index = 3;
@@ -151,7 +153,10 @@ void ObjImporter::getTxtCoords(string line, double* txtCoords){
     //cout << "TxtCoords x: " << txtCoords[0] << " y: " << txtCoords[1] << endl;
 }
 
-void ObjImporter::loadFace(string line, int* order){
+void ObjImporter::getOrder(string line, int* order){
+    //**Function which get the reference of coordinates, textures coordinates
+    //**and normals for the vertices by group of three is provided by the obj file
+    //**and stack the data in the Data vector
     stringstream ss;
     ss << line;
     int x0, y0, z0, x1, y1, z1, x2, y2, z2, i;
@@ -165,30 +170,30 @@ void ObjImporter::loadFace(string line, int* order){
     ss >> tmp >> x0 >> c >> y0 >> c >> z0 >> x1 >> c >> y1 >> c >> z1 >> x2 >> c >> y2 >> c >> z2;
 
     //**Manual calculation of the normals
-    vec3 v0 = vec3(Coords.at(x0-1)[0], Coords.at(x0-1)[1], Coords.at(x0-1)[2]);
-    vec3 v1 = vec3(Coords.at(x1-1)[0], Coords.at(x1-1)[1], Coords.at(x1-1)[2]);
-    vec3 v2 = vec3(Coords.at(x2-1)[0], Coords.at(x2-1)[1], Coords.at(x2-1)[2]);
+    vec3 v0 = vec3(Vertices.at(x0-1)[0], Vertices.at(x0-1)[1], Vertices.at(x0-1)[2]);
+    vec3 v1 = vec3(Vertices.at(x1-1)[0], Vertices.at(x1-1)[1], Vertices.at(x1-1)[2]);
+    vec3 v2 = vec3(Vertices.at(x2-1)[0], Vertices.at(x2-1)[1], Vertices.at(x2-1)[2]);
 
     vec3 norm = normalize(cross(v1 - v0, v2 - v1));
     
     //**Storing of datas for the first vertex
     //**TxtCoords temporaly ignored (indexted by y)
     for(i = 0 ; i < 3 ; i++)//Coordinates loop
-        Data.push_back(Coords.at(x0-1)[i]);
+        Data.push_back(Vertices.at(x0-1)[i]);
     for(i = 0 ; i < 3 ; i++)//Normals loop
         //Data.push_back(Normals.at(z0-1)[i]);
         Data.push_back(norm[i]);
 
     //**Storing of datas for the second vertex
     for(i = 0 ; i < 3 ; i++)//Coordinates loop
-        Data.push_back(Coords.at(x1-1)[i]);
+        Data.push_back(Vertices.at(x1-1)[i]);
     for(i = 0 ; i < 3 ; i++)//Normals loop
         //Data.push_back(Normals.at(z1-1)[i]);
         Data.push_back(norm[i]);
 
     //**Storing of datas for the third vertex
     for(i = 0 ; i < 3 ; i++)//Coordinates loop
-        Data.push_back(Coords.at(x2-1)[i]);
+        Data.push_back(Vertices.at(x2-1)[i]);
     for(i = 0 ; i < 3 ; i++)//Normals loop
         //Data.push_back(Normals.at(z2-1)[i]);
         Data.push_back(norm[i]);
