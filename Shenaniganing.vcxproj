@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="layout.cpp" />
     <ClCompile Include="mobject.cpp" />
     <ClCompile Include="objImporter.cpp" />
@@ -156,7 +157,9 @@
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.hpp" />
     <ClInclude Include="constant.hpp" />
+    <ClInclude Include="displays.hpp" />
     <ClInclude Include="layout.hpp" />
     <ClInclude Include="mobject.hpp" />
     <ClInclude Include="objImporter.hpp" />

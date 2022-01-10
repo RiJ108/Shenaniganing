@@ -42,10 +42,10 @@ void Layout::allocData() {
 			data[5 + offset] = buttons.at(i).size[0];
 			data[6 + offset] = buttons.at(i).size[1];
 		}
-		cout << __FUNCTION__ << " -> Allocation done, " << buttons.size() << " button(s) allocated." << endl;
+		cout << __FUNCTION__ << "->Allocation done, " << buttons.size() << " button(s) allocated." << endl;
 	}
 	else
-		cout << __FUNCTION__ << " -> Allocation failed. No buttons in the layout." << endl;
+		cout << __FUNCTION__ << "->###!! Allocation failed. No buttons in the layout. !!###" << endl;
 }
 
 void Layout::setName(string aName) {

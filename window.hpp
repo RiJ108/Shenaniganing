@@ -19,6 +19,7 @@
 #include "objImporter.hpp"
 #include "mobject.hpp"
 #include "constant.hpp"
+#include "camera.hpp"
 
 using namespace std;
 using namespace glm;
@@ -48,7 +49,9 @@ private:
     GLuint VAO_OBJ, VBO_OBJ;
     ObjImporter objImporter;
     MObject testObj;
+    Camera pov;
     void init3DShader();
+    void processKeyInputs();
 
     //**Window section
     GLFWwindow* wHandler;

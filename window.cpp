@@ -57,7 +57,7 @@ BOOL Window::init() {
 BOOL Window::loop() {
     initUI();
     setLayouts();
-    objImporter.extract("resources/objects/Ball.obj");
+    objImporter.extract("resources/objects/TorusMod.obj");
     objImporter.loadMObject(&testObj);
     testObj.initAndFillBuffers();
     while (!glfwWindowShouldClose(wHandler)) {
@@ -70,14 +70,17 @@ BOOL Window::loop() {
         glClearColor(0.025f, 0.025f, 0.025f, 1.0f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        //**Data rendering
-        renderText(shader_TXT, build + " ms=" + to_string((int)(deltaTime * 1000)), 10.0f, 10.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-        renderText(shader_TXT, " x = " + to_string(cursorPosX), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-        renderText(shader_TXT, " y = " + to_string(cursorPosY), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-
+        //**Finite-state machine calls
         F();
         M();
         G();
+
+        //**Data rendering
+        glDisable(GL_DEPTH_TEST);
+        renderText(shader_TXT, build + " ms=" + to_string((int)(deltaTime * 1000)), 10.0f, 10.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
+        //renderText(shader_TXT, " x = " + to_string(cursorPosX), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
+        //renderText(shader_TXT, " y = " + to_string(cursorPosY), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
+        glEnable(GL_DEPTH_TEST);
 
         //**Refresh buffers and polling
         glfwSwapBuffers(wHandler);
@@ -97,13 +100,18 @@ void Window::F() {
             nextState = State::inGame;
             getLayoutPtr("mainMenu")->setActive(false);
             getLayoutPtr("mainMenu")->resetButtonsStates();
+            glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            pov.setLastCursorPosition(vec2(srcWidth/2.0f, srcHeight/2.0f));
+            pov.setFirstMouse(true);
         }
         break;
 
     case State::inGame:
+        processKeyInputs();
         if (glfwGetKey(wHandler, 256) == GLFW_PRESS) {
             nextState = State::mainMenu;
             getLayoutPtr("mainMenu")->setActive(true);
+            glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
         break;
     }
@@ -141,24 +149,46 @@ void Window::G() {
         break;
 
     case State::inGame:
-        vec3 position = vec3(-2.0f, 0.5f, -1.0f);
-        vec3 front = vec3(0.0f) - position;
-        vec3 up = vec3(0.0f, 1.0f, 0.0f);
         //**Setting shader's uniform
         shader3D.use();
         shader3D.setVec3("lightPos", vec3(-2.0f * sin(currentFrame * 0.5f), 2.0f * cos(currentFrame * 0.05f), 0.0f));
-        shader3D.setVec3("frontView", vec3(0.0f) - position);
-        shader3D.setMat4("view", lookAt(position, position + front, up));
-        shader3D.setVec3("viewPos", position);
-        shader3D.setMat4("projection", perspective(radians(90.0f), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
+        shader3D.setVec3("frontView", pov.getFront());
+        
+        shader3D.setMat4("view", pov.lookAt());
+        shader3D.setVec3("viewPos", pov.getPosition());
+        shader3D.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
         shader3D.setMat4("model", mat4(1.0f));
+
+        //**Render the MObject
         glBindVertexArray(testObj.getVAO());
         glDrawArrays(GL_TRIANGLES, 0, testObj.getNbrFaces() * 6);
         glBindVertexArray(0);
 
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         break;
     }
+}
+
+void Window::processKeyInputs() {
+    //**Camera interaction (set speeds vector)
+    if (glfwGetKey(wHandler, 87) == GLFW_PRESS)
+        pov.key(87);
+    if (glfwGetKey(wHandler, 83) == GLFW_PRESS)
+        pov.key(83);
+    if (glfwGetKey(wHandler, 65) == GLFW_PRESS)
+        pov.key(65);
+    if (glfwGetKey(wHandler, 68) == GLFW_PRESS)
+        pov.key(68);
+    if (glfwGetKey(wHandler, 32) == GLFW_PRESS)
+        pov.key(32);
+    if (glfwGetKey(wHandler, 340) == GLFW_PRESS)
+        pov.key(340);
+    if (glfwGetKey(wHandler, 82) == GLFW_PRESS)
+        pov.setDefault();
+
+    //**Update camera position
+    pov.updatePosition(deltaTime);
 }
 
 void Window::checkUI() {
@@ -301,6 +331,9 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
     int height = windowPtr->srcHeight;
     windowPtr->cursorPosX = 2.0f * (xpos - (width / 2.0)) / width;
     windowPtr->cursorPosY = -2.0f * (ypos - (height / 2.0)) / height;
+    if (windowPtr->actualState == State::inGame) {
+        windowPtr->pov.mouseMotion(xpos, ypos);
+    }
 }
 
 void Window::initUI() {
