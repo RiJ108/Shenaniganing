@@ -17,10 +17,12 @@
 #include "shader.hpp"
 #include "layout.hpp"
 #include "objImporter.hpp"
+#include "engine.hpp"
 #include "mobject.hpp"
 #include "constant.hpp"
 #include "camera.hpp"
 #include "block.hpp"
+
 
 using namespace std;
 using namespace glm;
@@ -32,6 +34,14 @@ public:
 
     static void functionPtrTest(Window* aWindowPtr);
     static void exitCallBack(Window* aWindowPtr);
+
+    ~Window() {
+        if(!layoutPtr)free(layoutPtr);
+        if(!buttonPtr)free(buttonPtr);
+        if(!data)free(data);
+        if(!wHandler)free(wHandler);
+        if(!tmp)free(tmp);
+    }
 
 private:
     //**FSM section
@@ -49,9 +59,13 @@ private:
     ObjImporter objImporter;
     MObject testObj;
     Block testBlock;
+    vector<Block*> testBlocks;
     Camera pov;
     void init3DShader();
     void processKeyInputs();
+
+    //**
+    Engine engine;
 
     //**Texture testing
     int width, height, nrChannels;
@@ -62,11 +76,9 @@ private:
     GLFWwindow* wHandler;
     string build = "Shenaniganing build 0.1 dev";
     ivec2 WINDOW_SIZE = ivec2(1280, 720);
-    int* scrWidthPtr, * scrHeightPtr;
     int srcWidth = 1280, srcHeight = 720;
     int fpsCap = 60;
     float deltaTime = 0.0f, lastFrame = 0.0f, currentFrame = 0.0f;		// Time management
-    float* cursorPosXPtr, * cursorPosYPtr;
     float cursorPosX = -1.0f, cursorPosY = -1.0f;
     static void keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods);
     static void framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height);

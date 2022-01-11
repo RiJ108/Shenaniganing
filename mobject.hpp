@@ -36,6 +36,10 @@ public:
 	GLuint getVAO();
 	//Return as a (GLuint) the value of the vertex buffer object
 	GLuint getVBO();
+	~MObject() {
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+	}
 
 	vector<float> data;
 	unsigned int nbrFaces = 0;

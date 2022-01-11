@@ -6,7 +6,7 @@ Camera::Camera() {
 }
 
 void Camera::setDefault() {
-    position = vec3(0.0f, 0.0f, 3.0f);
+    position = vec3(0.0f, 5.0f, 3.0f);
     front = normalize(-position);
     up = vec3(0.0f, 1.0f, 0.0f);
     FOV = 100.0f;
@@ -17,7 +17,7 @@ void Camera::setDefault() {
     lastCursorPosition = vec2(0.0f);
     firstMouse = true;
     yaw = orientedAngle(vec3(-1.0f, 0.0f, 0.0f),front, up) * RADIAN_TO_DEGREE;
-    pitch = orientedAngle(vec3(0.0f, 0.0f, -1.0f), front, normalize(cross(up, front))) * RADIAN_TO_DEGREE;
+    pitch = -orientedAngle(vec3(0.0f, 0.0f, -1.0f), front, normalize(cross(up, front))) * RADIAN_TO_DEGREE;
 }
 
 void Camera::mouseMotion(double xMotion, double yMotion) {

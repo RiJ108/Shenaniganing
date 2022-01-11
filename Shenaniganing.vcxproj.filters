@@ -25,6 +25,9 @@
     <Filter Include="Fichiers de ressources\shaders\UI">
       <UniqueIdentifier>{8956ddaf-9ec3-4831-a2ab-df24c78345ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers de ressources\shaders\testing">
+      <UniqueIdentifier>{7ec821b8-5e4d-4cff-856c-07f415560492}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Shenaniganing.cpp">
@@ -49,6 +52,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="camera.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="perlinNoise.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,6 +92,9 @@
     <ClInclude Include="block.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="engine.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shader\fShaderSourceUI.fs">
@@ -114,6 +123,12 @@
     </None>
     <None Include="resources\shaders\vShaderSource3D.vs">
       <Filter>Fichiers de ressources\shaders\3D</Filter>
+    </None>
+    <None Include="resources\shaders\fShaderSourceTesting.fs">
+      <Filter>Fichiers de ressources\shaders\testing</Filter>
+    </None>
+    <None Include="resources\shaders\vShaderSourceTesting.vs">
+      <Filter>Fichiers de ressources\shaders\testing</Filter>
     </None>
   </ItemGroup>
 </Project>

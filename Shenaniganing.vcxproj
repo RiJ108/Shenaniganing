@@ -151,6 +151,7 @@
     <ClCompile Include="layout.cpp" />
     <ClCompile Include="mobject.cpp" />
     <ClCompile Include="objImporter.cpp" />
+    <ClCompile Include="perlinNoise.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Shenaniganing.cpp" />
     <ClCompile Include="src\glad.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="constant.hpp" />
     <ClInclude Include="displays.hpp" />
+    <ClInclude Include="engine.hpp" />
     <ClInclude Include="layout.hpp" />
     <ClInclude Include="mobject.hpp" />
     <ClInclude Include="objImporter.hpp" />
@@ -172,8 +174,10 @@
   <ItemGroup>
     <None Include="resources\shaders\fShaderSource3D_OLD.fs" />
     <None Include="resources\shaders\fShaderSource3D.fs" />
+    <None Include="resources\shaders\fShaderSourceTesting.fs" />
     <None Include="resources\shaders\vShaderSource3D_OLD.vs" />
     <None Include="resources\shaders\vShaderSource3D.vs" />
+    <None Include="resources\shaders\vShaderSourceTesting.vs" />
     <None Include="resources\shader\fShaderSourceTXT.fs" />
     <None Include="resources\shader\fShaderSourceUI.fs" />
     <None Include="resources\shader\gShaderSourceUI.gs" />

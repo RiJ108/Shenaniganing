@@ -12,6 +12,24 @@ using namespace glm;
 
 class Block {
 public:
+	void setIndex(unsigned int aIndex) {
+		index = aIndex;
+	}
+
+	void setData(vec3 aPosition) {
+		position = aPosition;
+		for (unsigned int i = 0; i < dataSize; i+=0) {
+			for (unsigned int j = 0; j < 3; j++) {
+				data[i] = CUBE_REFS[i] + aPosition[j];
+				i++;
+			}
+			for (unsigned int j = 0; j < 6; j++) {
+				data[i] = CUBE_REFS[i];
+				i++;
+			}
+		}
+	}
+
 	void setData() {
 		for (unsigned int i = 0; i < dataSize; i++)
 			data[i] = CUBE_REFS[i];
@@ -43,11 +61,20 @@ public:
 		return nbrVertices;
 	};
 
+	~Block() {
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+	}
+
 private:
 	GLuint VAO, VBO;
+	vec3 position = vec3(0.0f);
+	unsigned int index = 0;
+	unsigned int dataIndex = 0;
 	unsigned int dataSize = 324;
 	unsigned int nbrFaces = 12;
 	unsigned int nbrVertices = 36;
+	unsigned int sizeOfData = 324 * sizeof(float);
 	float data[324];
 	float CUBE_REFS[324] = {
 	-0.5, 0.5, -0.5,        -0, 1, 0,       0.375, 0.75,    0,

@@ -1,4 +1,4 @@
-#version 400 core
+#version 430 core
 
 out vec4 FragColor;
 
@@ -33,5 +33,6 @@ void main()
         
     vec3 result = (ambient + diffuse + specular) * objectColor;
     //texture(ourTexture, TexCoord) * 
-    FragColor = vec4(result, 1.0);
+    //FragColor = vec4(result, 1.0);
+    FragColor = vec4(1.0);
 }

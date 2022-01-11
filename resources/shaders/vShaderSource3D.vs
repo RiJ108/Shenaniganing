@@ -1,4 +1,4 @@
-#version 400 core
+#version 430 core
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
@@ -12,7 +12,6 @@ out vec2 TexCoord;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-
 uniform vec3 frontView;
 
 void main(){

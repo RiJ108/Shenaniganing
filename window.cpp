@@ -63,8 +63,25 @@ BOOL Window::init() {
     testObj.initAndFillBuffers();
     testObj.initAndFillBuffers_();*/
 
-    testBlock.setData();
-    testBlock.gfsBuffers();
+    /*testBlock.setData(vec3(0.0f));
+    testBlock.gfsBuffers();*/
+
+    Block* tmp;
+    int size = 3;
+
+    for (int i = -(size-1)/2; i <= (size - 1) / 2; i++) {
+        for (int j = -(size - 1) / 2; j <= (size - 1) / 2; j++) {
+            tmp = new Block();
+            tmp->setData(vec3(i, 0.0f, j));
+            tmp->setIndex(((i+1)*3) + (j+1));
+            tmp->gfsBuffers();
+            testBlocks.push_back(tmp);
+        }
+    }
+
+    engine.generateVertices();
+    engine.generateIndices();
+    engine.setBuffers();
 
     return true;
 }
@@ -160,7 +177,7 @@ void Window::G() {
 
     case State::inGame:
         //**Setting shader's uniform
-        shader3D.use();
+        /*shader3D.use();
         shader3D.setVec3("lightPos", vec3(-2.0f * sin(currentFrame * 0.5f), 2.0f * cos(currentFrame * 0.05f), 2.0f));
         shader3D.setVec3("frontView", pov.getFront());
 
@@ -170,9 +187,17 @@ void Window::G() {
         shader3D.setMat4("model", mat4(1.0f));
 
         //**Render the MObject
-        glBindVertexArray(testBlock.getVAO());
-        glDrawArrays(GL_TRIANGLES, 0, testBlock.getNbrVertices());
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        for (unsigned int i = 0; i < testBlocks.size(); i++) {
+            glBindVertexArray(testBlocks.at(i)->getVAO());
+            glDrawArrays(GL_TRIANGLES, 0, testBlocks.at(i)->getNbrVertices());
+        }
         glBindVertexArray(0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        engine.render(pov, (float)srcWidth / srcHeight);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
         renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
@@ -352,8 +377,7 @@ void Window::initUI() {
 
 void Window::init3DShader() {
     //**Initiate 3D shader
-    //shader3D = Shader("./resources/shaders/vShaderSource3D_OLD.vs", "resources/shaders/fShaderSource3D_OLD.fs");
-    shader3D = Shader("./resources/shaders/vShaderSource3D.vs", "resources/shaders/fShaderSource3D.fs");
+    shader3D = Shader("resources/shaders/vShaderSource3D.vs", "resources/shaders/fShaderSource3D.fs");
     shader3D.use();
     shader3D.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
     shader3D.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
