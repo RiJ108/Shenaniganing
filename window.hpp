@@ -20,10 +20,10 @@
 #include "mobject.hpp"
 #include "constant.hpp"
 #include "camera.hpp"
+#include "block.hpp"
 
 using namespace std;
 using namespace glm;
-
 
 class Window {
 public:
@@ -46,12 +46,17 @@ private:
 
     //**3D section
     Shader shader3D;
-    GLuint VAO_OBJ, VBO_OBJ;
     ObjImporter objImporter;
     MObject testObj;
+    Block testBlock;
     Camera pov;
     void init3DShader();
     void processKeyInputs();
+
+    //**Texture testing
+    int width, height, nrChannels;
+    unsigned char* data;
+    unsigned int texture;
 
     //**Window section
     GLFWwindow* wHandler;

@@ -31,7 +31,7 @@ public:
 	vector<float>* getDataPtr();
 	//Generate, bind, set-up and fill the vertex array object (GLuint) and the vertex buffer object (GLuint) with the "data" vector (vector<float>)
 	void initAndFillBuffers();
-
+	void initAndFillBuffers_OLD();
 	//Return as a (GLuint) the value of the vertex array object
 	GLuint getVAO();
 	//Return as a (GLuint) the value of the vertex buffer object

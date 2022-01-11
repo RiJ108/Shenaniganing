@@ -1,4 +1,4 @@
-#pragma once OBJIMPORTER
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -7,11 +7,10 @@
 #include <sstream>
 #include <typeinfo>
 #include "mobject.hpp"
-//#include <filesystem>
+#include "displays.hpp"
 
 using namespace std;
 using namespace glm;
-//namespace fs = std::filesystem;
 
 class ObjImporter {
 public:
@@ -27,12 +26,15 @@ public:
     //Function that merge the coordinates, textures coordinates and normals from the Vertices, Normals and TxtCoords vector (vector<double*>) that constitute a face
     //and push them in the Data vector (vector<float>) according form the "Face" string provided by the .Obj file
     void loadFace(string line, int* order);
+    void loadFace_OLD(string line, int* order);
     //Function that fill the MObject given instance with the previously loaded data form the .Obj file
     void loadMObject(MObject* aMObject);
+    void loadMObject_OLD(MObject* aMObject);
     //Function that return the data vector (vector<float>) of the importer
     vector<float> getData();
-
-    int getDataSize();
+    //Return as an unsigned int the size of the "Data" vector (vector<float>)
+    unsigned int getDataSize();
+    
     int faces = 0;
     bool debug = false;
 

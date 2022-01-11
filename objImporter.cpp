@@ -174,6 +174,61 @@ void ObjImporter::loadFace(string line, int* order) {
     vec3 norm = normalize(cross(v1 - v0, v2 - v1));
 
     //**Storing of datas for the first vertex
+    //**adding the textures coordinates
+    for (i = 0; i < 3; i++) //Coordinates loop
+        Data.push_back(Coords.at(x0 - 1)[i]);
+    for (i = 0; i < 3; i++) //Normals loop
+        Data.push_back(norm[i]);
+    for (i = 0; i < 2; i++) //TxtCoords loop
+        Data.push_back(TxtCoords.at(x0 - 1)[i]);
+    Data.push_back(0);
+
+    for (i = 0; i < 3; i++) //Coordinates loop
+        Data.push_back(Coords.at(x1 - 1)[i]);
+    for (i = 0; i < 3; i++) //Normals loop
+        Data.push_back(norm[i]);
+    for (i = 0; i < 2; i++) //TxtCoords loop
+        Data.push_back(TxtCoords.at(x1 - 1)[i]);
+    Data.push_back(0);
+
+    for (i = 0; i < 3; i++) //Coordinates loop
+        Data.push_back(Coords.at(x2 - 1)[i]);
+    for (i = 0; i < 3; i++) //Normals loop
+        Data.push_back(norm[i]);
+    for (i = 0; i < 2; i++) //TxtCoords loop
+        Data.push_back(TxtCoords.at(x2 - 1)[i]);
+    Data.push_back(0);
+}
+
+vector<float> ObjImporter::getData() {
+    return Data;
+}
+
+unsigned int ObjImporter::getDataSize() {
+    return Data.size();
+}
+
+void ObjImporter::loadFace_OLD(string line, int* order) {
+    stringstream ss;
+    ss << line;
+    int x0, y0, z0, x1, y1, z1, x2, y2, z2, i;
+    string tmp;
+    char c;
+
+    faces++;
+
+    //**Exctraction of the indices for coordinates, textures coordinates
+    //**and normals for the three vertices of the triangle
+    ss >> tmp >> x0 >> c >> y0 >> c >> z0 >> x1 >> c >> y1 >> c >> z1 >> x2 >> c >> y2 >> c >> z2;
+
+    //**Manual calculation of the normals
+    vec3 v0 = vec3(Coords.at(x0 - 1)[0], Coords.at(x0 - 1)[1], Coords.at(x0 - 1)[2]);
+    vec3 v1 = vec3(Coords.at(x1 - 1)[0], Coords.at(x1 - 1)[1], Coords.at(x1 - 1)[2]);
+    vec3 v2 = vec3(Coords.at(x2 - 1)[0], Coords.at(x2 - 1)[1], Coords.at(x2 - 1)[2]);
+
+    vec3 norm = normalize(cross(v1 - v0, v2 - v1));
+
+    //**Storing of datas for the first vertex
     //**TxtCoords temporaly ignored (indexted by y)
     for (i = 0; i < 3; i++)//Coordinates loop
         Data.push_back(Coords.at(x0 - 1)[i]);
@@ -195,7 +250,6 @@ void ObjImporter::loadFace(string line, int* order) {
         //Data.push_back(Normals.at(z2-1)[i]);
         Data.push_back(norm[i]);
 
-
     /*vec3 v0 = vec3(Vertices.at(x0-1)[0], Vertices.at(x0-1)[1], Vertices.at(x0-1)[2]);
     vec3 v1 = vec3(Vertices.at(x1-1)[0], Vertices.at(x1-1)[1], Vertices.at(x1-1)[2]);
     vec3 v2 = vec3(Vertices.at(x2-1)[0], Vertices.at(x2-1)[1], Vertices.at(x2-1)[2]);
@@ -209,10 +263,11 @@ void ObjImporter::loadFace(string line, int* order) {
         cout << "norm=" << norm.x << " " << norm.y << " " << norm.z << endl;
 }
 
-vector<float> ObjImporter::getData() {
-    return Data;
-}
-
-int ObjImporter::getDataSize() {
-    return Data.size();
+void ObjImporter::loadMObject_OLD(MObject* aMObject) {
+    if (Data.size() == 0) {
+        cout << __FUNCTION__ << "-> ###!! data empty, cannot load on the MObject. Exiting the function. !!###" << endl;
+        return;
+    }
+    aMObject->data = Data;
+    aMObject->nbrFaces = faces;
 }

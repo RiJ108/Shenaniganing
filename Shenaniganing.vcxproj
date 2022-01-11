@@ -157,6 +157,7 @@
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="block.hpp" />
     <ClInclude Include="camera.hpp" />
     <ClInclude Include="constant.hpp" />
     <ClInclude Include="displays.hpp" />
@@ -165,14 +166,17 @@
     <ClInclude Include="objImporter.hpp" />
     <ClInclude Include="perlinNoise.hpp" />
     <ClInclude Include="shader.hpp" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\shader\fShaderSource3D.fs" />
+    <None Include="resources\shaders\fShaderSource3D_OLD.fs" />
+    <None Include="resources\shaders\fShaderSource3D.fs" />
+    <None Include="resources\shaders\vShaderSource3D_OLD.vs" />
+    <None Include="resources\shaders\vShaderSource3D.vs" />
     <None Include="resources\shader\fShaderSourceTXT.fs" />
     <None Include="resources\shader\fShaderSourceUI.fs" />
     <None Include="resources\shader\gShaderSourceUI.gs" />
-    <None Include="resources\shader\vShaderSource3D.vs" />
     <None Include="resources\shader\vShaderSourceTXT.vs" />
     <None Include="resources\shader\vShaderSourceUI.vs" />
   </ItemGroup>

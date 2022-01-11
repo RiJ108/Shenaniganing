@@ -3,6 +3,17 @@
 #define BUTTON_NUMBER_OF_FLOAT 7
 #define BUTTON_SIZEOF BUTTON_NUMBER_OF_FLOAT*4
 #define NUMBER_OF_LAYOUTS 1
+#define RADIAN_TO_DEGREE (180.0 / 3.141592653589793238463)
+
+#include <map>
+#include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/vector_angle.hpp>
+
+using namespace std;
+using namespace glm;
 
 class Window;
 

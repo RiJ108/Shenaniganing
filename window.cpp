@@ -1,4 +1,6 @@
 #include "window.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 BOOL Window::init() {
     //**Initialization of GLFW
@@ -51,16 +53,24 @@ BOOL Window::init() {
     //**3D
     init3DShader();
 
+    //--------------------------------------------------------------------------------------------------------
+    initUI();
+    setLayouts();
+
+    /*objImporter.extract("resources/objects/Cube.obj");
+    objImporter.loadMObject(&testObj);
+    objImporter.loadMObject_(&testObj);
+    testObj.initAndFillBuffers();
+    testObj.initAndFillBuffers_();*/
+
+    testBlock.setData();
+    testBlock.gfsBuffers();
+
     return true;
 }
 
 BOOL Window::loop() {
-    initUI();
-    setLayouts();
-    objImporter.extract("resources/objects/TorusMod.obj");
-    objImporter.loadMObject(&testObj);
-    testObj.initAndFillBuffers();
-    while (!glfwWindowShouldClose(wHandler)) {
+        while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -151,17 +161,17 @@ void Window::G() {
     case State::inGame:
         //**Setting shader's uniform
         shader3D.use();
-        shader3D.setVec3("lightPos", vec3(-2.0f * sin(currentFrame * 0.5f), 2.0f * cos(currentFrame * 0.05f), 0.0f));
+        shader3D.setVec3("lightPos", vec3(-2.0f * sin(currentFrame * 0.5f), 2.0f * cos(currentFrame * 0.05f), 2.0f));
         shader3D.setVec3("frontView", pov.getFront());
-        
+
         shader3D.setMat4("view", pov.lookAt());
         shader3D.setVec3("viewPos", pov.getPosition());
         shader3D.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
         shader3D.setMat4("model", mat4(1.0f));
 
         //**Render the MObject
-        glBindVertexArray(testObj.getVAO());
-        glDrawArrays(GL_TRIANGLES, 0, testObj.getNbrFaces() * 6);
+        glBindVertexArray(testBlock.getVAO());
+        glDrawArrays(GL_TRIANGLES, 0, testBlock.getNbrVertices());
         glBindVertexArray(0);
 
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
@@ -342,6 +352,7 @@ void Window::initUI() {
 
 void Window::init3DShader() {
     //**Initiate 3D shader
+    //shader3D = Shader("./resources/shaders/vShaderSource3D_OLD.vs", "resources/shaders/fShaderSource3D_OLD.fs");
     shader3D = Shader("./resources/shaders/vShaderSource3D.vs", "resources/shaders/fShaderSource3D.fs");
     shader3D.use();
     shader3D.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));

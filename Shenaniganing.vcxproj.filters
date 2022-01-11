@@ -80,6 +80,12 @@
     <ClInclude Include="displays.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="block.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shader\fShaderSourceUI.fs">
@@ -97,10 +103,16 @@
     <None Include="resources\shader\fShaderSourceTXT.fs">
       <Filter>Fichiers de ressources\shaders\TXT</Filter>
     </None>
-    <None Include="resources\shader\vShaderSource3D.vs">
+    <None Include="resources\shaders\fShaderSource3D_OLD.fs">
       <Filter>Fichiers de ressources\shaders\3D</Filter>
     </None>
-    <None Include="resources\shader\fShaderSource3D.fs">
+    <None Include="resources\shaders\fShaderSource3D.fs">
+      <Filter>Fichiers de ressources\shaders\3D</Filter>
+    </None>
+    <None Include="resources\shaders\vShaderSource3D_OLD.vs">
+      <Filter>Fichiers de ressources\shaders\3D</Filter>
+    </None>
+    <None Include="resources\shaders\vShaderSource3D.vs">
       <Filter>Fichiers de ressources\shaders\3D</Filter>
     </None>
   </ItemGroup>
