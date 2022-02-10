@@ -66,7 +66,7 @@ BOOL Window::init() {
     /*testBlock.setData(vec3(0.0f));
     testBlock.gfsBuffers();*/
 
-    Block* tmp;
+    /*Block* tmp;
     int size = 3;
 
     for (int i = -(size-1)/2; i <= (size - 1) / 2; i++) {
@@ -77,12 +77,15 @@ BOOL Window::init() {
             tmp->gfsBuffers();
             testBlocks.push_back(tmp);
         }
-    }
+    }*/
 
     engine.generateVertices();
     engine.generateIndices();
     engine.setBuffers();
 
+    //engine.generateVertices(engine.terrain.active.vertices);
+    //engine.generateIndices(engine.terrain.active.indices);
+    //engine.setBuffers(engine.terrain.active.vertices, engine.terrain.active.indices, engine.terrain.active.VAO, engine.terrain.active.VBO, engine.terrain.active.EBO);
     return true;
 }
 
