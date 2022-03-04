@@ -251,24 +251,26 @@ void Window::G() {
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glPointSize(2);
-        //engine.testRenderPoints(pov, (float)srcWidth / srcHeight);
-        //engine.testRenderMesh(pov, (float)srcWidth / srcHeight);
+        engine.testRenderPoints(pov, (float)srcWidth / srcHeight);
+        engine.testRenderMesh(pov, (float)srcWidth / srcHeight);
 
-        shaderMC.use();
-        shaderMC.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
-        shaderMC.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
-        shaderMC.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
-        shaderMC.setMat4("view", pov.lookAt());
-        shaderMC.setVec3("viewPos", pov.getPosition());
-        shaderMC.setVec3("frontView", pov.getFront());
-        shaderMC.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
-        shaderMC.setMat4("model", mat4(1.0f));
+        if (!true) {
+            shaderMC.use();
+            shaderMC.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+            shaderMC.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+            shaderMC.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
+            shaderMC.setMat4("view", pov.lookAt());
+            shaderMC.setVec3("viewPos", pov.getPosition());
+            shaderMC.setVec3("frontView", pov.getFront());
+            shaderMC.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
+            shaderMC.setMat4("model", mat4(1.0f));
 
-        glBindVertexArray(VAOmc);
-        glDrawArrays(GL_TRIANGLES, 0, nbrTriangles * 3);
-        glBindVertexArray(VAOmcp);
-        glDrawArrays(GL_POINTS, 0, gridcellPoints.size() / 6);
-        glBindVertexArray(0);
+            glBindVertexArray(VAOmc);
+            glDrawArrays(GL_TRIANGLES, 0, nbrTriangles * 3);
+            glBindVertexArray(VAOmcp);
+            glDrawArrays(GL_POINTS, 0, gridcellPoints.size() / 6);
+            glBindVertexArray(0);
+        }
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -391,16 +393,13 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
     if (activeLayoutPtr == nullptr) {
-        cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
+        //cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
         return;
-    }
-    else {
-        cout << __FUNCTION__ << "->activeLayoutPtr != nullptr" << endl;
     }
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
     if (action == GLFW_PRESS) {
         if (activeButtonPtr) {
-            cout << __FUNCTION__ << " -> " << activeButtonPtr->name << " pressed." << endl;
+            //cout << __FUNCTION__ << " -> " << activeButtonPtr->name << " pressed." << endl;
             activeButtonPtr->functionPtr(windowPtr);
             activeButtonPtr->clicked = true;
         }
