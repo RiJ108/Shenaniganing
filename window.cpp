@@ -3,6 +3,7 @@
 #include "stb_image.h"
 
 BOOL Window::init() {
+    {
     //**Initialization of GLFW
     if (!glfwInit()) {
         cout << __FUNCTION__ << "->GLFW failed initialize." << endl;
@@ -50,47 +51,117 @@ BOOL Window::init() {
     //**Init and load FreeType (load glyphes)
     initFT();
 
-    //**3D
+    //**Other inits..
     init3DShader();
-
-    //--------------------------------------------------------------------------------------------------------
     initUI();
-    setLayouts();
+    setLayouts(); }
+    //________________________________________________________________________________________________________________________________________
+    //**TESTING**
+    //________________________________________________________________________________________________________________________________________
 
-    /*objImporter.extract("resources/objects/Cube.obj");
-    objImporter.loadMObject(&testObj);
-    objImporter.loadMObject_(&testObj);
-    testObj.initAndFillBuffers();
-    testObj.initAndFillBuffers_();*/
+    engine.initShaders();
+    engine.testFillPoints();
+    engine.testNormalizePointsValue();
+    engine.testThresholdingPointsToVector();
+    engine.testGFSBuffersVectorPoints();
 
-    /*testBlock.setData(vec3(0.0f));
-    testBlock.gfsBuffers();*/
+    engine.testMarchThrough();
+    engine.testSetMesh();
+    engine.testGFSBuffersMesh();
 
-    /*Block* tmp;
-    int size = 3;
+    int i = 0;
+    testGrid.p[i].x = -1;
+    testGrid.p[i].y = -1;
+    testGrid.p[i].z = 1;
+    testGrid.val[i] = 1.0f;
+    i++;
+    testGrid.p[i].x = 1;
+    testGrid.p[i].y = -1;
+    testGrid.p[i].z = 1;
+    testGrid.val[i] = 1.0f;
+    i++;
+    testGrid.p[i].x = 1;
+    testGrid.p[i].y = -1;
+    testGrid.p[i].z = -1;
+    testGrid.val[i] = 1.0f;
+    i++;
+    testGrid.p[i].x = -1;
+    testGrid.p[i].y = -1;
+    testGrid.p[i].z = -1;
+    testGrid.val[i] = 0.0f;
+    i++;
+    testGrid.p[i].x = -1;
+    testGrid.p[i].y = 1;
+    testGrid.p[i].z = 1;
+    testGrid.val[i] = 1.0f;
+    i++;
+    testGrid.p[i].x = 1;
+    testGrid.p[i].y = 1;
+    testGrid.p[i].z = 1;
+    testGrid.val[i] = 0;
+    i++;
+    testGrid.p[i].x = 1;
+    testGrid.p[i].y = 1;
+    testGrid.p[i].z = -1;
+    testGrid.val[i] = 0;
+    i++;
+    testGrid.p[i].x = -1;
+    testGrid.p[i].y = 1;
+    testGrid.p[i].z = -1;
+    testGrid.val[i] = 0;
 
-    for (int i = -(size-1)/2; i <= (size - 1) / 2; i++) {
-        for (int j = -(size - 1) / 2; j <= (size - 1) / 2; j++) {
-            tmp = new Block();
-            tmp->setData(vec3(i, 0.0f, j));
-            tmp->setIndex(((i+1)*3) + (j+1));
-            tmp->gfsBuffers();
-            testBlocks.push_back(tmp);
+    if (true) {
+        nbrTriangles = mCube.Polygonise(testGrid, 0.5f, &testTriangles);
+        for (int i = 0; i < nbrTriangles; i++) {
+            for (int j = 0; j < 3; j++) {
+                //cout << testTriangles[i].p[j].x << " _ " << testTriangles[i].p[j].y << " _ " << testTriangles[i].p[j].z << endl;
+                vertices.push_back(testTriangles[i].p[j].x);
+                vertices.push_back(testTriangles[i].p[j].y);
+                vertices.push_back(testTriangles[i].p[j].z);
+
+                vertices.push_back(1.0f);
+                vertices.push_back(1.0f);
+                vertices.push_back(0.0f);
+            }
         }
-    }*/
+        cout << __FUNCTION__ << "->mCube.Polygonise(testGrid, 0.5f, testTriangles) >> " << nbrTriangles << endl;
 
-    engine.generateVertices();
-    engine.generateIndices();
-    engine.setBuffers();
+        shaderMC = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
 
-    //engine.generateVertices(engine.terrain.active.vertices);
-    //engine.generateIndices(engine.terrain.active.indices);
-    //engine.setBuffers(engine.terrain.active.vertices, engine.terrain.active.indices, engine.terrain.active.VAO, engine.terrain.active.VBO, engine.terrain.active.EBO);
+        glGenVertexArrays(1, &VAOmc);
+        glGenBuffers(1, &VBOmc);
+
+        glBindVertexArray(VAOmc);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glBindVertexArray(0);
+    }
+
+    mCube.loadGridcellPointToVector(testGrid, &gridcellPoints);
+    glGenVertexArrays(1, &VAOmcp);
+    glGenBuffers(1, &VBOmcp);
+    glBindVertexArray(VAOmcp);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)* gridcellPoints.size(), &gridcellPoints[0], GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+    cout << __FUNCTION__ << "->FINISHED !" << endl;
+
     return true;
 }
 
 BOOL Window::loop() {
-        while (!glfwWindowShouldClose(wHandler)) {
+    while (!glfwWindowShouldClose(wHandler)) {
         //**Process timing
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -108,8 +179,6 @@ BOOL Window::loop() {
         //**Data rendering
         glDisable(GL_DEPTH_TEST);
         renderText(shader_TXT, build + " ms=" + to_string((int)(deltaTime * 1000)), 10.0f, 10.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-        //renderText(shader_TXT, " x = " + to_string(cursorPosX), 10.0f, 30.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
-        //renderText(shader_TXT, " y = " + to_string(cursorPosY), 10.0f, 20.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
         glEnable(GL_DEPTH_TEST);
 
         //**Refresh buffers and polling
@@ -126,10 +195,11 @@ BOOL Window::loop() {
 void Window::F() {
     switch (actualState) {
     case State::mainMenu:
-        if (layouts.at(0).buttons.at(0).clicked) {
+        layoutPtr = getLayoutPtr("mainMenu");
+        if (layoutPtr->buttons.at(0).clicked) {
             nextState = State::inGame;
-            getLayoutPtr("mainMenu")->setActive(false);
-            getLayoutPtr("mainMenu")->resetButtonsStates();
+            layoutPtr->setActive(false);
+            layoutPtr->resetButtonsStates();
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             pov.setLastCursorPosition(vec2(srcWidth/2.0f, srcHeight/2.0f));
             pov.setFirstMouse(true);
@@ -179,27 +249,27 @@ void Window::G() {
         break;
 
     case State::inGame:
-        //**Setting shader's uniform
-        /*shader3D.use();
-        shader3D.setVec3("lightPos", vec3(-2.0f * sin(currentFrame * 0.5f), 2.0f * cos(currentFrame * 0.05f), 2.0f));
-        shader3D.setVec3("frontView", pov.getFront());
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPointSize(2);
+        //engine.testRenderPoints(pov, (float)srcWidth / srcHeight);
+        //engine.testRenderMesh(pov, (float)srcWidth / srcHeight);
 
-        shader3D.setMat4("view", pov.lookAt());
-        shader3D.setVec3("viewPos", pov.getPosition());
-        shader3D.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
-        shader3D.setMat4("model", mat4(1.0f));
+        shaderMC.use();
+        shaderMC.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+        shaderMC.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+        shaderMC.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
+        shaderMC.setMat4("view", pov.lookAt());
+        shaderMC.setVec3("viewPos", pov.getPosition());
+        shaderMC.setVec3("frontView", pov.getFront());
+        shaderMC.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
+        shaderMC.setMat4("model", mat4(1.0f));
 
-        //**Render the MObject
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        for (unsigned int i = 0; i < testBlocks.size(); i++) {
-            glBindVertexArray(testBlocks.at(i)->getVAO());
-            glDrawArrays(GL_TRIANGLES, 0, testBlocks.at(i)->getNbrVertices());
-        }
+        glBindVertexArray(VAOmc);
+        glDrawArrays(GL_TRIANGLES, 0, nbrTriangles * 3);
+        glBindVertexArray(VAOmcp);
+        glDrawArrays(GL_POINTS, 0, gridcellPoints.size() / 6);
         glBindVertexArray(0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        engine.render(pov, (float)srcWidth / srcHeight);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
@@ -304,23 +374,6 @@ void Window::functionPtrTest(Window* aWindowPtr) {
 void Window::exitCallBack(Window* aWindowPtr) {
     cout << __FUNCTION__ << endl;
     glfwSetWindowShouldClose(aWindowPtr->wHandler, true);
-
-}
-
-void Window::resetActiveLayout() {
-    layoutPtr = getActiveLayoutPtr();
-    for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
-        layoutPtr->buttons.at(i).active = false;
-        layoutPtr->buttons.at(i).clicked = false;
-    }
-}
-
-Layout* Window::getActiveLayoutPtr() {
-    for (unsigned int i = 0; i < layouts.size(); i++) {
-        if (layouts.at(i).isActive())
-            return &layouts.at(i);
-    }
-    return nullptr;
 }
 
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
@@ -338,8 +391,11 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
     if (activeLayoutPtr == nullptr) {
-        //cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
+        cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
         return;
+    }
+    else {
+        cout << __FUNCTION__ << "->activeLayoutPtr != nullptr" << endl;
     }
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
     if (action == GLFW_PRESS) {
@@ -385,6 +441,22 @@ void Window::init3DShader() {
     shader3D.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
     shader3D.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
     shader3D.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
+}
+
+void Window::resetActiveLayout() {
+    layoutPtr = getActiveLayoutPtr();
+    for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
+        layoutPtr->buttons.at(i).active = false;
+        layoutPtr->buttons.at(i).clicked = false;
+    }
+}
+
+Layout* Window::getActiveLayoutPtr() {
+    for (unsigned int i = 0; i < layouts.size(); i++) {
+        if (layouts.at(i).isActive())
+            return &layouts.at(i);
+    }
+    return nullptr;
 }
 
 void Window::initFT() {

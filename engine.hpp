@@ -5,12 +5,35 @@
 #include "perlinNoise.hpp"
 #include "camera.hpp"
 #include "terrain.hpp"
+#include "marchingCube.hpp"
+#include "constant.hpp"
+
+#define LENGTH 10
+#define WIDTH 10
+#define HEIGHT 10
+#define GRID_RES 10
+
+typedef struct myPoint {
+	vec3 aPos = vec3(0.0f);
+	float value = 0.0f;
+}myPoint;
 
 class Engine {
 public:
 	Engine() {
 		vertices = (float*)malloc(sizeof(float) * 6 * (GRID_SUB_SIZE + 1) * (GRID_SUB_SIZE + 1));
 		indices = (unsigned int*)malloc(sizeof(unsigned int) * 6 * GRID_SUB_SIZE * GRID_SUB_SIZE);
+		points = (float*)malloc(sizeof(float) * LENGTH * WIDTH * HEIGHT * 6);
+		mPoints = (myPoint***)malloc(sizeof_3);
+		if (mPoints) {
+			for (unsigned int i = 0; i < LENGTH * GRID_RES; i++) {
+				mPoints[i] = (myPoint**)malloc(sizeof_2);
+				if (mPoints[i]) {
+					for (unsigned int j = 0; j < HEIGHT * GRID_RES; j++)
+						mPoints[i][j] = (myPoint*)malloc(sizeof_1);
+				}
+			}
+		}
 	}
 
 	void generateVertices() {
@@ -117,15 +140,220 @@ public:
 		glBindVertexArray(0);
 	}
 
+	void initShaders() {
+		pointShader = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
+	}
+
+	void testFillPoints() {
+		float x_offset = LENGTH / 2.0f;
+		float y_offset = HEIGHT / 2.0f;
+		float z_offset = WIDTH / 2.0f;
+
+		vec3 position = vec3(0.0f);
+
+		for (unsigned int i = 0; i < LENGTH * GRID_RES; i++) {
+			for (unsigned int j = 0; j < HEIGHT * GRID_RES; j++) {
+				for (unsigned int k = 0; k < WIDTH * GRID_RES; k++) {
+					position.x = i * (1.0 / GRID_RES) - x_offset;
+					position.y = j * (1.0 / GRID_RES) - y_offset;
+					position.z = k * (1.0 / GRID_RES) - z_offset;
+
+					mPoints[i][j][k].aPos = position;
+					mPoints[i][j][k].value = perlin.noise(0.15f * position.x, 0.15f * position.y, 0.15f * position.z);
+
+					if (mPoints[i][j][k].value < pointValue_min)
+						pointValue_min = mPoints[i][j][k].value;
+					if (mPoints[i][j][k].value > pointValue_max)
+						pointValue_max = mPoints[i][j][k].value;
+
+				}
+			}
+		}
+	}
+
+	void testNormalizePointsValue() {
+		Display::disp("Min value = ");
+		cout << pointValue_min << endl;
+		Display::disp("Max value = ");
+		cout << pointValue_max << endl;
+
+		for (int i = 0; i < LENGTH * GRID_RES; i++) {
+			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
+				for (int k = 0; k < WIDTH * GRID_RES; k++)
+					mPoints[i][j][k].value = (mPoints[i][j][k].value - pointValue_min)/(pointValue_max - pointValue_min);
+			}
+		}
+	}
+
+	void testThresholdingPointsToVector() {
+		for (int i = 0; i < LENGTH * GRID_RES; i++) {
+			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
+				for (int k = 0; k < WIDTH * GRID_RES; k++) {
+					if (mPoints[i][j][k].value < threshold) {
+						vecPoints.push_back(mPoints[i][j][k].aPos.x);
+						vecPoints.push_back(mPoints[i][j][k].aPos.y);
+						vecPoints.push_back(mPoints[i][j][k].aPos.z);
+
+						vecPoints.push_back(0.0f);
+						vecPoints.push_back(mPoints[i][j][k].value);
+						vecPoints.push_back(0.0f);
+					}
+				}
+			}
+		}
+	}
+
+	void testMergeToVector() {
+		for (int i = 0; i < LENGTH * GRID_RES; i++) {
+			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
+				for (int k = 0; k < WIDTH * GRID_RES; k++) {
+					vecPoints.push_back(mPoints[i][j][k].aPos.x);
+					vecPoints.push_back(mPoints[i][j][k].aPos.y);
+					vecPoints.push_back(mPoints[i][j][k].aPos.z);
+
+					vecPoints.push_back(0.0f);
+					vecPoints.push_back(mPoints[i][j][k].value);
+					vecPoints.push_back(0.0f);
+				}
+			}
+		}
+	}
+
+	void testGFSBuffersVectorPoints() {
+		glGenVertexArrays(1, &VAO_points);
+		glGenBuffers(1, &VBO_points);
+
+		glBindVertexArray(VAO_points);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_points);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vecPoints.size(), &vecPoints[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		cout << __FUNCTION__ << "->FINISHED !" << endl;
+	}
+
+	void testRenderPoints(Camera pov, float ratio) {
+		pointShader.use();
+
+		pointShader.setMat4("view", pov.lookAt());
+		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		pointShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_points);
+		glDrawArrays(GL_POINTS, 0, vecPoints.size());
+		glBindVertexArray(0);
+	}
+
+	void testRenderMesh(Camera pov, float ratio) {
+		pointShader.use();
+
+		pointShader.setMat4("view", pov.lookAt());
+		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		pointShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_mesh);
+		glDrawArrays(GL_TRIANGLES, 0, testMeshData.size() / 6);
+		glBindVertexArray(0);
+	}
+
+	void testMarchThrough() {
+		GRIDCELL gridcell;
+		int index = 0;
+		testTriangles = *(new vector<TRIANGLE>);
+		for (unsigned int i = 0; i < (LENGTH * GRID_RES) - 1; i++) {
+			for (unsigned int j = 0; j < (HEIGHT * GRID_RES) - 1; j++) {
+				for (unsigned int k = 0; k < (WIDTH * GRID_RES) - 1; k++) {
+					//Display::dispLn(vec3(i,j,k));
+					index = 0;
+					for (unsigned int l = 0; l < 2; l++) {
+						for (unsigned int m = 0; m < 2; m++) {
+							for (unsigned int n = 0; n < 2; n++) {
+								gridcell.p[index].x = mPoints[i + l][j + m][k + n].aPos.x;
+								gridcell.p[index].y = mPoints[i + l][j + m][k + n].aPos.y;
+								gridcell.p[index].z = mPoints[i + l][j + m][k + n].aPos.z;
+								gridcell.val[index] = mPoints[i + l][j + m][k + n].value;
+								index++;
+							}
+						}
+					}
+					nbrTriangles = mCube.Polygonise(gridcell, 0.5f, &testTriangles);
+					//cout << __FUNCTION__ << "->mCube.Polygonise(gridcell, " << threshold << ", testTriangles) >> " << nbrTriangles << endl;
+				}
+			}
+		}
+		cout << __FUNCTION__ << "->testTriangles.size()=" << testTriangles.size() << endl;
+	}
+
+	void testSetMesh() {
+		for (unsigned int i = 0; i < testTriangles.size(); i++) {
+			for (int j = 0; j < 3; j++) {
+				testMeshData.push_back(testTriangles.at(i).p[j].x);
+				testMeshData.push_back(testTriangles.at(i).p[j].y);
+				testMeshData.push_back(testTriangles.at(i).p[j].z);
+
+				testMeshData.push_back(1.0f);
+				testMeshData.push_back(1.0f);
+				testMeshData.push_back(0.0f);
+			}
+		}
+	}
+
+	void testGFSBuffersMesh() {
+		glGenVertexArrays(1, &VAO_mesh);
+		glGenBuffers(1, &VBO_mesh);
+
+		glBindVertexArray(VAO_mesh);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_mesh);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * testMeshData.size(), &testMeshData[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		cout << __FUNCTION__ << "->FINISHED !" << endl;
+	}
+
+	~Engine() {
+		if(mPoints)
+			free(mPoints);
+	}
+
 	GLuint VAO, VBO, EBO;
+	GLuint VAO_points, VBO_points;
+	GLuint VAO_mesh, VBO_mesh;
 	Terrain terrain;
 
 private:
 	int seed = 0;
 	PerlinNoise perlin;
-	//float vertices_[6 * (GRID_SUB_SIZE + 1) * (GRID_SUB_SIZE + 1)];
-	float* vertices;
-	//unsigned int indices_[6 * (GRID_SUB_SIZE) * (GRID_SUB_SIZE)];
-	unsigned int* indices;
+	MarchingCube mCube;
+	float threshold = 0.50f;
+	vector<TRIANGLE> testTriangles;
+	vector<float> testMeshData;
+	int nbrTriangles;
+
+	//** Single layer heigth map section
 	Shader shader;
+	float* vertices;
+	unsigned int* indices;
+
+	//** Marching cube testing section
+	Shader pointShader;
+	float* points;
+	int sizeof_1 = sizeof(myPoint) * (WIDTH * GRID_RES);
+	int sizeof_2 = sizeof_1 * (HEIGHT * GRID_RES);
+	int sizeof_3 = sizeof_2 * (LENGTH * GRID_RES);
+	myPoint*** mPoints;
+	vector<float> vecPoints;
+	float pointValue_min = HUGE_VALF;
+	float pointValue_max = 0.0f;
+
+	//**Marching cube
+
 };

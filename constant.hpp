@@ -19,6 +19,20 @@ class Window;
 
 enum class State {mainMenu, inGame};
 
+//Structs handling marching cube data
+typedef struct {
+	double x, y, z;
+} XYZ;
+
+typedef struct {
+	XYZ p[3];
+} TRIANGLE;
+
+typedef struct {
+	XYZ p[8];
+	double val[8];
+} GRIDCELL;
+
 //Holds all state information relevant to a character as loaded using FreeType
 typedef struct Character {
     unsigned int TextureID; // ID handle of the glyph texture

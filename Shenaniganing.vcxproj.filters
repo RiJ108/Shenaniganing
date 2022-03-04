@@ -98,6 +98,9 @@
     <ClInclude Include="terrain.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="marchingCube.hpp">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shader\fShaderSourceUI.fs">
@@ -131,6 +134,12 @@
       <Filter>Fichiers de ressources\shaders\testing</Filter>
     </None>
     <None Include="resources\shaders\vShaderSourceTesting.vs">
+      <Filter>Fichiers de ressources\shaders\testing</Filter>
+    </None>
+    <None Include="resources\shaders\fShaderSourcePoint.fs">
+      <Filter>Fichiers de ressources\shaders\testing</Filter>
+    </None>
+    <None Include="resources\shaders\vShaderSourcePoint.vs">
       <Filter>Fichiers de ressources\shaders\testing</Filter>
     </None>
   </ItemGroup>

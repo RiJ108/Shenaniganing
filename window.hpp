@@ -14,6 +14,7 @@
 #include "glm/glm.hpp"
 #include "ft2build.h"
 #include FT_FREETYPE_H
+
 #include "shader.hpp"
 #include "layout.hpp"
 #include "objImporter.hpp"
@@ -22,7 +23,7 @@
 #include "constant.hpp"
 #include "camera.hpp"
 #include "block.hpp"
-
+#include "marchingCube.hpp"
 
 using namespace std;
 using namespace glm;
@@ -64,8 +65,17 @@ private:
     void init3DShader();
     void processKeyInputs();
 
-    //**
+    //**Generation section
+    Shader shaderMC;
+    GRIDCELL testGrid;
+    MarchingCube mCube;
+    vector<TRIANGLE> testTriangles;
     Engine engine;
+    GLuint VBOmc, VAOmc;
+    GLuint VBOmcp, VAOmcp;
+    vector<float> vertices;
+    vector<float> gridcellPoints;
+    int nbrTriangles;
 
     //**Texture testing
     int width, height, nrChannels;
