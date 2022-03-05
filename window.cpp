@@ -258,6 +258,8 @@ void Window::G() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        renderText(shader_TXT, "Cube index = " + to_string(cubeIndex), 8.0f, srcHeight/2.0, 0.5f, vec3(0.8f, 0.8f, 0.5f));
+        renderText(shader_TXT, "Number of triangles = " + to_string(nbrTriangles), 4.0f, srcHeight/2.0 - 15.0f, 0.5f, vec3(0.8f, 0.8f, 0.5f));
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
         renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         break;
