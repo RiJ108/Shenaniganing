@@ -147,31 +147,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="layout.cpp" />
-    <ClCompile Include="mobject.cpp" />
-    <ClCompile Include="objImporter.cpp" />
-    <ClCompile Include="perlinNoise.cpp" />
-    <ClCompile Include="shader.cpp" />
-    <ClCompile Include="Shenaniganing.cpp" />
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\glad.cpp" />
-    <ClCompile Include="window.cpp" />
+    <ClCompile Include="src\layout.cpp" />
+    <ClCompile Include="src\mobject.cpp" />
+    <ClCompile Include="src\objImporter.cpp" />
+    <ClCompile Include="src\perlinNoise.cpp" />
+    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\Shenaniganing.cpp" />
+    <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="block.hpp" />
-    <ClInclude Include="camera.hpp" />
-    <ClInclude Include="constant.hpp" />
-    <ClInclude Include="displays.hpp" />
-    <ClInclude Include="engine.hpp" />
-    <ClInclude Include="layout.hpp" />
-    <ClInclude Include="marchingCube.hpp" />
-    <ClInclude Include="mobject.hpp" />
-    <ClInclude Include="objImporter.hpp" />
-    <ClInclude Include="perlinNoise.hpp" />
-    <ClInclude Include="shader.hpp" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="terrain.hpp" />
-    <ClInclude Include="window.hpp" />
+    <ClInclude Include="include\block.hpp" />
+    <ClInclude Include="include\camera.hpp" />
+    <ClInclude Include="include\constant.hpp" />
+    <ClInclude Include="include\displays.hpp" />
+    <ClInclude Include="include\engine.hpp" />
+    <ClInclude Include="include\ft2build.h" />
+    <ClInclude Include="include\layout.hpp" />
+    <ClInclude Include="include\marchingCube.hpp" />
+    <ClInclude Include="include\mobject.hpp" />
+    <ClInclude Include="include\objImporter.hpp" />
+    <ClInclude Include="include\perlinNoise.hpp" />
+    <ClInclude Include="include\shader.hpp" />
+    <ClInclude Include="include\stb_image.h" />
+    <ClInclude Include="include\terrain.hpp" />
+    <ClInclude Include="include\window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fShaderSource3D_OLD.fs" />

@@ -28,78 +28,90 @@
     <Filter Include="Fichiers de ressources\shaders\testing">
       <UniqueIdentifier>{7ec821b8-5e4d-4cff-856c-07f415560492}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\UNUSED">
+      <UniqueIdentifier>{ceb7c7df-638c-4d68-aee9-e7af7ec26e8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\MISC">
+      <UniqueIdentifier>{ed1d23b6-ef6c-4180-9dad-3dc963d5afd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\Done">
+      <UniqueIdentifier>{37ab25ea-219d-414b-b051-0a7a80ed9cc5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Shenaniganing.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\glad.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="shader.cpp">
+    <ClCompile Include="src\camera.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="window.cpp">
+    <ClCompile Include="src\layout.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="layout.cpp">
+    <ClCompile Include="src\mobject.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="objImporter.cpp">
+    <ClCompile Include="src\objImporter.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="mobject.cpp">
+    <ClCompile Include="src\perlinNoise.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
+    <ClCompile Include="src\shader.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="perlinNoise.cpp">
+    <ClCompile Include="src\window.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shenaniganing.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="perlinNoise.hpp">
+    <ClInclude Include="include\camera.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="shader.hpp">
+    <ClInclude Include="include\constant.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="window.hpp">
+    <ClInclude Include="include\engine.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="layout.hpp">
+    <ClInclude Include="include\layout.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="constant.hpp">
+    <ClInclude Include="include\marchingCube.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="objImporter.hpp">
+    <ClInclude Include="include\terrain.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="mobject.hpp">
+    <ClInclude Include="include\window.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="camera.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\block.hpp">
+      <Filter>Fichiers d%27en-tête\UNUSED</Filter>
     </ClInclude>
-    <ClInclude Include="displays.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\mobject.hpp">
+      <Filter>Fichiers d%27en-tête\UNUSED</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\objImporter.hpp">
+      <Filter>Fichiers d%27en-tête\UNUSED</Filter>
     </ClInclude>
-    <ClInclude Include="block.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\ft2build.h">
+      <Filter>Fichiers d%27en-tête\MISC</Filter>
     </ClInclude>
-    <ClInclude Include="engine.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\displays.hpp">
+      <Filter>Fichiers d%27en-tête\MISC</Filter>
     </ClInclude>
-    <ClInclude Include="terrain.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\stb_image.h">
+      <Filter>Fichiers d%27en-tête\MISC</Filter>
     </ClInclude>
-    <ClInclude Include="marchingCube.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="include\perlinNoise.hpp">
+      <Filter>Fichiers d%27en-tête\Done</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader.hpp">
+      <Filter>Fichiers d%27en-tête\Done</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

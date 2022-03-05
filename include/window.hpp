@@ -54,9 +54,9 @@ public:
     Engine engine;
     GLuint VBOmc, VAOmc;
     GLuint VBOmcp, VAOmcp;
-    vector<TRIANGLE> testTriangles;
+    vector<TRIANGLE> triangles;
     vector<float> vertices;
-    vector<float> gridcellPoints;
+    vector<float> points;
     int nbrTriangles;
     int cubeIndex = 0;
     bool needRefresh = false;

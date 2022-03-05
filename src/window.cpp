@@ -137,7 +137,12 @@ BOOL Window::init() {
     glBindVertexArray(0); }
     
     cubeIndex = 1;
-    refreshMCdebug(cubeIndex);
+    engine.refreshMCdebug(&testGrid, &vertices, &points, &triangles, cubeIndex);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)* vertices.size(), &vertices[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)* points.size(), &points[0]);
 
     cout << __FUNCTION__ << "->FINISHED !" << endl;
 
@@ -252,14 +257,14 @@ void Window::G() {
             glBindVertexArray(VAOmc);
             glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
             glBindVertexArray(VAOmcp);
-            glDrawArrays(GL_POINTS, 0, gridcellPoints.size() / 6);
+            glDrawArrays(GL_POINTS, 0, points.size() / 6);
             glBindVertexArray(0);
         }
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         renderText(shader_TXT, "Cube index = " + to_string(cubeIndex), 8.0f, srcHeight/2.0, 0.5f, vec3(0.8f, 0.8f, 0.5f));
-        renderText(shader_TXT, "Number of triangles = " + to_string(nbrTriangles), 4.0f, srcHeight/2.0 - 15.0f, 0.5f, vec3(0.8f, 0.8f, 0.5f));
+        renderText(shader_TXT, "Number of triangles = " + to_string(vertices.size() / (6 * 3)), 4.0f, srcHeight/2.0 - 15.0f, 0.5f, vec3(0.8f, 0.8f, 0.5f));
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
         renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         break;
@@ -365,48 +370,12 @@ void Window::exitCallBack(Window* aWindowPtr) {
 }
 
 void Window::refreshMCdebug(int cubeIndex) {
-    cout << cubeIndex << " :\t";
-
-    for (int i = 7; i >= 0; i--) {
-        if ((cubeIndex & (int)pow(2, i)) == (int)pow(2, i)) {
-            cout << "1";
-            testGrid.val[i] = 1.0f;
-        }
-        else {
-            cout << "0";
-            testGrid.val[i] = 0.0f;
-        }
-    }
-    cout << endl;
-
-    testTriangles.clear();
-    vertices.clear();
-    gridcellPoints.clear();
-
-    nbrTriangles = mCube.polygonise(testGrid, 0.5f, &testTriangles);
-
-    if (maxT < nbrTriangles)
-        maxT = nbrTriangles;
-
-    cout << __FUNCTION__ << "->mCube.Polygonise(testGrid, 0.5f, testTriangles) >> " << nbrTriangles << "\t maximum triangles = " << maxT << endl;
-
-    for (int i = 0; i < nbrTriangles; i++) {
-        for (int j = 0; j < 3; j++) {
-            vertices.push_back(testTriangles[i].p[j].x);
-            vertices.push_back(testTriangles[i].p[j].y);
-            vertices.push_back(testTriangles[i].p[j].z);
-
-            vertices.push_back(1.0f);
-            vertices.push_back(1.0f);
-            vertices.push_back(0.0f);
-        }
-    }
-    mCube.loadGridcellPointToVector(testGrid, &gridcellPoints);
+    engine.refreshMCdebug(&testGrid, &vertices, &points, &triangles, cubeIndex);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * vertices.size(), &vertices[0]);
     glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * gridcellPoints.size(), &gridcellPoints[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * points.size(), &points[0]);
 }
 
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {

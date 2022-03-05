@@ -260,6 +260,33 @@ public:
 		glBindVertexArray(0);
 	}
 
+	void refreshMCdebug(GRIDCELL *aGrid, vector<float> *vertices, vector<float> *points, vector<TRIANGLE> *triangles,  int cubeIndex) {
+		for (int i = 7; i >= 0; i--) {
+			if ((cubeIndex & (int)pow(2, i)) == (int)pow(2, i))
+				aGrid->val[i] = 1.0f;
+			else
+				aGrid->val[i] = 0.0f;
+		}
+		
+		triangles->clear();
+		vertices->clear();
+		points->clear();
+
+		nbrTriangles = mCube.polygonise(*aGrid, 0.5f, triangles);
+		for (int i = 0; i < nbrTriangles; i++) {
+			for (int j = 0; j < 3; j++) {
+				vertices->push_back(triangles->at(i).p[j].x);
+				vertices->push_back(triangles->at(i).p[j].y);
+				vertices->push_back(triangles->at(i).p[j].z);
+
+				vertices->push_back(1.0f);
+				vertices->push_back(1.0f);
+				vertices->push_back(0.0f);
+			}
+		}
+		mCube.loadGridcellPointToVector(*aGrid, points);
+	}
+
 	void marchThrough() {
 		GRIDCELL gridcell;
 		int index = 0;
@@ -267,7 +294,6 @@ public:
 		for (unsigned int i = 0; i < (LENGTH * GRID_RES) - 1; i++) {
 			for (unsigned int j = 0; j < (HEIGHT * GRID_RES) - 1; j++) {
 				for (unsigned int k = 0; k < (WIDTH * GRID_RES) - 1; k++) {
-					//Display::dispLn(vec3(i,j,k));
 					index = 0;
 					for (unsigned int l = 0; l < 2; l++) {
 						for (unsigned int m = 0; m < 2; m++) {
@@ -281,11 +307,10 @@ public:
 						}
 					}
 					nbrTriangles = mCube.polygonise(gridcell, 0.5f, &testTriangles);
-					//cout << __FUNCTION__ << "->mCube.Polygonise(gridcell, " << threshold << ", testTriangles) >> " << nbrTriangles << endl;
 				}
 			}
 		}
-		cout << __FUNCTION__ << "->testTriangles.size()=" << testTriangles.size() << endl;
+		cout << __FUNCTION__ << "->number of triangles =" << nbrTriangles << endl;
 	}
 
 	void setMesh() {
