@@ -4,86 +4,86 @@
 
 BOOL Window::init() {
     {
-    //**Initialization of GLFW
-    if (!glfwInit()) {
-        cout << __FUNCTION__ << "->GLFW failed initialize." << endl;
-        exit(EXIT_FAILURE);
-    }
-    else cout << __FUNCTION__ << "->GLFW initialized." << endl;
+        //**Initialization of GLFW
+        if (!glfwInit()) {
+            cout << __FUNCTION__ << "->GLFW failed initialize." << endl;
+            exit(EXIT_FAILURE);
+        }
+        else cout << __FUNCTION__ << "->GLFW initialized." << endl;
 
-    //**Setting window
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+        //**Setting window
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    //**Creating the window
-    wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
-    if (wHandler == NULL) {
-        cout << __FUNCTION__ << "->Failed to create GLFW window" << endl;
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-    else cout << __FUNCTION__ << "->GLFW window created." << endl;
-    //glfwSetWindowSizeLimits(wHandler, 990, 540, GLFW_DONT_CARE, GLFW_DONT_CARE);
-    glfwMakeContextCurrent(wHandler);
+        //**Creating the window
+        wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
+        if (wHandler == NULL) {
+            cout << __FUNCTION__ << "->Failed to create GLFW window" << endl;
+            glfwTerminate();
+            exit(EXIT_FAILURE);
+        }
+        else cout << __FUNCTION__ << "->GLFW window created." << endl;
+        //glfwSetWindowSizeLimits(wHandler, 990, 540, GLFW_DONT_CARE, GLFW_DONT_CARE);
+        glfwMakeContextCurrent(wHandler);
 
-    //**Set callbacks
-    glfwSetWindowUserPointer(wHandler, this);
-    //glfwSetKeyCallback(wHandler, keyCallback);
-    glfwSetFramebufferSizeCallback(wHandler, framebuffer_size_callback);
-    glfwSetCursorPosCallback(wHandler, mouse_callback_static);
-    glfwSetMouseButtonCallback(wHandler, mouse_button_callback_static);
+        //**Set callbacks
+        glfwSetWindowUserPointer(wHandler, this);
+        glfwSetKeyCallback(wHandler, keyCallback);
+        glfwSetFramebufferSizeCallback(wHandler, framebuffer_size_callback);
+        glfwSetCursorPosCallback(wHandler, mouse_callback_static);
+        glfwSetMouseButtonCallback(wHandler, mouse_button_callback_static);
 
-    //**Load glad
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        cout << __FUNCTION__ << "->Failed to initialize GLAD" << endl;
-        exit(EXIT_FAILURE);
-    }
-    else   cout << __FUNCTION__ << "->GLAD initialized." << endl;
+        //**Load glad
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            cout << __FUNCTION__ << "->Failed to initialize GLAD" << endl;
+            exit(EXIT_FAILURE);
+        }
+        else   cout << __FUNCTION__ << "->GLAD initialized." << endl;
 
-    //**OpenGL state
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //**OpenGL state
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    //**Init and load FreeType (load glyphes)
-    initFT();
+        //**Init and load FreeType (load glyphes)
+        initFT();
 
-    //**Other inits..
-    init3DShader();
-    initUI();
-    setLayouts(); }
+        //**Other inits..
+        init3DShader();
+        initUI();
+        setLayouts(); }
     //________________________________________________________________________________________________________________________________________
     //**TESTING**
     //________________________________________________________________________________________________________________________________________
 
     engine.initShaders();
-    engine.testFillPoints();
-    engine.testNormalizePointsValue();
-    engine.testThresholdingPointsToVector();
-    engine.testGFSBuffersVectorPoints();
+    engine.fillPoints();
+    engine.normalizePointsValue();
+    engine.thresholdingPointsToVector();
+    engine.GFSBuffersVectorPoints();
 
-    engine.testMarchThrough();
-    engine.testSetMesh();
-    engine.testGFSBuffersMesh();
+    engine.marchThrough();
+    engine.setMesh();
+    engine.GFSBuffersMesh();
 
-    int i = 0;
+    {int i = 0;
     testGrid.p[i].x = -1;
     testGrid.p[i].y = -1;
     testGrid.p[i].z = 1;
-    testGrid.val[i] = 1.0f;
+    testGrid.val[i] = 0.0f;
     i++;
     testGrid.p[i].x = 1;
     testGrid.p[i].y = -1;
     testGrid.p[i].z = 1;
-    testGrid.val[i] = 1.0f;
+    testGrid.val[i] = 0.0f;
     i++;
     testGrid.p[i].x = 1;
     testGrid.p[i].y = -1;
     testGrid.p[i].z = -1;
-    testGrid.val[i] = 1.0f;
+    testGrid.val[i] = 0.0f;
     i++;
     testGrid.p[i].x = -1;
     testGrid.p[i].y = -1;
@@ -93,67 +93,51 @@ BOOL Window::init() {
     testGrid.p[i].x = -1;
     testGrid.p[i].y = 1;
     testGrid.p[i].z = 1;
-    testGrid.val[i] = 1.0f;
+    testGrid.val[i] = 0.0f;
     i++;
     testGrid.p[i].x = 1;
     testGrid.p[i].y = 1;
     testGrid.p[i].z = 1;
-    testGrid.val[i] = 0;
+    testGrid.val[i] = 0.0f;
     i++;
     testGrid.p[i].x = 1;
     testGrid.p[i].y = 1;
     testGrid.p[i].z = -1;
-    testGrid.val[i] = 0;
+    testGrid.val[i] = 0.0f;
     i++;
     testGrid.p[i].x = -1;
     testGrid.p[i].y = 1;
     testGrid.p[i].z = -1;
-    testGrid.val[i] = 0;
+    testGrid.val[i] = 0.0f;}
 
-    if (true) {
-        nbrTriangles = mCube.Polygonise(testGrid, 0.5f, &testTriangles);
-        for (int i = 0; i < nbrTriangles; i++) {
-            for (int j = 0; j < 3; j++) {
-                //cout << testTriangles[i].p[j].x << " _ " << testTriangles[i].p[j].y << " _ " << testTriangles[i].p[j].z << endl;
-                vertices.push_back(testTriangles[i].p[j].x);
-                vertices.push_back(testTriangles[i].p[j].y);
-                vertices.push_back(testTriangles[i].p[j].z);
+    shaderMC = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
 
-                vertices.push_back(1.0f);
-                vertices.push_back(1.0f);
-                vertices.push_back(0.0f);
-            }
-        }
-        cout << __FUNCTION__ << "->mCube.Polygonise(testGrid, 0.5f, testTriangles) >> " << nbrTriangles << endl;
+    {glGenVertexArrays(1, &VAOmc);
+    glGenBuffers(1, &VBOmc);
 
-        shaderMC = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
-
-        glGenVertexArrays(1, &VAOmc);
-        glGenBuffers(1, &VBOmc);
-
-        glBindVertexArray(VAOmc);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-        glBindVertexArray(0);
-    }
-
-    mCube.loadGridcellPointToVector(testGrid, &gridcellPoints);
     glGenVertexArrays(1, &VAOmcp);
     glGenBuffers(1, &VBOmcp);
+
     glBindVertexArray(VAOmcp);
     glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)* gridcellPoints.size(), &gridcellPoints[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * 6, nullptr, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
+
+    glBindVertexArray(VAOmc);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * 3 * 6, nullptr, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0); }
+    
+    cubeIndex = 1;
+    refreshMCdebug(cubeIndex);
 
     cout << __FUNCTION__ << "->FINISHED !" << endl;
 
@@ -223,7 +207,7 @@ void Window::M() {
 
 void Window::G() {
     switch (actualState) {
-    case State::mainMenu:
+    case State::mainMenu: {
         layoutPtr = getActiveLayoutPtr();
         if (layoutPtr == nullptr) {
             cout << __FUNCTION__ << "->###!! layoutPtr == nullptr !!###" << endl;
@@ -246,15 +230,15 @@ void Window::G() {
 
         //**Inputs processing
         checkUI();
-        break;
+        break; }
 
     case State::inGame:
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glPointSize(2);
-        engine.testRenderPoints(pov, (float)srcWidth / srcHeight);
-        engine.testRenderMesh(pov, (float)srcWidth / srcHeight);
+        //engine.renderPoints(pov, (float)srcWidth / srcHeight);
+        //engine.renderMesh(pov, (float)srcWidth / srcHeight);
 
-        if (!true) {
+        if (true) {
             shaderMC.use();
             shaderMC.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
             shaderMC.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
@@ -266,7 +250,7 @@ void Window::G() {
             shaderMC.setMat4("model", mat4(1.0f));
 
             glBindVertexArray(VAOmc);
-            glDrawArrays(GL_TRIANGLES, 0, nbrTriangles * 3);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
             glBindVertexArray(VAOmcp);
             glDrawArrays(GL_POINTS, 0, gridcellPoints.size() / 6);
             glBindVertexArray(0);
@@ -378,8 +362,71 @@ void Window::exitCallBack(Window* aWindowPtr) {
     glfwSetWindowShouldClose(aWindowPtr->wHandler, true);
 }
 
+void Window::refreshMCdebug(int cubeIndex) {
+    cout << cubeIndex << " :\t";
+
+    for (int i = 7; i >= 0; i--) {
+        if ((cubeIndex & (int)pow(2, i)) == (int)pow(2, i)) {
+            cout << "1";
+            testGrid.val[i] = 1.0f;
+        }
+        else {
+            cout << "0";
+            testGrid.val[i] = 0.0f;
+        }
+    }
+    cout << endl;
+
+    testTriangles.clear();
+    vertices.clear();
+    gridcellPoints.clear();
+
+    nbrTriangles = mCube.polygonise(testGrid, 0.5f, &testTriangles);
+
+    if (maxT < nbrTriangles)
+        maxT = nbrTriangles;
+
+    cout << __FUNCTION__ << "->mCube.Polygonise(testGrid, 0.5f, testTriangles) >> " << nbrTriangles << "\t maximum triangles = " << maxT << endl;
+
+    for (int i = 0; i < nbrTriangles; i++) {
+        for (int j = 0; j < 3; j++) {
+            vertices.push_back(testTriangles[i].p[j].x);
+            vertices.push_back(testTriangles[i].p[j].y);
+            vertices.push_back(testTriangles[i].p[j].z);
+
+            vertices.push_back(1.0f);
+            vertices.push_back(1.0f);
+            vertices.push_back(0.0f);
+        }
+    }
+    mCube.loadGridcellPointToVector(testGrid, &gridcellPoints);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * vertices.size(), &vertices[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * gridcellPoints.size(), &gridcellPoints[0]);
+}
+
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
-    cout << __FUNCTION__ << "->" << key << " is " << action << endl;
+    //cout << __FUNCTION__ << "->" << key << " is " << action << endl;
+    Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
+    if (key == 265 && action == GLFW_PRESS) {
+        windowPtr->cubeIndex++;
+        if (windowPtr->cubeIndex > 255)
+            windowPtr->cubeIndex = 0;
+        windowPtr->needRefresh = true;
+    }
+    if (key == 264 && action == GLFW_PRESS) {
+        windowPtr->cubeIndex--;
+        if (windowPtr->cubeIndex < 0)
+            windowPtr->cubeIndex = 255;
+        windowPtr->needRefresh = true;
+    }
+
+    if (windowPtr->needRefresh) {
+        windowPtr->refreshMCdebug(windowPtr->cubeIndex);
+        windowPtr->needRefresh = false;
+    }
 }
 
 void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height) {

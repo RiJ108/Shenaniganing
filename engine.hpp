@@ -8,10 +8,10 @@
 #include "marchingCube.hpp"
 #include "constant.hpp"
 
-#define LENGTH 10
-#define WIDTH 10
-#define HEIGHT 10
-#define GRID_RES 10
+#define LENGTH 2
+#define WIDTH 2
+#define HEIGHT 2
+#define GRID_RES 1
 
 typedef struct myPoint {
 	vec3 aPos = vec3(0.0f);
@@ -144,7 +144,7 @@ public:
 		pointShader = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
 	}
 
-	void testFillPoints() {
+	void fillPoints() {
 		float x_offset = LENGTH / 2.0f;
 		float y_offset = HEIGHT / 2.0f;
 		float z_offset = WIDTH / 2.0f;
@@ -171,7 +171,7 @@ public:
 		}
 	}
 
-	void testNormalizePointsValue() {
+	void normalizePointsValue() {
 		Display::disp("Min value = ");
 		cout << pointValue_min << endl;
 		Display::disp("Max value = ");
@@ -185,7 +185,7 @@ public:
 		}
 	}
 
-	void testThresholdingPointsToVector() {
+	void thresholdingPointsToVector() {
 		for (int i = 0; i < LENGTH * GRID_RES; i++) {
 			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
 				for (int k = 0; k < WIDTH * GRID_RES; k++) {
@@ -203,7 +203,7 @@ public:
 		}
 	}
 
-	void testMergeToVector() {
+	void mergeToVector() {
 		for (int i = 0; i < LENGTH * GRID_RES; i++) {
 			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
 				for (int k = 0; k < WIDTH * GRID_RES; k++) {
@@ -219,7 +219,7 @@ public:
 		}
 	}
 
-	void testGFSBuffersVectorPoints() {
+	void GFSBuffersVectorPoints() {
 		glGenVertexArrays(1, &VAO_points);
 		glGenBuffers(1, &VBO_points);
 
@@ -236,7 +236,7 @@ public:
 		cout << __FUNCTION__ << "->FINISHED !" << endl;
 	}
 
-	void testRenderPoints(Camera pov, float ratio) {
+	void renderPoints(Camera pov, float ratio) {
 		pointShader.use();
 
 		pointShader.setMat4("view", pov.lookAt());
@@ -248,7 +248,7 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void testRenderMesh(Camera pov, float ratio) {
+	void renderMesh(Camera pov, float ratio) {
 		pointShader.use();
 
 		pointShader.setMat4("view", pov.lookAt());
@@ -260,7 +260,7 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void testMarchThrough() {
+	void marchThrough() {
 		GRIDCELL gridcell;
 		int index = 0;
 		testTriangles = *(new vector<TRIANGLE>);
@@ -280,7 +280,7 @@ public:
 							}
 						}
 					}
-					nbrTriangles = mCube.Polygonise(gridcell, 0.5f, &testTriangles);
+					nbrTriangles = mCube.polygonise(gridcell, 0.5f, &testTriangles);
 					//cout << __FUNCTION__ << "->mCube.Polygonise(gridcell, " << threshold << ", testTriangles) >> " << nbrTriangles << endl;
 				}
 			}
@@ -288,7 +288,7 @@ public:
 		cout << __FUNCTION__ << "->testTriangles.size()=" << testTriangles.size() << endl;
 	}
 
-	void testSetMesh() {
+	void setMesh() {
 		for (unsigned int i = 0; i < testTriangles.size(); i++) {
 			for (int j = 0; j < 3; j++) {
 				testMeshData.push_back(testTriangles.at(i).p[j].x);
@@ -302,7 +302,7 @@ public:
 		}
 	}
 
-	void testGFSBuffersMesh() {
+	void GFSBuffersMesh() {
 		glGenVertexArrays(1, &VAO_mesh);
 		glGenBuffers(1, &VBO_mesh);
 

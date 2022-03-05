@@ -44,6 +44,23 @@ public:
         if(!tmp)free(tmp);
     }
 
+    //**Generation section
+    void refreshMCdebug(int cubeIndex);
+    int maxT = 0;
+    vector<float> clearing;
+    Shader shaderMC;
+    GRIDCELL testGrid;
+    MarchingCube mCube;
+    Engine engine;
+    GLuint VBOmc, VAOmc;
+    GLuint VBOmcp, VAOmcp;
+    vector<TRIANGLE> testTriangles;
+    vector<float> vertices;
+    vector<float> gridcellPoints;
+    int nbrTriangles;
+    int cubeIndex = 0;
+    bool needRefresh = false;
+
 private:
     //**FSM section
     State actualState = State::mainMenu;
@@ -65,17 +82,7 @@ private:
     void init3DShader();
     void processKeyInputs();
 
-    //**Generation section
-    Shader shaderMC;
-    GRIDCELL testGrid;
-    MarchingCube mCube;
-    vector<TRIANGLE> testTriangles;
-    Engine engine;
-    GLuint VBOmc, VAOmc;
-    GLuint VBOmcp, VAOmcp;
-    vector<float> vertices;
-    vector<float> gridcellPoints;
-    int nbrTriangles;
+    
 
     //**Texture testing
     int width, height, nrChannels;
