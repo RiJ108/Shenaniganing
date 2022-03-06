@@ -8,10 +8,10 @@
 #include "marchingCube.hpp"
 #include "constant.hpp"
 
-#define LENGTH 20
-#define WIDTH 20
-#define HEIGHT 2
-#define GRID_RES 4
+#define LENGTH 4
+#define WIDTH 4
+#define HEIGHT 5
+#define GRID_RES 3
 #define CUBE_LIMIT ((LENGTH * GRID_RES) - 1) * ((HEIGHT * GRID_RES) - 1) * ((WIDTH * GRID_RES) - 1)
 
 typedef struct myPoint {
@@ -36,6 +36,13 @@ public:
 			}
 		}
 	}
+
+	~Engine() {
+		if (mPoints)
+			free(mPoints);
+	}
+
+	//______________________________________________________________________COMPUTATION
 
 	void generateVertices() {
 		generateVertices(vertices);
@@ -97,54 +104,6 @@ public:
 		cout << __FUNCTION__ << "->FINISHED !" << endl;
 	}
 
-	void setBuffers() {
-		cout << __FUNCTION__ << "->starting.." << endl;
-		shader = Shader("resources/shaders/vShaderSource3D_OLD.vs", "resources/shaders/fShaderSource3D_OLD.fs");
-
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
-
-		glBindVertexArray(VAO);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * (GRID_SUB_SIZE + 1) * (GRID_SUB_SIZE + 1), vertices, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6 * GRID_SUB_SIZE * GRID_SUB_SIZE, indices, GL_STATIC_DRAW);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-
-		cout << __FUNCTION__ << "->FINISHED !" << endl;
-	}
-
-	void render(Camera pov, float ratio) {
-		render(VAO, pov, ratio);
-	}
-
-	void render(GLuint aVAO, Camera pov, float ratio) {
-		shader.use();
-		shader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
-		shader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
-		shader.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
-		shader.setMat4("view", pov.lookAt());
-		shader.setVec3("viewPos", pov.getPosition());
-		shader.setVec3("frontView", pov.getFront());
-		shader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
-		shader.setMat4("model", mat4(1.0f));
-
-		glBindVertexArray(aVAO);
-		glDrawElements(GL_TRIANGLES, 6 * (GRID_SUB_SIZE) * (GRID_SUB_SIZE), GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-	}
-
-	void initShaders() {
-		pointShader = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
-	}
-
 	void fillPoints() {
 		float x_offset = LENGTH / 2.0f;
 		float y_offset = HEIGHT / 2.0f;
@@ -181,11 +140,11 @@ public:
 		for (int i = 0; i < LENGTH * GRID_RES; i++) {
 			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
 				for (int k = 0; k < WIDTH * GRID_RES; k++)
-					//mPoints[i][j][k].value = (mPoints[i][j][k].value - pointValue_min)/(pointValue_max - pointValue_min);
-					if (mPoints[i][j][k].value > threshold)
+					mPoints[i][j][k].value = (mPoints[i][j][k].value - pointValue_min)/(pointValue_max - pointValue_min);
+					/*if (mPoints[i][j][k].value > threshold)
 						mPoints[i][j][k].value = 1.0f;
 					else
-						mPoints[i][j][k].value = 0.0f;
+						mPoints[i][j][k].value = 0.0f;*/
 			}
 		}
 	}
@@ -194,7 +153,7 @@ public:
 		for (int i = 0; i < LENGTH * GRID_RES; i++) {
 			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
 				for (int k = 0; k < WIDTH * GRID_RES; k++) {
-					if (mPoints[i][j][k].value < threshold) {
+					if (mPoints[i][j][k].value > threshold) {
 						vecPoints.push_back(mPoints[i][j][k].aPos.x);
 						vecPoints.push_back(mPoints[i][j][k].aPos.y);
 						vecPoints.push_back(mPoints[i][j][k].aPos.z);
@@ -222,86 +181,6 @@ public:
 				}
 			}
 		}
-	}
-
-	void GFSBuffersVectorPoints() {
-		glGenVertexArrays(1, &VAO_points);
-		glGenBuffers(1, &VBO_points);
-
-		glBindVertexArray(VAO_points);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VBO_points);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vecPoints.size(), &vecPoints[0], GL_STATIC_DRAW);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-
-		cout << __FUNCTION__ << "->FINISHED !" << endl;
-	}
-
-	void renderPoints(Camera pov, float ratio) {
-		pointShader.use();
-
-		pointShader.setMat4("view", pov.lookAt());
-		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
-		pointShader.setMat4("model", mat4(1.0f));
-
-		glBindVertexArray(VAO_points);
-		glDrawArrays(GL_POINTS, 0, vecPoints.size());
-		glBindVertexArray(0);
-	}
-
-	void renderMesh(Camera pov, float ratio) {
-		pointShader.use();
-
-		pointShader.setMat4("view", pov.lookAt());
-		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
-		pointShader.setMat4("model", mat4(1.0f));
-
-		glBindVertexArray(VAO_mesh);
-		glDrawArrays(GL_TRIANGLES, 0, meshData.size() / 6);
-		glBindVertexArray(0);
-	}
-
-	void renderGCPoints(Camera pov, float ratio) {
-		pointShader.use();
-
-		pointShader.setMat4("view", pov.lookAt());
-		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
-		pointShader.setMat4("model", mat4(1.0f));
-
-		glBindVertexArray(VAO_gcp);
-		glDrawArrays(GL_POINTS, 0, gcp.size());
-		glBindVertexArray(0);
-	}
-
-	void refreshMCdebug(GRIDCELL *aGrid, vector<float> *vertices, vector<float> *points, vector<TRIANGLE> *triangles,  int cubeIndex) {
-		for (int i = 7; i >= 0; i--) {
-			if ((cubeIndex & (int)pow(2, i)) == (int)pow(2, i))
-				aGrid->val[i] = 1.0f;
-			else
-				aGrid->val[i] = 0.0f;
-		}
-		
-		triangles->clear();
-		vertices->clear();
-		points->clear();
-
-		nbrTriangles = mCube.polygonise(*aGrid, 0.5f, triangles);
-		for (int i = 0; i < nbrTriangles; i++) {
-			for (int j = 0; j < 3; j++) {
-				vertices->push_back(triangles->at(i).p[j].x);
-				vertices->push_back(triangles->at(i).p[j].y);
-				vertices->push_back(triangles->at(i).p[j].z);
-
-				vertices->push_back(1.0f);
-				vertices->push_back(1.0f);
-				vertices->push_back(0.0f);
-			}
-		}
-		mCube.loadGridcellPointToVector(*aGrid, points);
 	}
 
 	void marchThrough() {
@@ -358,16 +237,15 @@ public:
 					gridcell.p[index].y = mPoints[x][y + 1][z + 1].aPos.y;
 					gridcell.p[index].z = mPoints[x][y + 1][z + 1].aPos.z;
 					gridcell.val[index] = mPoints[x][y + 1][z + 1].value;
-					index++;}
+					index++; }
 					nbrTriangles = mCube.polygonise(gridcell, 0.5f, &triangles);
 				}
 			}
 		}
-		cout << __FUNCTION__ << "->number of triangles =" << nbrTriangles << endl;
+		//cout << __FUNCTION__ << "->number of triangles =" << nbrTriangles << endl;
 	}
 
 	void meshStepping() {
-		cout << __FUNCTION__ << "->step " << step << endl;
 		if (step == CUBE_LIMIT)
 			return;
 		unsigned int tmp;
@@ -383,15 +261,14 @@ public:
 		y = tmp / ySize;
 		tmp -= (ySize * y);
 		z = tmp;
-		
-		cout << "\t" << x << ", " << y << ", " << z << endl;
+
 		step++;
 
 		GRIDCELL gridcell;
 		int index = 0;
 		gcp.clear();
 
-		gridcell.p[index].x = mPoints[x][y][z].aPos.x;
+		{gridcell.p[index].x = mPoints[x][y][z].aPos.x;
 		gridcell.p[index].y = mPoints[x][y][z].aPos.y;
 		gridcell.p[index].z = mPoints[x][y][z].aPos.z;
 		gridcell.val[index] = mPoints[x][y][z].value;
@@ -483,34 +360,35 @@ public:
 
 		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.x);
 		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.y);
-		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.z);
+		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.z); }
 
 		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO_gcp);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 8 * 6, &gcp[0]);
 
-		Display::disp(gridcell);
-
 		testTriangles.clear();
 		nbrTriangles = mCube.polygonise(gridcell, threshold, &testTriangles);
 		cubeIndex = mCube.cubeindex;
-		if(nbrTriangles != 0)
-			cout << "Coordinates of the triangles :" << endl;
+
 		//testMeshData.clear();
 
 		for (unsigned int i = 0; i < testTriangles.size(); i++) {
-			cout << "Triangle_" << i << " :\n";
+			//cout << "Triangle_" << i << " :\n";
 			for (int j = 0; j < 3; j++) {
 				testMeshData.push_back(testTriangles.at(i).p[j].x);
 				testMeshData.push_back(testTriangles.at(i).p[j].y);
 				testMeshData.push_back(testTriangles.at(i).p[j].z);
 
-				cout << "\t" << testTriangles.at(i).p[j].x << ", " << testTriangles.at(i).p[j].y << ", " << testTriangles.at(i).p[j].z << endl;
+				//cout << "\t" << testTriangles.at(i).p[j].x << ", " << testTriangles.at(i).p[j].y << ", " << testTriangles.at(i).p[j].z << endl;
 
-				testMeshData.push_back(1.0f);
-				testMeshData.push_back(1.0f);
-				testMeshData.push_back(0.2f);
+				testMeshData.push_back(testTriangles.at(i).n.x);
+				testMeshData.push_back(testTriangles.at(i).n.y);
+				testMeshData.push_back(testTriangles.at(i).n.z);
+
+				//testMeshData.push_back(1.0f);
+				//testMeshData.push_back(1.0f);
+				//testMeshData.push_back(0.2f);
 			}
 		}
 
@@ -518,19 +396,86 @@ public:
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * testMeshData.size(), &testMeshData[0]);
 		meshSize += testTriangles.size();
 		lastOffset += sizeof(float) * testTriangles.size() * 3 * 6;
-		cout << "Lastoffset = " << lastOffset << "\nMesh size = " << meshSize << endl;
+		if (!true) {
+			cout << __FUNCTION__ << "->step " << step << endl;
+			cout << "\t" << x << ", " << y << ", " << z << endl;
+			Display::disp(gridcell);
+			if (nbrTriangles != 0)
+				cout << "Coordinates of the triangles :" << endl;
+			cout << "Lastoffset = " << lastOffset << "\nMesh size = " << meshSize << endl;
+		}
 	}
 
-	void renderTestingMesh(Camera pov, float ratio) {
-		pointShader.use();
+	void refreshMCdebug(GRIDCELL *aGrid, vector<float> *vertices, vector<float> *points, vector<TRIANGLE> *triangles,  int cubeIndex) {
+		for (int i = 7; i >= 0; i--) {
+			if ((cubeIndex & (int)pow(2, i)) == (int)pow(2, i))
+				aGrid->val[i] = 0.0f;
+			else
+				aGrid->val[i] = 1.0f;
+		}
+		
+		triangles->clear();
+		vertices->clear();
+		points->clear();
 
-		pointShader.setMat4("view", pov.lookAt());
-		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
-		pointShader.setMat4("model", mat4(1.0f));
+		nbrTriangles = mCube.polygonise(*aGrid, 0.5f, triangles);
+		for (int i = 0; i < nbrTriangles; i++) {
+			for (int j = 0; j < 3; j++) {
+				vertices->push_back(triangles->at(i).p[j].x);
+				vertices->push_back(triangles->at(i).p[j].y);
+				vertices->push_back(triangles->at(i).p[j].z);
 
-		glBindVertexArray(VAO_meshTesting);
-		glDrawArrays(GL_TRIANGLES, 0, testMeshData.size() / 6);
-		glBindVertexArray(0);
+				vertices->push_back(1.0f);
+				vertices->push_back(1.0f);
+				vertices->push_back(0.0f);
+			}
+		}
+		mCube.loadGridcellPointToVector(*aGrid, points);
+	}
+
+	void setMesh() {
+		for (unsigned int i = 0; i < triangles.size(); i++) {
+			for (int j = 0; j < 3; j++) {
+				meshData.push_back(triangles.at(i).p[j].x);
+				meshData.push_back(triangles.at(i).p[j].y);
+				meshData.push_back(triangles.at(i).p[j].z);
+
+				meshData.push_back(triangles.at(i).n.x);
+				meshData.push_back(triangles.at(i).n.y);
+				meshData.push_back(triangles.at(i).n.z);
+			}
+		}
+	}
+
+	//______________________________________________________________________BUFFERS/SHADERS SETTING
+
+	void initShaders() {
+		pointShader = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
+		meshShader = Shader("resources/shaders/vShaderSource3D_OLD.vs", "resources/shaders/fShaderSource3D_OLD.fs");
+	}
+
+	void setBuffers() {
+		cout << __FUNCTION__ << "->starting.." << endl;
+		shader = Shader("resources/shaders/vShaderSource3D_OLD.vs", "resources/shaders/fShaderSource3D_OLD.fs");
+
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+		glGenBuffers(1, &EBO);
+
+		glBindVertexArray(VAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * (GRID_SUB_SIZE + 1) * (GRID_SUB_SIZE + 1), vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6 * GRID_SUB_SIZE * GRID_SUB_SIZE, indices, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		cout << __FUNCTION__ << "->FINISHED !" << endl;
 	}
 
 	void initBuffersTesting() {
@@ -559,18 +504,21 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void setMesh() {
-		for (unsigned int i = 0; i < triangles.size(); i++) {
-			for (int j = 0; j < 3; j++) {
-				meshData.push_back(triangles.at(i).p[j].x);
-				meshData.push_back(triangles.at(i).p[j].y);
-				meshData.push_back(triangles.at(i).p[j].z);
+	void GFSBuffersVectorPoints() {
+		glGenVertexArrays(1, &VAO_points);
+		glGenBuffers(1, &VBO_points);
 
-				meshData.push_back(1.0f);
-				meshData.push_back(1.0f);
-				meshData.push_back(0.0f);
-			}
-		}
+		glBindVertexArray(VAO_points);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_points);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vecPoints.size(), &vecPoints[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		cout << __FUNCTION__ << "->FINISHED !" << endl;
 	}
 
 	void GFSBuffersMesh() {
@@ -590,9 +538,78 @@ public:
 		cout << __FUNCTION__ << "->FINISHED !" << endl;
 	}
 
-	~Engine() {
-		if(mPoints)
-			free(mPoints);
+	//______________________________________________________________________RENDERS
+
+	void renderPoints(Camera pov, float ratio) {
+		pointShader.use();
+
+		pointShader.setMat4("view", pov.lookAt());
+		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		pointShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_points);
+		glDrawArrays(GL_POINTS, 0, vecPoints.size());
+		glBindVertexArray(0);
+	}
+
+	void renderMesh(Camera pov, float ratio) {
+		meshShader.use();
+		meshShader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+		meshShader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+		meshShader.setVec3("lightPos", vec3(-25.0f, -50.0f, -25.0f));
+		meshShader.setMat4("view", pov.lookAt());
+		meshShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		meshShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_mesh);
+		glDrawArrays(GL_TRIANGLES, 0, meshData.size() / 6);
+		glBindVertexArray(0);
+	}
+
+	void renderGCPoints(Camera pov, float ratio) {
+		pointShader.use();
+
+		pointShader.setMat4("view", pov.lookAt());
+		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		pointShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_gcp);
+		glDrawArrays(GL_POINTS, 0, gcp.size());
+		glBindVertexArray(0);
+	}
+
+	void renderTestingMesh(Camera pov, float ratio) {
+		meshShader.use();
+		meshShader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+		meshShader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+		meshShader.setVec3("lightPos", vec3(-25.0f, -50.0f, -25.0f));
+		meshShader.setMat4("view", pov.lookAt());
+		meshShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		meshShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_meshTesting);
+		glDrawArrays(GL_TRIANGLES, 0, testMeshData.size() / 6);
+		glBindVertexArray(0);
+	}
+
+	void render(Camera pov, float ratio) {
+		render(VAO, pov, ratio);
+	}
+
+	void render(GLuint aVAO, Camera pov, float ratio) {
+		shader.use();
+		shader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+		shader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+		shader.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
+		shader.setMat4("view", pov.lookAt());
+		shader.setVec3("viewPos", pov.getPosition());
+		shader.setVec3("frontView", pov.getFront());
+		shader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		shader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(aVAO);
+		glDrawElements(GL_TRIANGLES, 6 * (GRID_SUB_SIZE) * (GRID_SUB_SIZE), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
 
 	GLuint VAO, VBO, EBO;
@@ -607,7 +624,7 @@ public:
 
 private:
 	
-
+	Shader meshShader;
 	int seed = 0;
 	PerlinNoise perlin;
 	MarchingCube mCube;

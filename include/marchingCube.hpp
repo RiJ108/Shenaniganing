@@ -43,18 +43,19 @@ public:
 		
 		XYZ vertlist[12];
 		TRIANGLE* tmpTriangle;
+		vec3 a, b, norm;
 
 		/*Determine the index into the edge table which
 		tells us which vertices are inside of the surface*/
 		cubeindex = 0;
-		if (grid.val[0] < isolevel) cubeindex |= 1;
-		if (grid.val[1] < isolevel) cubeindex |= 2;
-		if (grid.val[2] < isolevel) cubeindex |= 4;
-		if (grid.val[3] < isolevel) cubeindex |= 8;
-		if (grid.val[4] < isolevel) cubeindex |= 16;
-		if (grid.val[5] < isolevel) cubeindex |= 32;
-		if (grid.val[6] < isolevel) cubeindex |= 64;
-		if (grid.val[7] < isolevel) cubeindex |= 128;
+		if (grid.val[0] > isolevel) cubeindex |= 1;
+		if (grid.val[1] > isolevel) cubeindex |= 2;
+		if (grid.val[2] > isolevel) cubeindex |= 4;
+		if (grid.val[3] > isolevel) cubeindex |= 8;
+		if (grid.val[4] > isolevel) cubeindex |= 16;
+		if (grid.val[5] > isolevel) cubeindex |= 32;
+		if (grid.val[6] > isolevel) cubeindex |= 64;
+		if (grid.val[7] > isolevel) cubeindex |= 128;
 
 		/* Cube is entirely in/out of the surface */
 		if (edgeTable[cubeindex] == 0)
@@ -93,6 +94,15 @@ public:
 			tmpTriangle->p[0] = vertlist[triTable[cubeindex][i]];
 			tmpTriangle->p[1] = vertlist[triTable[cubeindex][i + 1]];
 			tmpTriangle->p[2] = vertlist[triTable[cubeindex][i + 2]];
+
+			/* Compute normals*/
+			a = vec3(tmpTriangle->p[1].x - tmpTriangle->p[0].x, tmpTriangle->p[1].y - tmpTriangle->p[0].y, tmpTriangle->p[1].z - tmpTriangle->p[0].z);
+			b = vec3(tmpTriangle->p[2].x - tmpTriangle->p[1].x, tmpTriangle->p[2].y - tmpTriangle->p[1].y, tmpTriangle->p[2].z - tmpTriangle->p[1].z);
+			norm = normalize(cross(a, b));
+			tmpTriangle->n.x = norm.x;
+			tmpTriangle->n.y = norm.y;
+			tmpTriangle->n.z = norm.z;
+
 			triangles->push_back(*tmpTriangle);
 			ntriang++;
 		}
@@ -136,8 +146,8 @@ private:
 	0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
 	0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0 };
 
-	int triTable[256][16] =
-	{ {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+	int triTable[256][16] =	{
+	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{1, 8, 3, 9, 8, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

@@ -17,6 +17,16 @@ BOOL Window::init() {
         glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
         //**Creating the window
+        /*monitor = glfwGetPrimaryMonitor();
+        mode = glfwGetVideoMode(monitor);
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+        srcWidth = mode->width;
+        srcHeight = mode->height;
+        wHandler = glfwCreateWindow(mode->width, mode->height, build.c_str(), monitor, NULL);*/
+
         wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
         if (wHandler == NULL) {
             cout << __FUNCTION__ << "->Failed to create GLFW window" << endl;
@@ -241,6 +251,13 @@ void Window::G() {
 
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        if (runStepping) {
+            if (engine.step == CUBE_LIMIT) {
+                runStepping = false;
+                return;
+            }
+            engine.meshStepping();
+        }
         if (!true) {
             shaderMC.use();
             shaderMC.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
@@ -260,20 +277,20 @@ void Window::G() {
             glBindVertexArray(0);
         }
         else {
-            glPointSize(2);
-            engine.renderPoints(pov, (float)srcWidth / srcHeight);
             glPointSize(4);
+            engine.renderPoints(pov, (float)srcWidth / srcHeight);
+            glPointSize(8);
             engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
-            //engine.renderTestingMesh(pov, (float)srcWidth / srcHeight);
-            engine.renderMesh(pov, (float)srcWidth / srcHeight);
+            engine.renderTestingMesh(pov, (float)srcWidth / srcHeight);
+            //engine.renderMesh(pov, (float)srcWidth / srcHeight);
         }
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
         renderText(shader_TXT, "Step = " + to_string(engine.step), 4.0f, srcHeight/2.0, 0.5f, vec3(0.8f, 0.8f, 0.5f));
-        renderText(shader_TXT, "Cube index (single)= " + to_string(cubeIndex), 4.0f, srcHeight / 2.0 + 25.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
+        //renderText(shader_TXT, "Cube index (single)= " + to_string(cubeIndex), 4.0f, srcHeight / 2.0 + 25.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
         renderText(shader_TXT, "Cube index (mesh stepping) = " + to_string(engine.cubeIndex), 4.0f, srcHeight/2.0 + 50.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
-        renderText(shader_TXT, "Added triangles = " + to_string(engine.nbrTriangles), 4.0f, srcHeight/2.0 - 25.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
+        //renderText(shader_TXT, "Added triangles = " + to_string(engine.nbrTriangles), 4.0f, srcHeight/2.0 - 25.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
         renderText(shader_TXT, "Number of triangles = " + to_string(engine.meshSize), 4.0f, srcHeight/2.0 - 50.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
         //renderText(shader_TXT, "Number of triangles = " + to_string(vertices.size() / (6 * 3)), 4.0f, srcHeight/2.0 - 15.0f, 0.5f, vec3(0.8f, 0.8f, 0.5f));
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
@@ -395,10 +412,18 @@ void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int actio
     if (true) {
         if (key == 335 && (action == GLFW_PRESS || action == 2))
             windowPtr->engine.meshStepping();
+
+        if (key == 257 && action == GLFW_PRESS) {
+            if (!windowPtr->runStepping)
+                windowPtr->runStepping = true;
+        }
+        else if ((key == 259 || key == 256) && action == GLFW_PRESS) {
+            if (windowPtr->runStepping)
+                windowPtr->runStepping = false;
+        }
     }
 
-    if (true) {
-        
+    if (!true) {
         if (key == 265 && (action == GLFW_PRESS || action == 2)) {
             windowPtr->cubeIndex++;
             if (windowPtr->cubeIndex > 255)

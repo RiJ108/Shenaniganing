@@ -26,6 +26,7 @@ typedef struct {
 
 typedef struct {
 	XYZ p[3];
+	XYZ n;
 } TRIANGLE;
 
 typedef struct {

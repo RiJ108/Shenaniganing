@@ -60,6 +60,7 @@ public:
     int nbrTriangles;
     int cubeIndex = 0;
     bool needRefresh = false;
+    bool runStepping = false;
 
 private:
     //**FSM section
@@ -91,6 +92,8 @@ private:
 
     //**Window section
     GLFWwindow* wHandler;
+    GLFWmonitor* monitor;
+    const GLFWvidmode* mode;
     string build = "Shenaniganing build 0.1 dev";
     ivec2 WINDOW_SIZE = ivec2(1280, 720);
     int srcWidth = 1280, srcHeight = 720;
