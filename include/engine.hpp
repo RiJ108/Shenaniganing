@@ -8,10 +8,11 @@
 #include "marchingCube.hpp"
 #include "constant.hpp"
 
-#define LENGTH 2
-#define WIDTH 2
+#define LENGTH 20
+#define WIDTH 20
 #define HEIGHT 2
-#define GRID_RES 1
+#define GRID_RES 4
+#define CUBE_LIMIT ((LENGTH * GRID_RES) - 1) * ((HEIGHT * GRID_RES) - 1) * ((WIDTH * GRID_RES) - 1)
 
 typedef struct myPoint {
 	vec3 aPos = vec3(0.0f);
@@ -180,7 +181,11 @@ public:
 		for (int i = 0; i < LENGTH * GRID_RES; i++) {
 			for (int j = 0; j < HEIGHT * GRID_RES; j++) {
 				for (int k = 0; k < WIDTH * GRID_RES; k++)
-					mPoints[i][j][k].value = (mPoints[i][j][k].value - pointValue_min)/(pointValue_max - pointValue_min);
+					//mPoints[i][j][k].value = (mPoints[i][j][k].value - pointValue_min)/(pointValue_max - pointValue_min);
+					if (mPoints[i][j][k].value > threshold)
+						mPoints[i][j][k].value = 1.0f;
+					else
+						mPoints[i][j][k].value = 0.0f;
 			}
 		}
 	}
@@ -256,7 +261,19 @@ public:
 		pointShader.setMat4("model", mat4(1.0f));
 
 		glBindVertexArray(VAO_mesh);
-		glDrawArrays(GL_TRIANGLES, 0, testMeshData.size() / 6);
+		glDrawArrays(GL_TRIANGLES, 0, meshData.size() / 6);
+		glBindVertexArray(0);
+	}
+
+	void renderGCPoints(Camera pov, float ratio) {
+		pointShader.use();
+
+		pointShader.setMat4("view", pov.lookAt());
+		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		pointShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_gcp);
+		glDrawArrays(GL_POINTS, 0, gcp.size());
 		glBindVertexArray(0);
 	}
 
@@ -290,39 +307,268 @@ public:
 	void marchThrough() {
 		GRIDCELL gridcell;
 		int index = 0;
-		testTriangles = *(new vector<TRIANGLE>);
-		for (unsigned int i = 0; i < (LENGTH * GRID_RES) - 1; i++) {
-			for (unsigned int j = 0; j < (HEIGHT * GRID_RES) - 1; j++) {
-				for (unsigned int k = 0; k < (WIDTH * GRID_RES) - 1; k++) {
+		triangles.clear();
+		for (unsigned int x = 0; x < (LENGTH * GRID_RES) - 1; x++) {
+			for (unsigned int y = 0; y < (HEIGHT * GRID_RES) - 1; y++) {
+				for (unsigned int z = 0; z < (WIDTH * GRID_RES) - 1; z++) {
 					index = 0;
-					for (unsigned int l = 0; l < 2; l++) {
-						for (unsigned int m = 0; m < 2; m++) {
-							for (unsigned int n = 0; n < 2; n++) {
-								gridcell.p[index].x = mPoints[i + l][j + m][k + n].aPos.x;
-								gridcell.p[index].y = mPoints[i + l][j + m][k + n].aPos.y;
-								gridcell.p[index].z = mPoints[i + l][j + m][k + n].aPos.z;
-								gridcell.val[index] = mPoints[i + l][j + m][k + n].value;
-								index++;
-							}
-						}
-					}
-					nbrTriangles = mCube.polygonise(gridcell, 0.5f, &testTriangles);
+					{gridcell.p[index].x = mPoints[x][y][z].aPos.x;
+					gridcell.p[index].y = mPoints[x][y][z].aPos.y;
+					gridcell.p[index].z = mPoints[x][y][z].aPos.z;
+					gridcell.val[index] = mPoints[x][y][z].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x + 1][y][z].aPos.x;
+					gridcell.p[index].y = mPoints[x + 1][y][z].aPos.y;
+					gridcell.p[index].z = mPoints[x + 1][y][z].aPos.z;
+					gridcell.val[index] = mPoints[x + 1][y][z].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x + 1][y][z + 1].aPos.x;
+					gridcell.p[index].y = mPoints[x + 1][y][z + 1].aPos.y;
+					gridcell.p[index].z = mPoints[x + 1][y][z + 1].aPos.z;
+					gridcell.val[index] = mPoints[x + 1][y][z + 1].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x][y][z + 1].aPos.x;
+					gridcell.p[index].y = mPoints[x][y][z + 1].aPos.y;
+					gridcell.p[index].z = mPoints[x][y][z + 1].aPos.z;
+					gridcell.val[index] = mPoints[x][y][z + 1].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x][y + 1][z].aPos.x;
+					gridcell.p[index].y = mPoints[x][y + 1][z].aPos.y;
+					gridcell.p[index].z = mPoints[x][y + 1][z].aPos.z;
+					gridcell.val[index] = mPoints[x][y + 1][z].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x + 1][y + 1][z].aPos.x;
+					gridcell.p[index].y = mPoints[x + 1][y + 1][z].aPos.y;
+					gridcell.p[index].z = mPoints[x + 1][y + 1][z].aPos.z;
+					gridcell.val[index] = mPoints[x + 1][y + 1][z].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x + 1][y + 1][z + 1].aPos.x;
+					gridcell.p[index].y = mPoints[x + 1][y + 1][z + 1].aPos.y;
+					gridcell.p[index].z = mPoints[x + 1][y + 1][z + 1].aPos.z;
+					gridcell.val[index] = mPoints[x + 1][y + 1][z + 1].value;
+					index++;
+
+					gridcell.p[index].x = mPoints[x][y + 1][z + 1].aPos.x;
+					gridcell.p[index].y = mPoints[x][y + 1][z + 1].aPos.y;
+					gridcell.p[index].z = mPoints[x][y + 1][z + 1].aPos.z;
+					gridcell.val[index] = mPoints[x][y + 1][z + 1].value;
+					index++;}
+					nbrTriangles = mCube.polygonise(gridcell, 0.5f, &triangles);
 				}
 			}
 		}
 		cout << __FUNCTION__ << "->number of triangles =" << nbrTriangles << endl;
 	}
 
-	void setMesh() {
+	void meshStepping() {
+		cout << __FUNCTION__ << "->step " << step << endl;
+		if (step == CUBE_LIMIT)
+			return;
+		unsigned int tmp;
+		unsigned int x, y, z;
+		unsigned int xSize, ySize;
+
+		ySize = 1 * ((WIDTH * GRID_RES) - 1);
+		xSize = ySize * ((HEIGHT * GRID_RES) - 1);
+
+		tmp = step;
+		x = tmp / xSize;
+		tmp -= (xSize * x);
+		y = tmp / ySize;
+		tmp -= (ySize * y);
+		z = tmp;
+		
+		cout << "\t" << x << ", " << y << ", " << z << endl;
+		step++;
+
+		GRIDCELL gridcell;
+		int index = 0;
+		gcp.clear();
+
+		gridcell.p[index].x = mPoints[x][y][z].aPos.x;
+		gridcell.p[index].y = mPoints[x][y][z].aPos.y;
+		gridcell.p[index].z = mPoints[x][y][z].aPos.z;
+		gridcell.val[index] = mPoints[x][y][z].value;
+		index++;
+
+		gcp.push_back(mPoints[x][y][z].aPos.x);
+		gcp.push_back(mPoints[x][y][z].aPos.y);
+		gcp.push_back(mPoints[x][y][z].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x + 1][y][z].aPos.x;
+		gridcell.p[index].y = mPoints[x + 1][y][z].aPos.y;
+		gridcell.p[index].z = mPoints[x + 1][y][z].aPos.z;
+		gridcell.val[index] = mPoints[x + 1][y][z].value;
+		index++;
+
+		gcp.push_back(mPoints[x + 1][y][z].aPos.x);
+		gcp.push_back(mPoints[x + 1][y][z].aPos.y);
+		gcp.push_back(mPoints[x + 1][y][z].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x + 1][y][z + 1].aPos.x;
+		gridcell.p[index].y = mPoints[x + 1][y][z + 1].aPos.y;
+		gridcell.p[index].z = mPoints[x + 1][y][z + 1].aPos.z;
+		gridcell.val[index] = mPoints[x + 1][y][z + 1].value;
+		index++;
+
+		gcp.push_back(mPoints[x + 1][y][z + 1].aPos.x);
+		gcp.push_back(mPoints[x + 1][y][z + 1].aPos.y);
+		gcp.push_back(mPoints[x + 1][y][z + 1].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x][y][z + 1].aPos.x;
+		gridcell.p[index].y = mPoints[x][y][z + 1].aPos.y;
+		gridcell.p[index].z = mPoints[x][y][z + 1].aPos.z;
+		gridcell.val[index] = mPoints[x][y][z + 1].value;
+		index++;
+
+		gcp.push_back(mPoints[x][y][z + 1].aPos.x);
+		gcp.push_back(mPoints[x][y][z + 1].aPos.y);
+		gcp.push_back(mPoints[x][y][z + 1].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x][y + 1][z].aPos.x;
+		gridcell.p[index].y = mPoints[x][y + 1][z].aPos.y;
+		gridcell.p[index].z = mPoints[x][y + 1][z].aPos.z;
+		gridcell.val[index] = mPoints[x][y + 1][z].value;
+		index++;
+
+		gcp.push_back(mPoints[x][y + 1][z].aPos.x);
+		gcp.push_back(mPoints[x][y + 1][z].aPos.y);
+		gcp.push_back(mPoints[x][y + 1][z].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x + 1][y + 1][z].aPos.x;
+		gridcell.p[index].y = mPoints[x + 1][y + 1][z].aPos.y;
+		gridcell.p[index].z = mPoints[x + 1][y + 1][z].aPos.z;
+		gridcell.val[index] = mPoints[x + 1][y + 1][z].value;
+		index++;
+
+		gcp.push_back(mPoints[x + 1][y + 1][z].aPos.x);
+		gcp.push_back(mPoints[x + 1][y + 1][z].aPos.y);
+		gcp.push_back(mPoints[x + 1][y + 1][z].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x + 1][y + 1][z + 1].aPos.x;
+		gridcell.p[index].y = mPoints[x + 1][y + 1][z + 1].aPos.y;
+		gridcell.p[index].z = mPoints[x + 1][y + 1][z + 1].aPos.z;
+		gridcell.val[index] = mPoints[x + 1][y + 1][z + 1].value;
+		index++;
+
+		gcp.push_back(mPoints[x + 1][y + 1][z + 1].aPos.x);
+		gcp.push_back(mPoints[x + 1][y + 1][z + 1].aPos.y);
+		gcp.push_back(mPoints[x + 1][y + 1][z + 1].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		gridcell.p[index].x = mPoints[x][y + 1][z + 1].aPos.x;
+		gridcell.p[index].y = mPoints[x][y + 1][z + 1].aPos.y;
+		gridcell.p[index].z = mPoints[x][y + 1][z + 1].aPos.z;
+		gridcell.val[index] = mPoints[x][y + 1][z + 1].value;
+		index++;
+
+		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.x);
+		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.y);
+		gcp.push_back(mPoints[x][y + 1][z + 1].aPos.z);
+
+		gcp.push_back(1.0f); gcp.push_back(0.0f); gcp.push_back(0.0f);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_gcp);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 8 * 6, &gcp[0]);
+
+		Display::disp(gridcell);
+
+		testTriangles.clear();
+		nbrTriangles = mCube.polygonise(gridcell, threshold, &testTriangles);
+		cubeIndex = mCube.cubeindex;
+		if(nbrTriangles != 0)
+			cout << "Coordinates of the triangles :" << endl;
+		//testMeshData.clear();
+
 		for (unsigned int i = 0; i < testTriangles.size(); i++) {
+			cout << "Triangle_" << i << " :\n";
 			for (int j = 0; j < 3; j++) {
 				testMeshData.push_back(testTriangles.at(i).p[j].x);
 				testMeshData.push_back(testTriangles.at(i).p[j].y);
 				testMeshData.push_back(testTriangles.at(i).p[j].z);
 
+				cout << "\t" << testTriangles.at(i).p[j].x << ", " << testTriangles.at(i).p[j].y << ", " << testTriangles.at(i).p[j].z << endl;
+
 				testMeshData.push_back(1.0f);
 				testMeshData.push_back(1.0f);
-				testMeshData.push_back(0.0f);
+				testMeshData.push_back(0.2f);
+			}
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_meshTesting);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * testMeshData.size(), &testMeshData[0]);
+		meshSize += testTriangles.size();
+		lastOffset += sizeof(float) * testTriangles.size() * 3 * 6;
+		cout << "Lastoffset = " << lastOffset << "\nMesh size = " << meshSize << endl;
+	}
+
+	void renderTestingMesh(Camera pov, float ratio) {
+		pointShader.use();
+
+		pointShader.setMat4("view", pov.lookAt());
+		pointShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		pointShader.setMat4("model", mat4(1.0f));
+
+		glBindVertexArray(VAO_meshTesting);
+		glDrawArrays(GL_TRIANGLES, 0, testMeshData.size() / 6);
+		glBindVertexArray(0);
+	}
+
+	void initBuffersTesting() {
+		glGenVertexArrays(1, &VAO_meshTesting);
+		glGenBuffers(1, &VBO_meshTesting);
+
+		glBindVertexArray(VAO_meshTesting);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_meshTesting);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * 3 * 6 * CUBE_LIMIT, nullptr, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glBindVertexArray(0);
+
+		glGenVertexArrays(1, &VAO_gcp);
+		glGenBuffers(1, &VBO_gcp);
+
+		glBindVertexArray(VAO_gcp);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO_gcp);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * 6, nullptr, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glBindVertexArray(0);
+	}
+
+	void setMesh() {
+		for (unsigned int i = 0; i < triangles.size(); i++) {
+			for (int j = 0; j < 3; j++) {
+				meshData.push_back(triangles.at(i).p[j].x);
+				meshData.push_back(triangles.at(i).p[j].y);
+				meshData.push_back(triangles.at(i).p[j].z);
+
+				meshData.push_back(1.0f);
+				meshData.push_back(1.0f);
+				meshData.push_back(0.0f);
 			}
 		}
 	}
@@ -334,7 +580,7 @@ public:
 		glBindVertexArray(VAO_mesh);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO_mesh);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * testMeshData.size(), &testMeshData[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * meshData.size(), &meshData[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -350,18 +596,27 @@ public:
 	}
 
 	GLuint VAO, VBO, EBO;
+	GLuint VAO_gcp, VBO_gcp;
 	GLuint VAO_points, VBO_points;
 	GLuint VAO_mesh, VBO_mesh;
+	GLuint VAO_meshTesting, VBO_meshTesting;
+	vector<float> gcp;
 	Terrain terrain;
+	unsigned int step = 0, lastOffset = 0, meshSize = 0, cubeIndex = 0;
+	int nbrTriangles;
 
 private:
+	
+
 	int seed = 0;
 	PerlinNoise perlin;
 	MarchingCube mCube;
 	float threshold = 0.50f;
 	vector<TRIANGLE> testTriangles;
+	vector<TRIANGLE> triangles;
 	vector<float> testMeshData;
-	int nbrTriangles;
+	vector<float> meshData;
+	
 
 	//** Single layer heigth map section
 	Shader shader;

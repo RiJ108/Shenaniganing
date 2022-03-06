@@ -36,9 +36,11 @@ public:
 		return(p);
 	};
 
+	int cubeindex;
+
 	int polygonise(GRIDCELL grid, double isolevel, vector<TRIANGLE> *triangles){
 		int i, ntriang;
-		int cubeindex;
+		
 		XYZ vertlist[12];
 		TRIANGLE* tmpTriangle;
 

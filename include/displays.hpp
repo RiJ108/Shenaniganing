@@ -4,11 +4,19 @@
 #include <string>
 #include <glm/glm.hpp>
 
+#include "constant.hpp"
+
 using namespace std;
 using namespace glm;
 
 class Display {
 public:
+	static void disp(GRIDCELL aGridcell) {
+		cout << "Coordinates :\t Value :\n";
+		for(int i = 0; i < 8; i++)
+			cout << i << "_\t" << aGridcell.p[i].x << ", " << aGridcell.p[i].y << ", " << aGridcell.p[i].z << "\t" << aGridcell.val[i] << endl;
+	}
+
 	static void disp(string values) {
 		cout << values;
 	}
