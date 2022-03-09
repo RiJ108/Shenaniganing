@@ -5,19 +5,7 @@
 class MarchingCube {
 public:
 
-	/*void loadGridcellPointToVector(GRIDCELL aGridcell, vector<float> *aVector) {
-		for (int i = 0; i < 8; i++) {
-			aVector->push_back(aGridcell.p[i].x);
-			aVector->push_back(aGridcell.p[i].y);
-			aVector->push_back(aGridcell.p[i].z);
-
-			aVector->push_back(0.0f);
-			aVector->push_back(aGridcell.val[i]);
-			aVector->push_back(0.0f);
-		}
-	};*/
-
-	vec3 vertexInterp_OPT(double isolevel, vec3 p1, vec3 p2, double valp1, double valp2) {
+	vec3 vertexInterp(double isolevel, vec3 p1, vec3 p2, double valp1, double valp2) {
 		double mu;
 		vec3 p;
 
@@ -36,11 +24,11 @@ public:
 		return(p);
 	};
 
-	int polygonise_OPT(GRIDCELL_OPT aGrid, double isolevel, vector<TRIANGLE_OPT>* triangles) {
+	int polygonise(GRIDCELL aGrid, double isolevel, vector<TRIANGLE>* triangles) {
 		int i, ntriang;
 
 		vec3 vertlist[12];
-		TRIANGLE_OPT* tmpTriangle;
+		TRIANGLE* tmpTriangle;
 		vec3 a, b, norm;
 
 		/*Determine the index into the edge table which
@@ -62,34 +50,34 @@ public:
 
 		/* Find the vertices where the surface intersects the cube */
 		if (edgeTable[cubeindex] & 1)
-			vertlist[0] = vertexInterp_OPT(isolevel, aGrid.points[0]->coord, aGrid.points[1]->coord, aGrid.points[0]->val, aGrid.points[1]->val);
+			vertlist[0] = vertexInterp(isolevel, aGrid.points[0]->coord, aGrid.points[1]->coord, aGrid.points[0]->val, aGrid.points[1]->val);
 		if (edgeTable[cubeindex] & 2)
-			vertlist[1] = vertexInterp_OPT(isolevel, aGrid.points[1]->coord, aGrid.points[2]->coord, aGrid.points[1]->val, aGrid.points[2]->val);
+			vertlist[1] = vertexInterp(isolevel, aGrid.points[1]->coord, aGrid.points[2]->coord, aGrid.points[1]->val, aGrid.points[2]->val);
 		if (edgeTable[cubeindex] & 4)
-			vertlist[2] = vertexInterp_OPT(isolevel, aGrid.points[2]->coord, aGrid.points[3]->coord, aGrid.points[2]->val, aGrid.points[3]->val);
+			vertlist[2] = vertexInterp(isolevel, aGrid.points[2]->coord, aGrid.points[3]->coord, aGrid.points[2]->val, aGrid.points[3]->val);
 		if (edgeTable[cubeindex] & 8)
-			vertlist[3] = vertexInterp_OPT(isolevel, aGrid.points[3]->coord, aGrid.points[0]->coord, aGrid.points[3]->val, aGrid.points[0]->val);
+			vertlist[3] = vertexInterp(isolevel, aGrid.points[3]->coord, aGrid.points[0]->coord, aGrid.points[3]->val, aGrid.points[0]->val);
 		if (edgeTable[cubeindex] & 16)
-			vertlist[4] = vertexInterp_OPT(isolevel, aGrid.points[4]->coord, aGrid.points[5]->coord, aGrid.points[4]->val, aGrid.points[5]->val);
+			vertlist[4] = vertexInterp(isolevel, aGrid.points[4]->coord, aGrid.points[5]->coord, aGrid.points[4]->val, aGrid.points[5]->val);
 		if (edgeTable[cubeindex] & 32)
-			vertlist[5] = vertexInterp_OPT(isolevel, aGrid.points[5]->coord, aGrid.points[6]->coord, aGrid.points[5]->val, aGrid.points[6]->val);
+			vertlist[5] = vertexInterp(isolevel, aGrid.points[5]->coord, aGrid.points[6]->coord, aGrid.points[5]->val, aGrid.points[6]->val);
 		if (edgeTable[cubeindex] & 64)
-			vertlist[6] = vertexInterp_OPT(isolevel, aGrid.points[6]->coord, aGrid.points[7]->coord, aGrid.points[6]->val, aGrid.points[7]->val);
+			vertlist[6] = vertexInterp(isolevel, aGrid.points[6]->coord, aGrid.points[7]->coord, aGrid.points[6]->val, aGrid.points[7]->val);
 		if (edgeTable[cubeindex] & 128)
-			vertlist[7] = vertexInterp_OPT(isolevel, aGrid.points[7]->coord, aGrid.points[4]->coord, aGrid.points[7]->val, aGrid.points[4]->val);
+			vertlist[7] = vertexInterp(isolevel, aGrid.points[7]->coord, aGrid.points[4]->coord, aGrid.points[7]->val, aGrid.points[4]->val);
 		if (edgeTable[cubeindex] & 256)
-			vertlist[8] = vertexInterp_OPT(isolevel, aGrid.points[0]->coord, aGrid.points[4]->coord, aGrid.points[0]->val, aGrid.points[4]->val);
+			vertlist[8] = vertexInterp(isolevel, aGrid.points[0]->coord, aGrid.points[4]->coord, aGrid.points[0]->val, aGrid.points[4]->val);
 		if (edgeTable[cubeindex] & 512)
-			vertlist[9] = vertexInterp_OPT(isolevel, aGrid.points[1]->coord, aGrid.points[5]->coord, aGrid.points[1]->val, aGrid.points[5]->val);
+			vertlist[9] = vertexInterp(isolevel, aGrid.points[1]->coord, aGrid.points[5]->coord, aGrid.points[1]->val, aGrid.points[5]->val);
 		if (edgeTable[cubeindex] & 1024)
-			vertlist[10] = vertexInterp_OPT(isolevel, aGrid.points[2]->coord, aGrid.points[6]->coord, aGrid.points[2]->val, aGrid.points[6]->val);
+			vertlist[10] = vertexInterp(isolevel, aGrid.points[2]->coord, aGrid.points[6]->coord, aGrid.points[2]->val, aGrid.points[6]->val);
 		if (edgeTable[cubeindex] & 2048)
-			vertlist[11] = vertexInterp_OPT(isolevel, aGrid.points[3]->coord, aGrid.points[7]->coord, aGrid.points[3]->val, aGrid.points[7]->val);
+			vertlist[11] = vertexInterp(isolevel, aGrid.points[3]->coord, aGrid.points[7]->coord, aGrid.points[3]->val, aGrid.points[7]->val);
 
 		/* Create the triangle */
 		ntriang = 0;
 		for (i = 0; triTable[cubeindex][i] != -1; i += 3) {
-			tmpTriangle = new TRIANGLE_OPT;
+			tmpTriangle = new TRIANGLE;
 			tmpTriangle->points[0] = vertlist[triTable[cubeindex][i]];
 			tmpTriangle->points[1] = vertlist[triTable[cubeindex][i + 1]];
 			tmpTriangle->points[2] = vertlist[triTable[cubeindex][i + 2]];

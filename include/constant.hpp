@@ -19,42 +19,22 @@ class Window;
 
 enum class State {mainMenu, inGame};
 
-//Structs handling marching cube data
-/*typedef struct {
-	double x, y, z;
-} XYZ;
-
-typedef struct {
-	XYZ p[3];
-	XYZ n;
-} TRIANGLE;
-
-typedef struct {
-	XYZ p[8];
-	double val[8];
-} GRIDCELL;*/
-
-/*typedef struct myPoint {
-	vec3 aPos = vec3(0.0f);
-	float value = 0.0f;
-}myPoint;*/
-
 //__Custom
 
 typedef struct {
 	vec3 coord;
 	vec3 norm;
 	double val;
-} POINT_OPT;
+} MPOINT;
 
 typedef struct {
-	POINT_OPT* points[8];
-} GRIDCELL_OPT;
+	MPOINT* points[8];
+} GRIDCELL;
 
 typedef struct {
 	vec3 points[3];
 	vec3 norm;
-}TRIANGLE_OPT;
+}TRIANGLE;
 
 //Holds all state information relevant to a character as loaded using FreeType
 typedef struct Character {

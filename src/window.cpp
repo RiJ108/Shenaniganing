@@ -69,13 +69,10 @@ BOOL Window::init() {
     //________________________________________________________________________________________________________________________________________
 
     engine.initShaders();
-    engine.GFSBuffersVectorPoints();
-    engine.initBuffersTesting();
-
     engine.generateWorldPoints();
     engine.generateWorldGridcells();
-    engine.setMesh_OPT();
-    engine.GFSBuffersMesh_OPT();
+    engine.setMesh();
+    engine.GFSBuffersMesh();
 
     shaderMC = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
 
@@ -182,12 +179,8 @@ void Window::G() {
             //engine.meshStepping();
         }
 
-        glPointSize(4);
-        //engine.renderPoints(pov, (float)srcWidth / srcHeight);
-        glPointSize(8);
-        engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
-        engine.renderTestingMesh(pov, (float)srcWidth / srcHeight);
-        engine.renderMesh_OPT(pov, (float)srcWidth / srcHeight);
+        //engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
+        engine.renderMesh(pov, (float)srcWidth / srcHeight);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
