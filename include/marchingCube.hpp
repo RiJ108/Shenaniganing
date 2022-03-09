@@ -5,7 +5,7 @@
 class MarchingCube {
 public:
 
-	void loadGridcellPointToVector(GRIDCELL aGridcell, vector<float> *aVector) {
+	/*void loadGridcellPointToVector(GRIDCELL aGridcell, vector<float> *aVector) {
 		for (int i = 0; i < 8; i++) {
 			aVector->push_back(aGridcell.p[i].x);
 			aVector->push_back(aGridcell.p[i].y);
@@ -15,30 +15,11 @@ public:
 			aVector->push_back(aGridcell.val[i]);
 			aVector->push_back(0.0f);
 		}
-	};
+	};*/
 
 	vec3 vertexInterp_OPT(double isolevel, vec3 p1, vec3 p2, double valp1, double valp2) {
 		double mu;
 		vec3 p;
-
-		if (abs(isolevel - valp1) < 0.00001)
-			return(p1);
-		if (abs(isolevel - valp2) < 0.00001)
-			return(p2);
-		if (abs(valp1 - valp2) < 0.00001)
-			return(p1);
-
-		mu = (isolevel - valp1) / (valp2 - valp1);
-		p.x = p1.x + mu * (p2.x - p1.x);
-		p.y = p1.y + mu * (p2.y - p1.y);
-		p.z = p1.z + mu * (p2.z - p1.z);
-
-		return(p);
-	};
-
-	XYZ vertexInterp(double isolevel, XYZ p1, XYZ p2, double valp1, double valp2){
-		double mu;
-		XYZ p;
 
 		if (abs(isolevel - valp1) < 0.00001)
 			return(p1);
@@ -120,78 +101,6 @@ public:
 			tmpTriangle->norm.x = norm.x;
 			tmpTriangle->norm.y = norm.y;
 			tmpTriangle->norm.z = norm.z;
-
-			triangles->push_back(*tmpTriangle);
-			ntriang++;
-		}
-
-		return(ntriang);
-	};
-
-	int polygonise(GRIDCELL grid, double isolevel, vector<TRIANGLE> *triangles){
-		int i, ntriang;
-		
-		XYZ vertlist[12];
-		TRIANGLE* tmpTriangle;
-		vec3 a, b, norm;
-
-		/*Determine the index into the edge table which
-		tells us which vertices are inside of the surface*/
-		cubeindex = 0;
-		if (grid.val[0] > isolevel) cubeindex |= 1;
-		if (grid.val[1] > isolevel) cubeindex |= 2;
-		if (grid.val[2] > isolevel) cubeindex |= 4;
-		if (grid.val[3] > isolevel) cubeindex |= 8;
-		if (grid.val[4] > isolevel) cubeindex |= 16;
-		if (grid.val[5] > isolevel) cubeindex |= 32;
-		if (grid.val[6] > isolevel) cubeindex |= 64;
-		if (grid.val[7] > isolevel) cubeindex |= 128;
-
-		/* Cube is entirely in/out of the surface */
-		if (edgeTable[cubeindex] == 0)
-			return(0);
-
-		/* Find the vertices where the surface intersects the cube */
-		if (edgeTable[cubeindex] & 1)
-			vertlist[0] = vertexInterp(isolevel, grid.p[0], grid.p[1], grid.val[0], grid.val[1]);
-		if (edgeTable[cubeindex] & 2)
-			vertlist[1] = vertexInterp(isolevel, grid.p[1], grid.p[2], grid.val[1], grid.val[2]);
-		if (edgeTable[cubeindex] & 4)
-			vertlist[2] = vertexInterp(isolevel, grid.p[2], grid.p[3], grid.val[2], grid.val[3]);
-		if (edgeTable[cubeindex] & 8)
-			vertlist[3] = vertexInterp(isolevel, grid.p[3], grid.p[0], grid.val[3], grid.val[0]);
-		if (edgeTable[cubeindex] & 16)
-			vertlist[4] = vertexInterp(isolevel, grid.p[4], grid.p[5], grid.val[4], grid.val[5]);
-		if (edgeTable[cubeindex] & 32)
-			vertlist[5] = vertexInterp(isolevel, grid.p[5], grid.p[6], grid.val[5], grid.val[6]);
-		if (edgeTable[cubeindex] & 64)
-			vertlist[6] = vertexInterp(isolevel, grid.p[6], grid.p[7], grid.val[6], grid.val[7]);
-		if (edgeTable[cubeindex] & 128)
-			vertlist[7] = vertexInterp(isolevel, grid.p[7], grid.p[4], grid.val[7], grid.val[4]);
-		if (edgeTable[cubeindex] & 256)
-			vertlist[8] = vertexInterp(isolevel, grid.p[0], grid.p[4], grid.val[0], grid.val[4]);
-		if (edgeTable[cubeindex] & 512)
-			vertlist[9] = vertexInterp(isolevel, grid.p[1], grid.p[5], grid.val[1], grid.val[5]);
-		if (edgeTable[cubeindex] & 1024)
-			vertlist[10] = vertexInterp(isolevel, grid.p[2], grid.p[6], grid.val[2], grid.val[6]);
-		if (edgeTable[cubeindex] & 2048)
-			vertlist[11] = vertexInterp(isolevel, grid.p[3], grid.p[7], grid.val[3], grid.val[7]);
-
-		/* Create the triangle */
-		ntriang = 0;
-		for (i = 0; triTable[cubeindex][i] != -1; i += 3) {
-			tmpTriangle = new TRIANGLE;
-			tmpTriangle->p[0] = vertlist[triTable[cubeindex][i]];
-			tmpTriangle->p[1] = vertlist[triTable[cubeindex][i + 1]];
-			tmpTriangle->p[2] = vertlist[triTable[cubeindex][i + 2]];
-
-			/* Compute normals*/
-			a = vec3(tmpTriangle->p[1].x - tmpTriangle->p[0].x, tmpTriangle->p[1].y - tmpTriangle->p[0].y, tmpTriangle->p[1].z - tmpTriangle->p[0].z);
-			b = vec3(tmpTriangle->p[2].x - tmpTriangle->p[1].x, tmpTriangle->p[2].y - tmpTriangle->p[1].y, tmpTriangle->p[2].z - tmpTriangle->p[1].z);
-			norm = normalize(cross(a, b));
-			tmpTriangle->n.x = norm.x;
-			tmpTriangle->n.y = norm.y;
-			tmpTriangle->n.z = norm.z;
 
 			triangles->push_back(*tmpTriangle);
 			ntriang++;

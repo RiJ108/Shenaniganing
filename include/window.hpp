@@ -49,12 +49,12 @@ public:
     int maxT = 0;
     vector<float> clearing;
     Shader shaderMC;
-    GRIDCELL testGrid;
+    //GRIDCELL testGrid;
     MarchingCube mCube;
     Engine engine;
     GLuint VBOmc, VAOmc;
     GLuint VBOmcp, VAOmcp;
-    vector<TRIANGLE> triangles;
+    //vector<TRIANGLE> triangles;
     vector<float> vertices;
     vector<float> points;
     int nbrTriangles;

@@ -69,14 +69,7 @@ BOOL Window::init() {
     //________________________________________________________________________________________________________________________________________
 
     engine.initShaders();
-    engine.fillPoints();
-    engine.normalizePointsValue();
-    engine.thresholdingPointsToVector();
     engine.GFSBuffersVectorPoints();
-
-    engine.marchThrough();
-    engine.setMesh();
-    engine.GFSBuffersMesh();
     engine.initBuffersTesting();
 
     engine.generateWorldPoints();
@@ -84,82 +77,7 @@ BOOL Window::init() {
     engine.setMesh_OPT();
     engine.GFSBuffersMesh_OPT();
 
-    {int i = 0;
-    testGrid.p[i].x = -1;
-    testGrid.p[i].y = -1;
-    testGrid.p[i].z = 1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = 1;
-    testGrid.p[i].y = -1;
-    testGrid.p[i].z = 1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = 1;
-    testGrid.p[i].y = -1;
-    testGrid.p[i].z = -1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = -1;
-    testGrid.p[i].y = -1;
-    testGrid.p[i].z = -1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = -1;
-    testGrid.p[i].y = 1;
-    testGrid.p[i].z = 1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = 1;
-    testGrid.p[i].y = 1;
-    testGrid.p[i].z = 1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = 1;
-    testGrid.p[i].y = 1;
-    testGrid.p[i].z = -1;
-    testGrid.val[i] = 0.0f;
-    i++;
-    testGrid.p[i].x = -1;
-    testGrid.p[i].y = 1;
-    testGrid.p[i].z = -1;
-    testGrid.val[i] = 0.0f;}
-
     shaderMC = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
-
-    if(true) {
-        glGenVertexArrays(1, &VAOmc);
-        glGenBuffers(1, &VBOmc);
-
-        glGenVertexArrays(1, &VAOmcp);
-        glGenBuffers(1, &VBOmcp);
-
-        glBindVertexArray(VAOmcp);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 8 * 6, nullptr, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-        glBindVertexArray(0);
-
-        glBindVertexArray(VAOmc);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 5 * 3 * 6, nullptr, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-        glBindVertexArray(0);
-    
-        cubeIndex = 1;
-        engine.refreshMCdebug(&testGrid, &vertices, &points, &triangles, cubeIndex);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)* vertices.size(), &vertices[0]);
-        glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float)* points.size(), &points[0]);
-    }
 
     cout << __FUNCTION__ << "->FINISHED !" << endl;
 
@@ -261,35 +179,15 @@ void Window::G() {
                 runStepping = false;
                 return;
             }
-            engine.meshStepping();
+            //engine.meshStepping();
         }
-        if (!true) {
-            shaderMC.use();
-            shaderMC.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
-            shaderMC.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
-            shaderMC.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
-            shaderMC.setMat4("view", pov.lookAt());
-            shaderMC.setVec3("viewPos", pov.getPosition());
-            shaderMC.setVec3("frontView", pov.getFront());
-            shaderMC.setMat4("projection", perspective(radians(pov.getFOV()), (float)srcWidth / srcHeight, 0.1f, 10000.0f));
-            shaderMC.setMat4("model", mat4(1.0f));
 
-            glPointSize(4);
-            glBindVertexArray(VAOmc);
-            glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
-            glBindVertexArray(VAOmcp);
-            glDrawArrays(GL_POINTS, 0, points.size() / 6);
-            glBindVertexArray(0);
-        }
-        else {
-            glPointSize(4);
-            //engine.renderPoints(pov, (float)srcWidth / srcHeight);
-            glPointSize(8);
-            engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
-            engine.renderTestingMesh(pov, (float)srcWidth / srcHeight);
-            //engine.renderMesh(pov, (float)srcWidth / srcHeight);
-            engine.renderMesh_OPT(pov, (float)srcWidth / srcHeight);
-        }
+        glPointSize(4);
+        //engine.renderPoints(pov, (float)srcWidth / srcHeight);
+        glPointSize(8);
+        engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
+        engine.renderTestingMesh(pov, (float)srcWidth / srcHeight);
+        engine.renderMesh_OPT(pov, (float)srcWidth / srcHeight);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
@@ -403,22 +301,10 @@ void Window::exitCallBack(Window* aWindowPtr) {
     glfwSetWindowShouldClose(aWindowPtr->wHandler, true);
 }
 
-void Window::refreshMCdebug(int cubeIndex) {
-    engine.refreshMCdebug(&testGrid, &vertices, &points, &triangles, cubeIndex);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBOmc);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * vertices.size(), &vertices[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOmcp);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * points.size(), &points[0]);
-}
-
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
     //cout << __FUNCTION__ << "->" << key << " is " << action << endl;
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
-    if (true) {
-        if (key == 335 && (action == GLFW_PRESS || action == 2))
-            windowPtr->engine.meshStepping();
-
+    if (!true) {
         if (key == 257 && action == GLFW_PRESS) {
             if (!windowPtr->runStepping)
                 windowPtr->runStepping = true;
@@ -426,26 +312,6 @@ void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int actio
         else if ((key == 259 || key == 256) && action == GLFW_PRESS) {
             if (windowPtr->runStepping)
                 windowPtr->runStepping = false;
-        }
-    }
-
-    if (!true) {
-        if (key == 265 && (action == GLFW_PRESS || action == 2)) {
-            windowPtr->cubeIndex++;
-            if (windowPtr->cubeIndex > 255)
-                windowPtr->cubeIndex = 0;
-            windowPtr->needRefresh = true;
-        }
-        if (key == 264 && (action == GLFW_PRESS || action == 2)) {
-            windowPtr->cubeIndex--;
-            if (windowPtr->cubeIndex < 0)
-                windowPtr->cubeIndex = 255;
-            windowPtr->needRefresh = true;
-        }
-
-        if (windowPtr->needRefresh) {
-            windowPtr->refreshMCdebug(windowPtr->cubeIndex);
-            windowPtr->needRefresh = false;
         }
     }
 }

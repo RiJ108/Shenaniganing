@@ -20,7 +20,7 @@ class Window;
 enum class State {mainMenu, inGame};
 
 //Structs handling marching cube data
-typedef struct {
+/*typedef struct {
 	double x, y, z;
 } XYZ;
 
@@ -32,12 +32,12 @@ typedef struct {
 typedef struct {
 	XYZ p[8];
 	double val[8];
-} GRIDCELL;
+} GRIDCELL;*/
 
-typedef struct myPoint {
+/*typedef struct myPoint {
 	vec3 aPos = vec3(0.0f);
 	float value = 0.0f;
-}myPoint;
+}myPoint;*/
 
 //__Custom
 
