@@ -34,6 +34,28 @@ typedef struct {
 	double val[8];
 } GRIDCELL;
 
+typedef struct myPoint {
+	vec3 aPos = vec3(0.0f);
+	float value = 0.0f;
+}myPoint;
+
+//__Custom
+
+typedef struct {
+	vec3 coord;
+	vec3 norm;
+	double val;
+} POINT_OPT;
+
+typedef struct {
+	POINT_OPT* points[8];
+} GRIDCELL_OPT;
+
+typedef struct {
+	vec3 points[3];
+	vec3 norm;
+}TRIANGLE_OPT;
+
 //Holds all state information relevant to a character as loaded using FreeType
 typedef struct Character {
     unsigned int TextureID; // ID handle of the glyph texture

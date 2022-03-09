@@ -79,6 +79,11 @@ BOOL Window::init() {
     engine.GFSBuffersMesh();
     engine.initBuffersTesting();
 
+    engine.generateWorldPoints();
+    engine.generateWorldGridcells();
+    engine.setMesh_OPT();
+    engine.GFSBuffersMesh_OPT();
+
     {int i = 0;
     testGrid.p[i].x = -1;
     testGrid.p[i].y = -1;
@@ -120,7 +125,7 @@ BOOL Window::init() {
     testGrid.p[i].z = -1;
     testGrid.val[i] = 0.0f;}
 
-    shaderMC = Shader("resources/shaders/vShaderSourcePoint.vs", "resources/shaders/fShaderSourcePoint.fs");
+    shaderMC = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
 
     if(true) {
         glGenVertexArrays(1, &VAOmc);
@@ -278,11 +283,12 @@ void Window::G() {
         }
         else {
             glPointSize(4);
-            engine.renderPoints(pov, (float)srcWidth / srcHeight);
+            //engine.renderPoints(pov, (float)srcWidth / srcHeight);
             glPointSize(8);
             engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
             engine.renderTestingMesh(pov, (float)srcWidth / srcHeight);
             //engine.renderMesh(pov, (float)srcWidth / srcHeight);
+            engine.renderMesh_OPT(pov, (float)srcWidth / srcHeight);
         }
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -492,12 +498,12 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
 }
 
 void Window::initUI() {
-    shader_UI = Shader("resources/shaders/vShaderSourceUI.vs", "resources/shaders/gShaderSourceUI.gs", "resources/shaders/fShaderSourceUI.fs");
+    shader_UI = Shader("resources/shaders/vShaderSourceUI.glsl", "resources/shaders/gShaderSourceUI.glsl", "resources/shaders/fShaderSourceUI.glsl");
 }
 
 void Window::init3DShader() {
     //**Initiate 3D shader
-    shader3D = Shader("resources/shaders/vShaderSource3D.vs", "resources/shaders/fShaderSource3D.fs");
+    shader3D = Shader("resources/shaders/vShaderSource3D.glsl", "resources/shaders/fShaderSource3D.glsl");
     shader3D.use();
     shader3D.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
     shader3D.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
@@ -522,7 +528,7 @@ Layout* Window::getActiveLayoutPtr() {
 
 void Window::initFT() {
     //**Initiate 2D shader
-    shader_TXT = Shader("resources/shaders/vShaderSourceTXT.vs", "resources/shaders/fShaderSourceTXT.fs");
+    shader_TXT = Shader("resources/shaders/vShaderSourceTXT.glsl", "resources/shaders/fShaderSourceTXT.glsl");
     mat4 proj = ortho(0.0f, static_cast<float>(WINDOW_SIZE.x), 0.0f, static_cast<float>(WINDOW_SIZE.y));
     shader_TXT.use();
     glUniformMatrix4fv(glGetUniformLocation(shader_TXT.id, "projection"), 1, GL_FALSE, value_ptr(proj));

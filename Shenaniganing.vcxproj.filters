@@ -16,9 +16,6 @@
     <Filter Include="Fichiers de ressources\shaders">
       <UniqueIdentifier>{0674fd20-4545-45ce-ae6a-dddc9eae87a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers de ressources\shaders\3D">
-      <UniqueIdentifier>{21426e11-e567-490a-b635-b79040b712fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Fichiers de ressources\shaders\TXT">
       <UniqueIdentifier>{0c1a9773-ce13-4f94-9784-5562ddb6c59f}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,9 @@
     </Filter>
     <Filter Include="Fichiers d%27en-tête\Done">
       <UniqueIdentifier>{37ab25ea-219d-414b-b051-0a7a80ed9cc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers de ressources\shaders\3D">
+      <UniqueIdentifier>{eb1430dc-d13c-4ab0-8b91-ba00e572945a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,46 +113,5 @@
     <ClInclude Include="include\shader.hpp">
       <Filter>Fichiers d%27en-tête\Done</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\shader\fShaderSourceUI.fs">
-      <Filter>Fichiers de ressources\shaders\UI</Filter>
-    </None>
-    <None Include="resources\shader\gShaderSourceUI.gs">
-      <Filter>Fichiers de ressources\shaders\UI</Filter>
-    </None>
-    <None Include="resources\shader\vShaderSourceUI.vs">
-      <Filter>Fichiers de ressources\shaders\UI</Filter>
-    </None>
-    <None Include="resources\shader\vShaderSourceTXT.vs">
-      <Filter>Fichiers de ressources\shaders\TXT</Filter>
-    </None>
-    <None Include="resources\shader\fShaderSourceTXT.fs">
-      <Filter>Fichiers de ressources\shaders\TXT</Filter>
-    </None>
-    <None Include="resources\shaders\fShaderSource3D_OLD.fs">
-      <Filter>Fichiers de ressources\shaders\3D</Filter>
-    </None>
-    <None Include="resources\shaders\fShaderSource3D.fs">
-      <Filter>Fichiers de ressources\shaders\3D</Filter>
-    </None>
-    <None Include="resources\shaders\vShaderSource3D_OLD.vs">
-      <Filter>Fichiers de ressources\shaders\3D</Filter>
-    </None>
-    <None Include="resources\shaders\vShaderSource3D.vs">
-      <Filter>Fichiers de ressources\shaders\3D</Filter>
-    </None>
-    <None Include="resources\shaders\fShaderSourceTesting.fs">
-      <Filter>Fichiers de ressources\shaders\testing</Filter>
-    </None>
-    <None Include="resources\shaders\vShaderSourceTesting.vs">
-      <Filter>Fichiers de ressources\shaders\testing</Filter>
-    </None>
-    <None Include="resources\shaders\fShaderSourcePoint.fs">
-      <Filter>Fichiers de ressources\shaders\testing</Filter>
-    </None>
-    <None Include="resources\shaders\vShaderSourcePoint.vs">
-      <Filter>Fichiers de ressources\shaders\testing</Filter>
-    </None>
   </ItemGroup>
 </Project>

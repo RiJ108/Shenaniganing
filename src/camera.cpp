@@ -11,7 +11,7 @@ void Camera::setDefault() {
     up = vec3(0.0f, 1.0f, 0.0f);
     FOV = 100.0f;
     speeds = vec3(0.0f);
-    speedsCap = 3.0f * vec3(1.0f, 1.0f, 0.75f);
+    speedsCap = 20.0f * vec3(1.0f, 1.0f, 0.75f);
     accelarations = vec3(0.0f);
     modelMatrix = mat4(1.0f);
     lastCursorPosition = vec2(0.0f);

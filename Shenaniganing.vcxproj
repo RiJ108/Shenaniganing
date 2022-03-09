@@ -174,21 +174,6 @@
     <ClInclude Include="include\terrain.hpp" />
     <ClInclude Include="include\window.hpp" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\shaders\fShaderSource3D_OLD.fs" />
-    <None Include="resources\shaders\fShaderSource3D.fs" />
-    <None Include="resources\shaders\fShaderSourcePoint.fs" />
-    <None Include="resources\shaders\fShaderSourceTesting.fs" />
-    <None Include="resources\shaders\vShaderSource3D_OLD.vs" />
-    <None Include="resources\shaders\vShaderSource3D.vs" />
-    <None Include="resources\shaders\vShaderSourcePoint.vs" />
-    <None Include="resources\shaders\vShaderSourceTesting.vs" />
-    <None Include="resources\shader\fShaderSourceTXT.fs" />
-    <None Include="resources\shader\fShaderSourceUI.fs" />
-    <None Include="resources\shader\gShaderSourceUI.gs" />
-    <None Include="resources\shader\vShaderSourceTXT.vs" />
-    <None Include="resources\shader\vShaderSourceUI.vs" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

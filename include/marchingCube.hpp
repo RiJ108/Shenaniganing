@@ -17,6 +17,25 @@ public:
 		}
 	};
 
+	vec3 vertexInterp_OPT(double isolevel, vec3 p1, vec3 p2, double valp1, double valp2) {
+		double mu;
+		vec3 p;
+
+		if (abs(isolevel - valp1) < 0.00001)
+			return(p1);
+		if (abs(isolevel - valp2) < 0.00001)
+			return(p2);
+		if (abs(valp1 - valp2) < 0.00001)
+			return(p1);
+
+		mu = (isolevel - valp1) / (valp2 - valp1);
+		p.x = p1.x + mu * (p2.x - p1.x);
+		p.y = p1.y + mu * (p2.y - p1.y);
+		p.z = p1.z + mu * (p2.z - p1.z);
+
+		return(p);
+	};
+
 	XYZ vertexInterp(double isolevel, XYZ p1, XYZ p2, double valp1, double valp2){
 		double mu;
 		XYZ p;
@@ -36,7 +55,78 @@ public:
 		return(p);
 	};
 
-	int cubeindex;
+	int polygonise_OPT(GRIDCELL_OPT aGrid, double isolevel, vector<TRIANGLE_OPT>* triangles) {
+		int i, ntriang;
+
+		vec3 vertlist[12];
+		TRIANGLE_OPT* tmpTriangle;
+		vec3 a, b, norm;
+
+		/*Determine the index into the edge table which
+		tells us which vertices are inside of the surface*/
+		cubeindex = 0;
+		aGrid.points[0]->val > isolevel;
+		if (aGrid.points[0]->val > isolevel) cubeindex |= 1;
+		if (aGrid.points[1]->val > isolevel) cubeindex |= 2;
+		if (aGrid.points[2]->val > isolevel) cubeindex |= 4;
+		if (aGrid.points[3]->val > isolevel) cubeindex |= 8;
+		if (aGrid.points[4]->val > isolevel) cubeindex |= 16;
+		if (aGrid.points[5]->val > isolevel) cubeindex |= 32;
+		if (aGrid.points[6]->val > isolevel) cubeindex |= 64;
+		if (aGrid.points[7]->val > isolevel) cubeindex |= 128;
+
+		/* Cube is entirely in/out of the surface */
+		if (edgeTable[cubeindex] == 0)
+			return(0);
+
+		/* Find the vertices where the surface intersects the cube */
+		if (edgeTable[cubeindex] & 1)
+			vertlist[0] = vertexInterp_OPT(isolevel, aGrid.points[0]->coord, aGrid.points[1]->coord, aGrid.points[0]->val, aGrid.points[1]->val);
+		if (edgeTable[cubeindex] & 2)
+			vertlist[1] = vertexInterp_OPT(isolevel, aGrid.points[1]->coord, aGrid.points[2]->coord, aGrid.points[1]->val, aGrid.points[2]->val);
+		if (edgeTable[cubeindex] & 4)
+			vertlist[2] = vertexInterp_OPT(isolevel, aGrid.points[2]->coord, aGrid.points[3]->coord, aGrid.points[2]->val, aGrid.points[3]->val);
+		if (edgeTable[cubeindex] & 8)
+			vertlist[3] = vertexInterp_OPT(isolevel, aGrid.points[3]->coord, aGrid.points[0]->coord, aGrid.points[3]->val, aGrid.points[0]->val);
+		if (edgeTable[cubeindex] & 16)
+			vertlist[4] = vertexInterp_OPT(isolevel, aGrid.points[4]->coord, aGrid.points[5]->coord, aGrid.points[4]->val, aGrid.points[5]->val);
+		if (edgeTable[cubeindex] & 32)
+			vertlist[5] = vertexInterp_OPT(isolevel, aGrid.points[5]->coord, aGrid.points[6]->coord, aGrid.points[5]->val, aGrid.points[6]->val);
+		if (edgeTable[cubeindex] & 64)
+			vertlist[6] = vertexInterp_OPT(isolevel, aGrid.points[6]->coord, aGrid.points[7]->coord, aGrid.points[6]->val, aGrid.points[7]->val);
+		if (edgeTable[cubeindex] & 128)
+			vertlist[7] = vertexInterp_OPT(isolevel, aGrid.points[7]->coord, aGrid.points[4]->coord, aGrid.points[7]->val, aGrid.points[4]->val);
+		if (edgeTable[cubeindex] & 256)
+			vertlist[8] = vertexInterp_OPT(isolevel, aGrid.points[0]->coord, aGrid.points[4]->coord, aGrid.points[0]->val, aGrid.points[4]->val);
+		if (edgeTable[cubeindex] & 512)
+			vertlist[9] = vertexInterp_OPT(isolevel, aGrid.points[1]->coord, aGrid.points[5]->coord, aGrid.points[1]->val, aGrid.points[5]->val);
+		if (edgeTable[cubeindex] & 1024)
+			vertlist[10] = vertexInterp_OPT(isolevel, aGrid.points[2]->coord, aGrid.points[6]->coord, aGrid.points[2]->val, aGrid.points[6]->val);
+		if (edgeTable[cubeindex] & 2048)
+			vertlist[11] = vertexInterp_OPT(isolevel, aGrid.points[3]->coord, aGrid.points[7]->coord, aGrid.points[3]->val, aGrid.points[7]->val);
+
+		/* Create the triangle */
+		ntriang = 0;
+		for (i = 0; triTable[cubeindex][i] != -1; i += 3) {
+			tmpTriangle = new TRIANGLE_OPT;
+			tmpTriangle->points[0] = vertlist[triTable[cubeindex][i]];
+			tmpTriangle->points[1] = vertlist[triTable[cubeindex][i + 1]];
+			tmpTriangle->points[2] = vertlist[triTable[cubeindex][i + 2]];
+
+			/* Compute normals*/
+			a = vec3(tmpTriangle->points[1].x - tmpTriangle->points[0].x, tmpTriangle->points[1].y - tmpTriangle->points[0].y, tmpTriangle->points[1].z - tmpTriangle->points[0].z);
+			b = vec3(tmpTriangle->points[2].x - tmpTriangle->points[1].x, tmpTriangle->points[2].y - tmpTriangle->points[1].y, tmpTriangle->points[2].z - tmpTriangle->points[1].z);
+			norm = normalize(cross(a, b));
+			tmpTriangle->norm.x = norm.x;
+			tmpTriangle->norm.y = norm.y;
+			tmpTriangle->norm.z = norm.z;
+
+			triangles->push_back(*tmpTriangle);
+			ntriang++;
+		}
+
+		return(ntriang);
+	};
 
 	int polygonise(GRIDCELL grid, double isolevel, vector<TRIANGLE> *triangles){
 		int i, ntriang;
@@ -110,8 +200,9 @@ public:
 		return(ntriang);
 	};
 
-private:
+	int cubeindex;
 
+private:
 	int edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
 	0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -145,7 +236,6 @@ private:
 	0x69c, 0x795, 0x49f, 0x596, 0x29a, 0x393, 0x99 , 0x190,
 	0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
 	0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0 };
-
 	int triTable[256][16] =	{
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
