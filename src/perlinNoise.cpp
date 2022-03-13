@@ -30,6 +30,10 @@ PerlinNoise::PerlinNoise(unsigned int seed){
     p.insert(p.end(), p.begin(), p.end());
 }
 
+double PerlinNoise::noise(vec3 position) {
+    return noise(position.x, position.y, position.z);
+}
+
 double PerlinNoise::noise(double x, double y, double z){
     // Find the unit cube that contains the point
     int X = (int) floor(x) & 255;

@@ -25,10 +25,17 @@ typedef struct {
 	vec3 coord;
 	vec3 norm;
 	double val;
-} MPOINT;
+} C_MIDPOINT;
 
 typedef struct {
-	MPOINT* points[8];
+	vec3 coord;
+	double val;
+} C_POINT;
+
+typedef struct {
+	C_POINT points[8];		//Coord, value
+	//C_MIDPOINT* midPoints[8];	//Coord, norm, value(count the number of normal calculated at this point for smoothing)
+	int cubeIndex;			//Store the cube index of the latest marchingCube passage in the gridcell
 } GRIDCELL;
 
 typedef struct {

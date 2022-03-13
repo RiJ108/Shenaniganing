@@ -4,7 +4,6 @@
 
 class MarchingCube {
 public:
-
 	vec3 vertexInterp(double isolevel, vec3 p1, vec3 p2, double valp1, double valp2) {
 		double mu;
 		vec3 p;
@@ -23,7 +22,6 @@ public:
 
 		return(p);
 	};
-
 	int polygonise(GRIDCELL aGrid, double isolevel, vector<TRIANGLE>* triangles) {
 		int i, ntriang;
 
@@ -34,15 +32,15 @@ public:
 		/*Determine the index into the edge table which
 		tells us which vertices are inside of the surface*/
 		cubeindex = 0;
-		aGrid.points[0]->val > isolevel;
-		if (aGrid.points[0]->val > isolevel) cubeindex |= 1;
-		if (aGrid.points[1]->val > isolevel) cubeindex |= 2;
-		if (aGrid.points[2]->val > isolevel) cubeindex |= 4;
-		if (aGrid.points[3]->val > isolevel) cubeindex |= 8;
-		if (aGrid.points[4]->val > isolevel) cubeindex |= 16;
-		if (aGrid.points[5]->val > isolevel) cubeindex |= 32;
-		if (aGrid.points[6]->val > isolevel) cubeindex |= 64;
-		if (aGrid.points[7]->val > isolevel) cubeindex |= 128;
+		if (aGrid.points[0].val < isolevel) cubeindex |= 1;
+		if (aGrid.points[1].val < isolevel) cubeindex |= 2;
+		if (aGrid.points[2].val < isolevel) cubeindex |= 4;
+		if (aGrid.points[3].val < isolevel) cubeindex |= 8;
+		if (aGrid.points[4].val < isolevel) cubeindex |= 16;
+		if (aGrid.points[5].val < isolevel) cubeindex |= 32;
+		if (aGrid.points[6].val < isolevel) cubeindex |= 64;
+		if (aGrid.points[7].val < isolevel) cubeindex |= 128;
+		aGrid.cubeIndex = cubeindex;
 
 		/* Cube is entirely in/out of the surface */
 		if (edgeTable[cubeindex] == 0)
@@ -50,29 +48,29 @@ public:
 
 		/* Find the vertices where the surface intersects the cube */
 		if (edgeTable[cubeindex] & 1)
-			vertlist[0] = vertexInterp(isolevel, aGrid.points[0]->coord, aGrid.points[1]->coord, aGrid.points[0]->val, aGrid.points[1]->val);
+			vertlist[0] = vertexInterp(isolevel, aGrid.points[0].coord, aGrid.points[1].coord, aGrid.points[0].val, aGrid.points[1].val);
 		if (edgeTable[cubeindex] & 2)
-			vertlist[1] = vertexInterp(isolevel, aGrid.points[1]->coord, aGrid.points[2]->coord, aGrid.points[1]->val, aGrid.points[2]->val);
+			vertlist[1] = vertexInterp(isolevel, aGrid.points[1].coord, aGrid.points[2].coord, aGrid.points[1].val, aGrid.points[2].val);
 		if (edgeTable[cubeindex] & 4)
-			vertlist[2] = vertexInterp(isolevel, aGrid.points[2]->coord, aGrid.points[3]->coord, aGrid.points[2]->val, aGrid.points[3]->val);
+			vertlist[2] = vertexInterp(isolevel, aGrid.points[2].coord, aGrid.points[3].coord, aGrid.points[2].val, aGrid.points[3].val);
 		if (edgeTable[cubeindex] & 8)
-			vertlist[3] = vertexInterp(isolevel, aGrid.points[3]->coord, aGrid.points[0]->coord, aGrid.points[3]->val, aGrid.points[0]->val);
+			vertlist[3] = vertexInterp(isolevel, aGrid.points[3].coord, aGrid.points[0].coord, aGrid.points[3].val, aGrid.points[0].val);
 		if (edgeTable[cubeindex] & 16)
-			vertlist[4] = vertexInterp(isolevel, aGrid.points[4]->coord, aGrid.points[5]->coord, aGrid.points[4]->val, aGrid.points[5]->val);
+			vertlist[4] = vertexInterp(isolevel, aGrid.points[4].coord, aGrid.points[5].coord, aGrid.points[4].val, aGrid.points[5].val);
 		if (edgeTable[cubeindex] & 32)
-			vertlist[5] = vertexInterp(isolevel, aGrid.points[5]->coord, aGrid.points[6]->coord, aGrid.points[5]->val, aGrid.points[6]->val);
+			vertlist[5] = vertexInterp(isolevel, aGrid.points[5].coord, aGrid.points[6].coord, aGrid.points[5].val, aGrid.points[6].val);
 		if (edgeTable[cubeindex] & 64)
-			vertlist[6] = vertexInterp(isolevel, aGrid.points[6]->coord, aGrid.points[7]->coord, aGrid.points[6]->val, aGrid.points[7]->val);
+			vertlist[6] = vertexInterp(isolevel, aGrid.points[6].coord, aGrid.points[7].coord, aGrid.points[6].val, aGrid.points[7].val);
 		if (edgeTable[cubeindex] & 128)
-			vertlist[7] = vertexInterp(isolevel, aGrid.points[7]->coord, aGrid.points[4]->coord, aGrid.points[7]->val, aGrid.points[4]->val);
+			vertlist[7] = vertexInterp(isolevel, aGrid.points[7].coord, aGrid.points[4].coord, aGrid.points[7].val, aGrid.points[4].val);
 		if (edgeTable[cubeindex] & 256)
-			vertlist[8] = vertexInterp(isolevel, aGrid.points[0]->coord, aGrid.points[4]->coord, aGrid.points[0]->val, aGrid.points[4]->val);
+			vertlist[8] = vertexInterp(isolevel, aGrid.points[0].coord, aGrid.points[4].coord, aGrid.points[0].val, aGrid.points[4].val);
 		if (edgeTable[cubeindex] & 512)
-			vertlist[9] = vertexInterp(isolevel, aGrid.points[1]->coord, aGrid.points[5]->coord, aGrid.points[1]->val, aGrid.points[5]->val);
+			vertlist[9] = vertexInterp(isolevel, aGrid.points[1].coord, aGrid.points[5].coord, aGrid.points[1].val, aGrid.points[5].val);
 		if (edgeTable[cubeindex] & 1024)
-			vertlist[10] = vertexInterp(isolevel, aGrid.points[2]->coord, aGrid.points[6]->coord, aGrid.points[2]->val, aGrid.points[6]->val);
+			vertlist[10] = vertexInterp(isolevel, aGrid.points[2].coord, aGrid.points[6].coord, aGrid.points[2].val, aGrid.points[6].val);
 		if (edgeTable[cubeindex] & 2048)
-			vertlist[11] = vertexInterp(isolevel, aGrid.points[3]->coord, aGrid.points[7]->coord, aGrid.points[3]->val, aGrid.points[7]->val);
+			vertlist[11] = vertexInterp(isolevel, aGrid.points[3].coord, aGrid.points[7].coord, aGrid.points[3].val, aGrid.points[7].val);
 
 		/* Create the triangle */
 		ntriang = 0;
@@ -94,11 +92,266 @@ public:
 			ntriang++;
 		}
 
-		return(ntriang);
+		return(cubeindex);
 	};
-
 	int cubeindex;
-
+	int nbrTriangle[256] = {
+		0,
+		1,
+		1,
+		2,
+		1,
+		2,
+		2,
+		3,
+		1,
+		2,
+		2,
+		3,
+		2,
+		3,
+		3,
+		2,
+		1,
+		2,
+		2,
+		3,
+		2,
+		3,
+		3,
+		4,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		3,
+		1,
+		2,
+		2,
+		3,
+		2,
+		3,
+		3,
+		4,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		3,
+		2,
+		3,
+		3,
+		2,
+		3,
+		4,
+		4,
+		3,
+		3,
+		4,
+		4,
+		3,
+		4,
+		5,
+		5,
+		2,
+		1,
+		2,
+		2,
+		3,
+		2,
+		3,
+		3,
+		4,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		3,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		5,
+		3,
+		4,
+		4,
+		5,
+		4,
+		5,
+		5,
+		4,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		2,
+		3,
+		3,
+		4,
+		4,
+		5,
+		4,
+		5,
+		3,
+		2,
+		3,
+		4,
+		4,
+		3,
+		4,
+		5,
+		3,
+		2,
+		4,
+		5,
+		5,
+		4,
+		5,
+		2,
+		4,
+		1,
+		1,
+		2,
+		2,
+		3,
+		2,
+		3,
+		3,
+		4,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		3,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		5,
+		3,
+		2,
+		4,
+		3,
+		4,
+		3,
+		5,
+		2,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		5,
+		3,
+		4,
+		4,
+		5,
+		4,
+		5,
+		5,
+		4,
+		3,
+		4,
+		4,
+		3,
+		4,
+		5,
+		5,
+		4,
+		4,
+		3,
+		5,
+		2,
+		5,
+		4,
+		2,
+		1,
+		2,
+		3,
+		3,
+		4,
+		3,
+		4,
+		4,
+		5,
+		3,
+		4,
+		4,
+		5,
+		2,
+		3,
+		3,
+		2,
+		3,
+		4,
+		4,
+		5,
+		4,
+		5,
+		5,
+		2,
+		4,
+		3,
+		5,
+		4,
+		3,
+		2,
+		4,
+		1,
+		3,
+		4,
+		4,
+		5,
+		4,
+		5,
+		3,
+		4,
+		4,
+		5,
+		5,
+		2,
+		3,
+		4,
+		2,
+		1,
+		2,
+		3,
+		3,
+		2,
+		3,
+		4,
+		2,
+		1,
+		3,
+		2,
+		4,
+		1,
+		2,
+		1,
+		1,
+		0 };
 private:
 	int edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -133,7 +386,7 @@ private:
 	0x69c, 0x795, 0x49f, 0x596, 0x29a, 0x393, 0x99 , 0x190,
 	0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f, 0x905, 0x80c,
 	0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0 };
-	int triTable[256][16] =	{
+	int triTable[256][16] = {
 	{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 	{0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

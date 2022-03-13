@@ -69,10 +69,11 @@ BOOL Window::init() {
     //________________________________________________________________________________________________________________________________________
 
     engine.initShaders();
-    engine.generateWorldPoints();
-    engine.generateWorldGridcells();
+    //engine.generateWorldPoints();
+    //engine.generateWorldGridcellsAndMeshTriangles();
+    engine.generateMeshTriangles();
     engine.setMesh();
-    engine.GFSBuffersMesh();
+    engine.GFSMeshBuffers();
 
     shaderMC = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
 
@@ -89,7 +90,7 @@ BOOL Window::loop() {
         lastFrame = currentFrame;
 
         //**Clearing buffers
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         //**Finite-state machine calls
@@ -129,6 +130,10 @@ void Window::F() {
 
     case State::inGame:
         processKeyInputs();
+
+        if(!engine.computeCollision(pov.getFuturPos(deltaTime)))
+            pov.updatePosition(deltaTime);
+
         if (glfwGetKey(wHandler, 256) == GLFW_PRESS) {
             nextState = State::mainMenu;
             getLayoutPtr("mainMenu")->setActive(true);
@@ -184,14 +189,19 @@ void Window::G() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
-        renderText(shader_TXT, "Step = " + to_string(engine.step), 4.0f, srcHeight/2.0, 0.5f, vec3(0.8f, 0.8f, 0.5f));
+        //renderText(shader_TXT, "Step = " + to_string(engine.step), 4.0f, srcHeight/2.0, 0.5f, vec3(0.8f, 0.8f, 0.5f));
         //renderText(shader_TXT, "Cube index (single)= " + to_string(cubeIndex), 4.0f, srcHeight / 2.0 + 25.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
-        renderText(shader_TXT, "Cube index (mesh stepping) = " + to_string(engine.cubeIndex), 4.0f, srcHeight/2.0 + 50.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
+        //renderText(shader_TXT, "Cube index (mesh stepping) = " + to_string(engine.cubeIndex), 4.0f, srcHeight/2.0 + 50.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
         //renderText(shader_TXT, "Added triangles = " + to_string(engine.nbrTriangles), 4.0f, srcHeight/2.0 - 25.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
-        renderText(shader_TXT, "Number of triangles = " + to_string(engine.meshSize), 4.0f, srcHeight/2.0 - 50.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
+        //renderText(shader_TXT, "Number of triangles = " + to_string(engine.meshSize), 4.0f, srcHeight/2.0 - 50.0f, 0.4f, vec3(0.8f, 0.8f, 0.5f));
         //renderText(shader_TXT, "Number of triangles = " + to_string(vertices.size() / (6 * 3)), 4.0f, srcHeight/2.0 - 15.0f, 0.5f, vec3(0.8f, 0.8f, 0.5f));
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
         renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+
+        renderText(shader_TXT, "Gridcell index at position = " + to_string(engine.gridcellIndexTrack), 10.0f, 50.0f, 0.3f, vec3(0.4f, 0.8f, 0.2f));
+        renderText(shader_TXT, "position.x = " + to_string(pov.getPosition().x), 10.0f, 40.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "position.y = " + to_string(pov.getPosition().y), 10.0f, 30.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "position.z = " + to_string(pov.getPosition().z), 10.0f, 20.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         break;
     }
 }
@@ -214,7 +224,7 @@ void Window::processKeyInputs() {
         pov.setDefault();
 
     //**Update camera position
-    pov.updatePosition(deltaTime);
+    //pov.updatePosition(deltaTime);
 }
 
 void Window::checkUI() {

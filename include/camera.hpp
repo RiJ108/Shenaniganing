@@ -23,6 +23,7 @@ public:
 	float getFOV();
 	void key(int aKey);
 	void updatePosition(float deltaTime);
+	vec3 getFuturPos(float deltaTime);
 	void setLastCursorPosition(vec2 aValue);
 	void setFirstMouse(bool aValue);
 	void mouseMotion(double xMotion, double yMotion);

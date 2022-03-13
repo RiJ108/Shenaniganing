@@ -6,7 +6,7 @@ Camera::Camera() {
 }
 
 void Camera::setDefault() {
-    position = vec3(0.0f, 5.0f, 3.0f);
+    position = vec3(0.0f, 10.0f, 3.0f);
     front = normalize(-position);
     up = vec3(0.0f, 1.0f, 0.0f);
     FOV = 100.0f;
@@ -75,6 +75,10 @@ void Camera::key(int aKey) {
         cout << __FUNCTION__ << "False call." << endl;
         break;
     }
+}
+
+vec3 Camera::getFuturPos(float deltaTime) {
+    return position + deltaTime * rotate(speeds, orientedAngle(vec3(1.0f, 0.0f, 0.0f), front, up), up);;
 }
 
 void Camera::updatePosition(float deltaTime) {
