@@ -22,7 +22,6 @@
 #include "mobject.hpp"
 #include "constant.hpp"
 #include "camera.hpp"
-#include "block.hpp"
 #include "marchingCube.hpp"
 
 using namespace std;
@@ -63,6 +62,11 @@ public:
     bool runStepping = false;
 
 private:
+    //**Shadow
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMap;
+    unsigned int depthMapFBO;
+
     //**FSM section
     State actualState = State::mainMenu;
     State nextState = State::mainMenu;
@@ -77,13 +81,9 @@ private:
     Shader shader3D;
     ObjImporter objImporter;
     MObject testObj;
-    Block testBlock;
-    vector<Block*> testBlocks;
     Camera pov;
     void init3DShader();
     void processKeyInputs();
-
-    
 
     //**Texture testing
     int width, height, nrChannels;

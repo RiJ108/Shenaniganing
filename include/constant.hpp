@@ -1,5 +1,11 @@
 #pragma once
 
+#define LENGTH 50
+#define WIDTH 50
+#define HEIGHT 25
+#define GRID_RES 2
+#define CUBE_LIMIT ((LENGTH * GRID_RES) - 1) * ((HEIGHT * GRID_RES) - 1) * ((WIDTH * GRID_RES) - 1)
+
 #define BUTTON_NUMBER_OF_FLOAT 7
 #define BUTTON_SIZEOF BUTTON_NUMBER_OF_FLOAT*4
 #define NUMBER_OF_LAYOUTS 1
@@ -17,7 +23,7 @@ using namespace glm;
 
 class Window;
 
-enum class State {mainMenu, inGame};
+enum class State { mainMenu, inGame };
 
 //__Custom
 
@@ -45,10 +51,10 @@ typedef struct {
 
 //Holds all state information relevant to a character as loaded using FreeType
 typedef struct Character {
-    unsigned int TextureID; // ID handle of the glyph texture
-    ivec2   Size;      // Size of glyph
-    ivec2   Bearing;   // Offset from baseline to left/top of glyph
-    unsigned int Advance;   // Horizontal offset to advance to next glyph
+	unsigned int TextureID; // ID handle of the glyph texture
+	ivec2   Size;      // Size of glyph
+	ivec2   Bearing;   // Offset from baseline to left/top of glyph
+	unsigned int Advance;   // Horizontal offset to advance to next glyph
 }Character;
 
 typedef struct Button {

@@ -11,7 +11,7 @@ void Camera::setDefault() {
     up = vec3(0.0f, 1.0f, 0.0f);
     FOV = 100.0f;
     speeds = vec3(0.0f);
-    speedsCap = 20.0f * vec3(1.0f, 1.0f, 0.75f);
+    //speedsCap = 20.0f * vec3(1.0f, 1.0f, 0.75f);
     accelarations = vec3(0.0f);
     modelMatrix = mat4(1.0f);
     lastCursorPosition = vec2(0.0f);
@@ -55,21 +55,27 @@ void Camera::key(int aKey) {
     switch (aKey) {
     case 87:
         speeds.x = speedsCap.x;
+        //accelarations.x = 5.0f;
         break;
     case 83:
         speeds.x = -speedsCap.x;
+        //accelarations.x = -5.0f;
         break;
     case 65:
         speeds.z = -speedsCap.z;
+        //accelarations.z = -5.0f;
         break;
     case 68:
         speeds.z = speedsCap.z;
+        //accelarations.z = 5.0f;
         break;
     case 32:
         speeds.y = speedsCap.y;
+        //accelarations.y = 5.0f;
         break;
     case 340:
         speeds.y = -speedsCap.y;
+        //accelarations.y = -5.0f;
         break;
     default:
         cout << __FUNCTION__ << "False call." << endl;
@@ -78,7 +84,11 @@ void Camera::key(int aKey) {
 }
 
 vec3 Camera::getFuturPos(float deltaTime) {
-    return position + deltaTime * rotate(speeds, orientedAngle(vec3(1.0f, 0.0f, 0.0f), front, up), up);;
+    return position + deltaTime * rotate(speeds, orientedAngle(vec3(1.0f, 0.0f, 0.0f), front, up), up);
+}
+
+vec3 Camera::getDirection() {
+    return rotate(speeds, orientedAngle(vec3(1.0f, 0.0f, 0.0f), front, up), up);
 }
 
 void Camera::updatePosition(float deltaTime) {

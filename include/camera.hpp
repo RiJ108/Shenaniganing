@@ -18,6 +18,7 @@ public:
 	void setDefault();
 	mat4 lookAt();
 	vec3 getPosition();
+	vec3 getDirection();
 	vec3 getUp();
 	vec3 getFront();
 	float getFOV();
@@ -28,13 +29,14 @@ public:
 	void setFirstMouse(bool aValue);
 	void mouseMotion(double xMotion, double yMotion);
 
-private:
 	vec3 position;
+	vec3 speeds;
+	vec3 accelarations;
+
+private:
 	vec3 up;
 	vec3 front;
-	vec3 accelarations;
-	vec3 speeds;
-	vec3 speedsCap;
+	vec3 speedsCap = vec3(10.0f);
 	mat4 modelMatrix;
 	vec2 lastCursorPosition;
 	vec2 mouseOffsets;
