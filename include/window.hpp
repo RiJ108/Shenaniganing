@@ -38,35 +38,11 @@ public:
     ~Window() {
         if(!layoutPtr)free(layoutPtr);
         if(!buttonPtr)free(buttonPtr);
-        if(!data)free(data);
         if(!wHandler)free(wHandler);
         if(!tmp)free(tmp);
     }
 
-    //**Generation section
-    void refreshMCdebug(int cubeIndex);
-    int maxT = 0;
-    vector<float> clearing;
-    Shader shaderMC;
-    //GRIDCELL testGrid;
-    MarchingCube mCube;
-    Engine engine;
-    GLuint VBOmc, VAOmc;
-    GLuint VBOmcp, VAOmcp;
-    //vector<TRIANGLE> triangles;
-    vector<float> vertices;
-    vector<float> points;
-    int nbrTriangles;
-    int cubeIndex = 0;
-    bool needRefresh = false;
-    bool runStepping = false;
-
 private:
-    //**Shadow
-    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-    unsigned int depthMap;
-    unsigned int depthMapFBO;
-
     //**FSM section
     State actualState = State::mainMenu;
     State nextState = State::mainMenu;
@@ -78,17 +54,9 @@ private:
     void G();
 
     //**3D section
-    Shader shader3D;
-    ObjImporter objImporter;
-    MObject testObj;
+    Engine engine;
     Camera pov;
-    void init3DShader();
     void processKeyInputs();
-
-    //**Texture testing
-    int width, height, nrChannels;
-    unsigned char* data;
-    unsigned int texture;
 
     //**Window section
     GLFWwindow* wHandler;

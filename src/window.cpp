@@ -17,16 +17,6 @@ BOOL Window::init() {
         glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
         //**Creating the window
-        /*monitor = glfwGetPrimaryMonitor();
-        mode = glfwGetVideoMode(monitor);
-        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-        srcWidth = mode->width;
-        srcHeight = mode->height;
-        wHandler = glfwCreateWindow(mode->width, mode->height, build.c_str(), monitor, NULL);*/
-
         wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
         if (wHandler == NULL) {
             cout << __FUNCTION__ << "->Failed to create GLFW window" << endl;
@@ -61,20 +51,14 @@ BOOL Window::init() {
         initFT();
 
         //**Other inits..
-        init3DShader();
         initUI();
         setLayouts(); }
     //________________________________________________________________________________________________________________________________________
     //**TESTING**
     //________________________________________________________________________________________________________________________________________
-
     engine.initShaders();
     engine.generateMeshTriangles();
     engine.setMesh();
-
-    shaderMC = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
-    cout << __FUNCTION__ << "->FINISHED !" << endl;
-
     return true;
 }
 
@@ -126,12 +110,7 @@ void Window::F() {
 
     case State::inGame:
         processKeyInputs();
-        if (true) {
-            if (!engine.computeCollision(pov.getFuturPos(deltaTime)))
-                pov.updatePosition(deltaTime);
-        }
-        else
-            pov.updatePosition(deltaTime);
+        pov.updatePosition(deltaTime);
 
         if (glfwGetKey(wHandler, 256) == GLFW_PRESS) {
             nextState = State::mainMenu;
@@ -291,16 +270,6 @@ void Window::exitCallBack(Window* aWindowPtr) {
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
     //cout << __FUNCTION__ << "->" << key << " is " << action << endl;
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
-    if (!true) {
-        if (key == 257 && action == GLFW_PRESS) {
-            if (!windowPtr->runStepping)
-                windowPtr->runStepping = true;
-        }
-        else if ((key == 259 || key == 256) && action == GLFW_PRESS) {
-            if (windowPtr->runStepping)
-                windowPtr->runStepping = false;
-        }
-    }
 }
 
 void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height) {
@@ -352,15 +321,6 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
 
 void Window::initUI() {
     shader_UI = Shader("resources/shaders/vShaderSourceUI.glsl", "resources/shaders/gShaderSourceUI.glsl", "resources/shaders/fShaderSourceUI.glsl");
-}
-
-void Window::init3DShader() {
-    //**Initiate 3D shader
-    shader3D = Shader("resources/shaders/vShaderSource3D.glsl", "resources/shaders/fShaderSource3D.glsl");
-    shader3D.use();
-    shader3D.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
-    shader3D.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
-    shader3D.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
 }
 
 void Window::resetActiveLayout() {

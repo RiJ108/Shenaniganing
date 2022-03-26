@@ -160,7 +160,6 @@
   <ItemGroup>
     <ClInclude Include="include\camera.hpp" />
     <ClInclude Include="include\constant.hpp" />
-    <ClInclude Include="include\core.hpp" />
     <ClInclude Include="include\displays.hpp" />
     <ClInclude Include="include\engine.hpp" />
     <ClInclude Include="include\ft2build.h" />

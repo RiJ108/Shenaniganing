@@ -107,9 +107,6 @@
     <ClInclude Include="include\shader.hpp">
       <Filter>Fichiers d%27en-tête\Done</Filter>
     </ClInclude>
-    <ClInclude Include="include\core.hpp">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\mesh.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>

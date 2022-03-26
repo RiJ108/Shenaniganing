@@ -4,8 +4,8 @@
 
 class MarchingCube {
 public:
-	vec3 vertexInterp(double isolevel, vec3 p1, vec3 p2, double valp1, double valp2) {
-		double mu;
+	vec3 vertexInterp(float isolevel, vec3 p1, vec3 p2, float valp1, float valp2) {
+		float mu;
 		vec3 p;
 
 		if (abs(isolevel - valp1) < 0.00001)
@@ -22,24 +22,15 @@ public:
 
 		return(p);
 	};
-	int polygonise(GRIDCELL aGrid, double isolevel, vector<TRIANGLE>* triangles) {
+	int polygonise(GRIDCELL aGrid, float isolevel, vector<TRIANGLE>* triangles) {
 		int i, ntriang;
-
 		vec3 vertlist[12];
 		TRIANGLE* tmpTriangle;
 		vec3 a, b, norm;
 
 		/*Determine the index into the edge table which
 		tells us which vertices are inside of the surface*/
-		cubeindex = 0;
-		if (aGrid.points[0].val < isolevel) cubeindex |= 1;
-		if (aGrid.points[1].val < isolevel) cubeindex |= 2;
-		if (aGrid.points[2].val < isolevel) cubeindex |= 4;
-		if (aGrid.points[3].val < isolevel) cubeindex |= 8;
-		if (aGrid.points[4].val < isolevel) cubeindex |= 16;
-		if (aGrid.points[5].val < isolevel) cubeindex |= 32;
-		if (aGrid.points[6].val < isolevel) cubeindex |= 64;
-		if (aGrid.points[7].val < isolevel) cubeindex |= 128;
+		cubeindex = getCubeIndex(aGrid, isolevel);
 		aGrid.cubeIndex = cubeindex;
 
 		/* Cube is entirely in/out of the surface */
@@ -47,30 +38,7 @@ public:
 			return(0);
 
 		/* Find the vertices where the surface intersects the cube */
-		if (edgeTable[cubeindex] & 1)
-			vertlist[0] = vertexInterp(isolevel, aGrid.points[0].coord, aGrid.points[1].coord, aGrid.points[0].val, aGrid.points[1].val);
-		if (edgeTable[cubeindex] & 2)
-			vertlist[1] = vertexInterp(isolevel, aGrid.points[1].coord, aGrid.points[2].coord, aGrid.points[1].val, aGrid.points[2].val);
-		if (edgeTable[cubeindex] & 4)
-			vertlist[2] = vertexInterp(isolevel, aGrid.points[2].coord, aGrid.points[3].coord, aGrid.points[2].val, aGrid.points[3].val);
-		if (edgeTable[cubeindex] & 8)
-			vertlist[3] = vertexInterp(isolevel, aGrid.points[3].coord, aGrid.points[0].coord, aGrid.points[3].val, aGrid.points[0].val);
-		if (edgeTable[cubeindex] & 16)
-			vertlist[4] = vertexInterp(isolevel, aGrid.points[4].coord, aGrid.points[5].coord, aGrid.points[4].val, aGrid.points[5].val);
-		if (edgeTable[cubeindex] & 32)
-			vertlist[5] = vertexInterp(isolevel, aGrid.points[5].coord, aGrid.points[6].coord, aGrid.points[5].val, aGrid.points[6].val);
-		if (edgeTable[cubeindex] & 64)
-			vertlist[6] = vertexInterp(isolevel, aGrid.points[6].coord, aGrid.points[7].coord, aGrid.points[6].val, aGrid.points[7].val);
-		if (edgeTable[cubeindex] & 128)
-			vertlist[7] = vertexInterp(isolevel, aGrid.points[7].coord, aGrid.points[4].coord, aGrid.points[7].val, aGrid.points[4].val);
-		if (edgeTable[cubeindex] & 256)
-			vertlist[8] = vertexInterp(isolevel, aGrid.points[0].coord, aGrid.points[4].coord, aGrid.points[0].val, aGrid.points[4].val);
-		if (edgeTable[cubeindex] & 512)
-			vertlist[9] = vertexInterp(isolevel, aGrid.points[1].coord, aGrid.points[5].coord, aGrid.points[1].val, aGrid.points[5].val);
-		if (edgeTable[cubeindex] & 1024)
-			vertlist[10] = vertexInterp(isolevel, aGrid.points[2].coord, aGrid.points[6].coord, aGrid.points[2].val, aGrid.points[6].val);
-		if (edgeTable[cubeindex] & 2048)
-			vertlist[11] = vertexInterp(isolevel, aGrid.points[3].coord, aGrid.points[7].coord, aGrid.points[3].val, aGrid.points[7].val);
+		getVertexList(aGrid, isolevel, vertlist);
 
 		/* Create the triangle */
 		ntriang = 0;
@@ -94,6 +62,47 @@ public:
 
 		return(cubeindex);
 	};
+	int getCubeIndex(GRIDCELL aGrid, float isolevel) {
+		/*Determine the index into the edge table which
+		tells us which vertices are inside of the surface*/
+		int cubeIndex = 0;
+		if (aGrid.apex[0].value < isolevel) cubeIndex |= 1;
+		if (aGrid.apex[1].value < isolevel) cubeIndex |= 2;
+		if (aGrid.apex[2].value < isolevel) cubeIndex |= 4;
+		if (aGrid.apex[3].value < isolevel) cubeIndex |= 8;
+		if (aGrid.apex[4].value < isolevel) cubeIndex |= 16;
+		if (aGrid.apex[5].value < isolevel) cubeIndex |= 32;
+		if (aGrid.apex[6].value < isolevel) cubeIndex |= 64;
+		if (aGrid.apex[7].value < isolevel) cubeIndex |= 128;
+		return cubeIndex;
+	}
+	void getVertexList(GRIDCELL aGrid, float isolevel, vec3 vertlist[12]) {
+		/* Find the vertices where the surface intersects the cube */
+		if (edgeTable[cubeindex] & 1)
+			vertlist[0] = vertexInterp(isolevel, aGrid.apex[0].coordinates, aGrid.apex[1].coordinates, aGrid.apex[0].value, aGrid.apex[1].value);
+		if (edgeTable[cubeindex] & 2)
+			vertlist[1] = vertexInterp(isolevel, aGrid.apex[1].coordinates, aGrid.apex[2].coordinates, aGrid.apex[1].value, aGrid.apex[2].value);
+		if (edgeTable[cubeindex] & 4)
+			vertlist[2] = vertexInterp(isolevel, aGrid.apex[2].coordinates, aGrid.apex[3].coordinates, aGrid.apex[2].value, aGrid.apex[3].value);
+		if (edgeTable[cubeindex] & 8)
+			vertlist[3] = vertexInterp(isolevel, aGrid.apex[3].coordinates, aGrid.apex[0].coordinates, aGrid.apex[3].value, aGrid.apex[0].value);
+		if (edgeTable[cubeindex] & 16)
+			vertlist[4] = vertexInterp(isolevel, aGrid.apex[4].coordinates, aGrid.apex[5].coordinates, aGrid.apex[4].value, aGrid.apex[5].value);
+		if (edgeTable[cubeindex] & 32)
+			vertlist[5] = vertexInterp(isolevel, aGrid.apex[5].coordinates, aGrid.apex[6].coordinates, aGrid.apex[5].value, aGrid.apex[6].value);
+		if (edgeTable[cubeindex] & 64)
+			vertlist[6] = vertexInterp(isolevel, aGrid.apex[6].coordinates, aGrid.apex[7].coordinates, aGrid.apex[6].value, aGrid.apex[7].value);
+		if (edgeTable[cubeindex] & 128)
+			vertlist[7] = vertexInterp(isolevel, aGrid.apex[7].coordinates, aGrid.apex[4].coordinates, aGrid.apex[7].value, aGrid.apex[4].value);
+		if (edgeTable[cubeindex] & 256)
+			vertlist[8] = vertexInterp(isolevel, aGrid.apex[0].coordinates, aGrid.apex[4].coordinates, aGrid.apex[0].value, aGrid.apex[4].value);
+		if (edgeTable[cubeindex] & 512)
+			vertlist[9] = vertexInterp(isolevel, aGrid.apex[1].coordinates, aGrid.apex[5].coordinates, aGrid.apex[1].value, aGrid.apex[5].value);
+		if (edgeTable[cubeindex] & 1024)
+			vertlist[10] = vertexInterp(isolevel, aGrid.apex[2].coordinates, aGrid.apex[6].coordinates, aGrid.apex[2].value, aGrid.apex[6].value);
+		if (edgeTable[cubeindex] & 2048)
+			vertlist[11] = vertexInterp(isolevel, aGrid.apex[3].coordinates, aGrid.apex[7].coordinates, aGrid.apex[3].value, aGrid.apex[7].value);
+	}
 	int cubeindex;
 	int nbrTriangle[256] = {
 	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 2,

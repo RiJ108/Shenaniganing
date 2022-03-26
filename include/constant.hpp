@@ -1,10 +1,13 @@
 #pragma once
 
-#define LENGTH 50
-#define WIDTH 50
+#define DIM 50
 #define HEIGHT 25
-#define GRID_RES 2
-#define CUBE_LIMIT ((LENGTH * GRID_RES) - 1) * ((HEIGHT * GRID_RES) - 1) * ((WIDTH * GRID_RES) - 1)
+#define RES 2
+#define STEP 1.0f/RES
+
+#define DIM_AUG DIM * RES
+#define HEIGHT_AUG HEIGHT * RES
+#define CUBE_LIMIT (DIM_AUG - 1) * (HEIGHT_AUG - 1) * (DIM_AUG - 1)
 
 #define BUTTON_NUMBER_OF_FLOAT 7
 #define BUTTON_SIZEOF BUTTON_NUMBER_OF_FLOAT*4
@@ -28,19 +31,12 @@ enum class State { mainMenu, inGame };
 //__Custom
 
 typedef struct {
-	vec3 coord;
-	vec3 norm;
-	double val;
-} C_MIDPOINT;
-
-typedef struct {
-	vec3 coord;
-	double val;
+	vec3 coordinates;
+	double value;
 } C_POINT;
 
 typedef struct {
-	C_POINT points[8];		//Coord, value
-	//C_MIDPOINT* midPoints[8];	//Coord, norm, value(count the number of normal calculated at this point for smoothing)
+	C_POINT apex[8];		//Coord, value
 	int cubeIndex;			//Store the cube index of the latest marchingCube passage in the gridcell
 } GRIDCELL;
 
