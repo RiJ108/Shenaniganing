@@ -27,7 +27,7 @@ public:
 	vec3 getFuturPos(float deltaTime);
 	void setLastCursorPosition(vec2 aValue);
 	void setFirstMouse(bool aValue);
-	void mouseMotion(double xMotion, double yMotion);
+	vec3 mouseMotion(vec2 value);
 
 	vec3 position;
 	vec3 speeds;

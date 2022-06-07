@@ -16,6 +16,7 @@
 #include FT_FREETYPE_H
 
 #include "shader.hpp"
+#include "ui.hpp"
 #include "layout.hpp"
 #include "objImporter.hpp"
 #include "engine.hpp"
@@ -23,6 +24,7 @@
 #include "constant.hpp"
 #include "camera.hpp"
 #include "marchingCube.hpp"
+#include "entity.hpp"
 
 using namespace std;
 using namespace glm;
@@ -39,7 +41,6 @@ public:
         if(!layoutPtr)free(layoutPtr);
         if(!buttonPtr)free(buttonPtr);
         if(!wHandler)free(wHandler);
-        if(!tmp)free(tmp);
     }
 
 private:
@@ -54,8 +55,12 @@ private:
     void G();
 
     //**3D section
+    unsigned int depthMapFBO;
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMap;
+    Camera lightSourcePov;
     Engine engine;
-    Camera pov;
+    Entity player;
     void processKeyInputs();
 
     //**Window section
@@ -68,6 +73,7 @@ private:
     int fpsCap = 60;
     float deltaTime = 0.0f, lastFrame = 0.0f, currentFrame = 0.0f;		// Time management
     float cursorPosX = -1.0f, cursorPosY = -1.0f;
+    vec2 srcMidPoint = vec2(srcWidth / 2.0f, srcHeight / 2.0f);
     static void keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods);
     static void framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height);
     static Window& getInstance() { static Window instance; return instance; }
@@ -86,16 +92,7 @@ private:
     void renderText(Shader& shader, string text, float x, float y, float scale, vec3 color);
 
     //**Layout section
-    Shader shader_UI;
-    GLuint VAO_UI[NUMBER_OF_LAYOUTS];
-    GLuint VBO_UI[NUMBER_OF_LAYOUTS];
-    vector<Layout> layouts;
-    Layout* tmp;
-    void initUI();
-    void setLayouts();
-    Layout* getActiveLayoutPtr();
-    Layout* getLayoutPtr(string aName);
-    void clearClicked();
-    void resetActiveLayout();
+    UI ui;
+    void renderButton_sText(Button* button);
     void checkUI();
 };

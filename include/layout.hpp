@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include "shader.hpp"
-#include "constant.hpp"
+#include <button.hpp>
 
 using namespace std;
 using namespace glm;
@@ -15,11 +15,13 @@ public:
 	// parameter 4: the off color of the button (vec3)
 	// parameter 5: the name/text of the button (string)
 	// return void
-	void addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, string aName);
+	void addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, string aName, string aText);
 	// Fill the "data" variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
 	void allocData();
 	// Return the pointer of the "button" which as is active parameter set to true
 	Button* getActiveButton();
+	// Return the pointer of the "button" named "aButtonName"
+	Button* getButtonPtr(string aButtonName);
 	// Return as an integer the size of the "buttons" vector (Button) of the layout
 	int getButtonsSize();
 	// Return the ptr to the "data" variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
@@ -47,13 +49,13 @@ public:
 	// Function that update the color values of the given button in the buffer
 	void updateBufferButtonColor(Button* aButtonPtr);
 	~Layout();
-	vector <Button> buttons;
 
-private:
+	vector <Button> buttons;
 	string name = "layoutDefaultName";
 	bool active = false;
 	Button* tmp;
 	float* data;
 	int indice;
 	GLuint VAO, VBO;
+
 };

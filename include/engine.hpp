@@ -7,6 +7,7 @@
 #include "marchingCube.hpp"
 #include "mesh.hpp"
 #include "constant.hpp"
+#include "entity.hpp"
 
 class Engine {
 public:
@@ -52,19 +53,39 @@ public:
 		mesh->setBuffers();
 		cout << __FUNCTION__ << "->" << mesh->data.size() / 6 << " Triangles in the mesh\n";
 	}
+	vec3 capsuleMeshCollision(vec2 capsuleDim, Mesh *mesh) {
+
+	};
 	//______________________________________________________________________BUFFERS/SHADERS SETTING
 	void initShaders() {
 		pointShader = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
-		meshShader = Shader("resources/shaders/vShaderSource3D_OLD.glsl", "resources/shaders/fShaderSource3D_OLD.glsl");
+		//meshShader = Shader("resources/shaders/vShaderSource3D_OLD.glsl", "resources/shaders/fShaderSource3D_OLD.glsl");
+		meshShader = Shader("resources/shaders/vShaderSource3D.glsl", "resources/shaders/fShaderSource3D.glsl");
 	}
 	//______________________________________________________________________RENDERS
-	void renderMesh(Camera pov, float ratio) { renderMesh(pov, ratio, &worldMesh); } void renderMesh(Camera pov, float ratio, Mesh* mesh) {
+	void renderMeshForDepth(vec3 position, vec3 front, float fov, float ratio) {
+		meshShader.use();
+	}
+	void renderMesh(Camera pov, float ratio) { renderMesh(pov, ratio, &worldMesh); }
+	void renderMesh(Camera pov, float ratio, Mesh* mesh) {
 		meshShader.use();
 		meshShader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
 		meshShader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
 		meshShader.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
 		meshShader.setMat4("view", pov.lookAt());
 		meshShader.setMat4("projection", perspective(radians(pov.getFOV()), ratio, 0.1f, 10000.0f));
+		meshShader.setMat4("model", mat4(1.0f));
+
+		mesh->render();
+	}
+	void renderMesh(Entity entity, float ratio) { renderMesh(entity, ratio, &worldMesh); }
+	void renderMesh(Entity entity, float ratio, Mesh* mesh) {
+		meshShader.use();
+		meshShader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
+		meshShader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
+		meshShader.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
+		meshShader.setMat4("view", entity.lookAt());
+		meshShader.setMat4("projection", perspective(radians(entity.FOV), ratio, 0.1f, 10000.0f));
 		meshShader.setMat4("model", mat4(1.0f));
 
 		mesh->render();

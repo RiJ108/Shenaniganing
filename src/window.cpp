@@ -14,7 +14,7 @@ BOOL Window::init() {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+        //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
         //**Creating the window
         wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
@@ -24,7 +24,6 @@ BOOL Window::init() {
             exit(EXIT_FAILURE);
         }
         else cout << __FUNCTION__ << "->GLFW window created." << endl;
-        //glfwSetWindowSizeLimits(wHandler, 990, 540, GLFW_DONT_CARE, GLFW_DONT_CARE);
         glfwMakeContextCurrent(wHandler);
 
         //**Set callbacks
@@ -50,15 +49,36 @@ BOOL Window::init() {
         //**Init and load FreeType (load glyphes)
         initFT();
 
+        //**UI init
+        ui.init(WINDOW_SIZE);
+        ui.setLayouts(Characters, srcMidPoint);
+
         //**Other inits..
-        initUI();
-        setLayouts(); }
+
+        //**Depth Texture
+        glGenFramebuffers(1, &depthMapFBO);
+
+        glGenTextures(1, &depthMap);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
     //________________________________________________________________________________________________________________________________________
     //**TESTING**
     //________________________________________________________________________________________________________________________________________
     engine.initShaders();
     engine.generateMeshTriangles();
     engine.setMesh();
+    player.position = vec3(0.0f, 10.0f, 3.0f);
     return true;
 }
 
@@ -87,8 +107,6 @@ BOOL Window::loop() {
         glfwSwapBuffers(wHandler);
         glfwPollEvents();
     }
-    glDeleteVertexArrays(1, &VAO_TXT);
-    glDeleteBuffers(1, &VBO_TXT);
 
     glfwTerminate();
     return true;
@@ -97,25 +115,28 @@ BOOL Window::loop() {
 void Window::F() {
     switch (actualState) {
     case State::mainMenu:
-        layoutPtr = getLayoutPtr("mainMenu");
-        if (layoutPtr->buttons.at(0).clicked) {
+        layoutPtr = ui.getLayoutPtr("mainMenu");
+        if (layoutPtr->getButtonPtr("Launch")->clicked) {
             nextState = State::inGame;
-            layoutPtr->setActive(false);
             layoutPtr->resetButtonsStates();
+            layoutPtr->setActive(false);
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            pov.setLastCursorPosition(vec2(srcWidth/2.0f, srcHeight/2.0f));
-            pov.setFirstMouse(true);
+            player.pov.setFirstMouse(true);
+        }
+        else if (layoutPtr->getButtonPtr("Exit")->clicked) {
+            glfwSetWindowShouldClose(wHandler, true);
         }
         break;
 
     case State::inGame:
         processKeyInputs();
-        pov.updatePosition(deltaTime);
+        player.updatePosition(deltaTime);
 
         if (glfwGetKey(wHandler, 256) == GLFW_PRESS) {
             nextState = State::mainMenu;
-            getLayoutPtr("mainMenu")->setActive(true);
+            ui.getLayoutPtr("mainMenu")->setActive(true);
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetCursorPos(wHandler, srcMidPoint.x ,srcMidPoint.y);
         }
         break;
     }
@@ -123,29 +144,27 @@ void Window::F() {
 
 void Window::M() {
     actualState = nextState;
-    //pov.accelarations.y = -9.81;
 }
 
 void Window::G() {
     switch (actualState) {
     case State::mainMenu: {
-        layoutPtr = getActiveLayoutPtr();
+        layoutPtr = ui.getActiveLayoutPtr();
+        //layoutPtr = getActiveLayoutPtr();
         if (layoutPtr == nullptr) {
             cout << __FUNCTION__ << "->###!! layoutPtr == nullptr !!###" << endl;
             return;
         }
 
-        shader_UI.use();
+        ui.shader_UI.use();
         glBindVertexArray(layoutPtr->getVAO());
         glDrawArrays(GL_POINTS, 0, layoutPtr->getButtonsSize());
         glBindVertexArray(0);
         glDisable(GL_DEPTH_TEST);
+        
         for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
             buttonPtr = &layoutPtr->buttons.at(i);
-            renderText(shader_TXT, layoutPtr->buttons.at(i).name,
-                (((buttonPtr->position.x + 1.0f) / 2.0f) * srcWidth) - (buttonPtr->nameLengthPxl * 0.5f * buttonPtr->scale),
-                (((buttonPtr->position.y + 1.0f) / 2.0f) * srcHeight) - (textHeightPxl * 0.5f * buttonPtr->scale),
-                buttonPtr->scale, vec3(1.0f));
+            renderButton_sText(buttonPtr);
         }
         glEnable(GL_DEPTH_TEST);
 
@@ -155,16 +174,30 @@ void Window::G() {
 
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        //engine.renderGCPoints(pov, (float)srcWidth / srcHeight);
-        engine.renderMesh(pov, (float)srcWidth / srcHeight);
+        //1.Depth map rendering
+        //glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        //glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        //glClear(GL_DEPTH_BUFFER_BIT);
+
+        //engine.renderMeshForDepth(vec3(-25.0f, 50.0f, -25.0f), player.position, player.FOV, (float)SHADOW_WIDTH / SHADOW_HEIGHT);
+
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //2.Normal render
+        glViewport(0, 0, srcWidth, srcHeight);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        engine.renderMesh(player, (float)srcWidth / srcHeight);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
         renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
         renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "position.x = " + to_string(pov.getPosition().x), 10.0f, 40.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "position.y = " + to_string(pov.getPosition().y), 10.0f, 30.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "position.z = " + to_string(pov.getPosition().z), 10.0f, 20.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "position.y = " + to_string(player.position.y), 10.0f, 30.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "position.z = " + to_string(player.position.z), 10.0f, 20.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "front.x = " + to_string(player.front.x), 10.0f, 70.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "front.y = " + to_string(player.front.y), 10.0f, 60.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        renderText(shader_TXT, "front.z = " + to_string(player.front.z), 10.0f, 50.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         break;
     }
 }
@@ -172,28 +205,29 @@ void Window::G() {
 void Window::processKeyInputs() {
     //**Camera interaction (set speeds vector)
     if (glfwGetKey(wHandler, 87) == GLFW_PRESS)
-        pov.key(87);
+        player.keyEvent(87);
     if (glfwGetKey(wHandler, 83) == GLFW_PRESS)
-        pov.key(83);
+        player.keyEvent(83);
     if (glfwGetKey(wHandler, 65) == GLFW_PRESS)
-        pov.key(65);
+        player.keyEvent(65);
     if (glfwGetKey(wHandler, 68) == GLFW_PRESS)
-        pov.key(68);
+        player.keyEvent(68);
     if (glfwGetKey(wHandler, 32) == GLFW_PRESS)
-        pov.key(32);
+        player.keyEvent(32);
     if (glfwGetKey(wHandler, 340) == GLFW_PRESS)
-        pov.key(340);
+        player.keyEvent(340);
     if (glfwGetKey(wHandler, 82) == GLFW_PRESS)
-        pov.setDefault();
+        player.setDefault();
+}
 
-    //**Update camera position
-    //pov.updatePosition(deltaTime);
+void Window::renderButton_sText(Button* buttonPtr) {
+    renderText(shader_TXT, buttonPtr->text, buttonPtr->textPosition.x, buttonPtr->textPosition.y, buttonPtr->textScale, vec3(1.0f));
 }
 
 void Window::checkUI() {
     Layout* activeLayoutPtr;
     Button* buttonPtr;
-    activeLayoutPtr = getActiveLayoutPtr();
+    activeLayoutPtr = ui.getActiveLayoutPtr();
     if (activeLayoutPtr == nullptr) {
         cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
         return;
@@ -215,47 +249,6 @@ void Window::checkUI() {
             }
         }
     }
-}
-
-void Window::setLayouts() {
-    tmp = new Layout;
-    tmp->addButton(vec2(0.0f, 0.15f),
-        vec2(0.5f, 0.25f),
-        vec3(0.2f, 1.0f, 0.2f),
-        vec3(0.2f, 0.2f, 0.2f),
-        "Launch");
-
-    tmp->addButton(vec2(0.0f, -0.1f),
-        vec2(0.2f, 0.175f),
-        vec3(1.0f, 0.2f, 0.2f),
-        vec3(0.2f, 0.2f, 0.2f),
-        "Exit");
-
-    for (unsigned int i = 0; i < tmp->buttons.size(); i++) {
-        tmp->buttons.at(i).index = i;
-        tmp->buttons.at(i).setStringLengthPxl(Characters);
-        tmp->buttons.at(i).setButtonWidthPxl(srcWidth);
-        tmp->buttons.at(i).setScale();
-    }
-
-    tmp->setActive(true);
-    tmp->setIndice(layouts.size());
-    tmp->setAndFillBuffers();
-    tmp->setName("mainMenu");
-
-    //**
-    tmp->buttons.at(0).functionPtr = &Window::functionPtrTest;
-    tmp->buttons.at(1).functionPtr = &Window::exitCallBack;
-
-    layouts.push_back(*tmp);
-}
-
-Layout* Window::getLayoutPtr(string aName) {
-    for (unsigned int i = 0; i < layouts.size(); i++) {
-        if (layouts.at(i).getName() == aName)
-            return &layouts.at(i);
-    }
-    return nullptr;
 }
 
 void Window::functionPtrTest(Window* aWindowPtr) {
@@ -281,7 +274,7 @@ void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int hei
 
 void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
-    Layout* activeLayoutPtr = windowPtr->getActiveLayoutPtr();
+    Layout* activeLayoutPtr = windowPtr->ui.getActiveLayoutPtr();
     if (activeLayoutPtr == nullptr) {
         //cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
         return;
@@ -290,21 +283,12 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
     if (action == GLFW_PRESS) {
         if (activeButtonPtr) {
             //cout << __FUNCTION__ << " -> " << activeButtonPtr->name << " pressed." << endl;
-            activeButtonPtr->functionPtr(windowPtr);
+            //activeButtonPtr->functionPtr(windowPtr);
             activeButtonPtr->clicked = true;
         }
     }
     else if (action == GLFW_RELEASE) {
 
-    }
-}
-
-void Window::clearClicked() {
-    for (unsigned int i = 0; i < layouts.size(); i++) {
-        layoutPtr = &layouts.at(i);
-        for (unsigned int j = 0; j < layoutPtr->buttons.size(); j++) {
-            layoutPtr->buttons.at(j).clicked = false;
-        }
     }
 }
 
@@ -315,28 +299,9 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
     windowPtr->cursorPosX = 2.0f * (xpos - (width / 2.0)) / width;
     windowPtr->cursorPosY = -2.0f * (ypos - (height / 2.0)) / height;
     if (windowPtr->actualState == State::inGame) {
-        windowPtr->pov.mouseMotion(xpos, ypos);
+        //windowPtr->pov.mouseMotion(vec2(xpos, ypos));
+        windowPtr->player.mouseMotion(vec2(xpos, ypos));
     }
-}
-
-void Window::initUI() {
-    shader_UI = Shader("resources/shaders/vShaderSourceUI.glsl", "resources/shaders/gShaderSourceUI.glsl", "resources/shaders/fShaderSourceUI.glsl");
-}
-
-void Window::resetActiveLayout() {
-    layoutPtr = getActiveLayoutPtr();
-    for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
-        layoutPtr->buttons.at(i).active = false;
-        layoutPtr->buttons.at(i).clicked = false;
-    }
-}
-
-Layout* Window::getActiveLayoutPtr() {
-    for (unsigned int i = 0; i < layouts.size(); i++) {
-        if (layouts.at(i).isActive())
-            return &layouts.at(i);
-    }
-    return nullptr;
 }
 
 void Window::initFT() {

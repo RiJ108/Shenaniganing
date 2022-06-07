@@ -16,20 +16,20 @@ void Camera::setDefault() {
     modelMatrix = mat4(1.0f);
     lastCursorPosition = vec2(0.0f);
     firstMouse = true;
-    yaw = orientedAngle(vec3(-1.0f, 0.0f, 0.0f),front, up) * RADIAN_TO_DEGREE;
-    pitch = -orientedAngle(vec3(0.0f, 0.0f, -1.0f), front, normalize(cross(up, front))) * RADIAN_TO_DEGREE;
+    pitch = asin(front.y);
+    yaw = acos(front.x) / pitch;
 }
 
-void Camera::mouseMotion(double xMotion, double yMotion) {
+vec3 Camera::mouseMotion(vec2 value) {
     if (firstMouse) {
-        lastCursorPosition.x = xMotion;
-        lastCursorPosition.y = yMotion;
+        lastCursorPosition.x = value.x;
+        lastCursorPosition.y = value.y;
         firstMouse = false;
     }
-    mouseOffsets.x = xMotion - lastCursorPosition.x;
-    mouseOffsets.y = lastCursorPosition.y - yMotion;
-    lastCursorPosition.x = xMotion;
-    lastCursorPosition.y = yMotion;
+    mouseOffsets.x = value.x - lastCursorPosition.x;
+    mouseOffsets.y = lastCursorPosition.y - value.y;
+    lastCursorPosition.x = value.x;
+    lastCursorPosition.y = value.y;
     mouseOffsets *= 0.2f;
     yaw += mouseOffsets.x;
     pitch += mouseOffsets.y;
@@ -39,8 +39,9 @@ void Camera::mouseMotion(double xMotion, double yMotion) {
     if (yaw > 360.0f) yaw -= 360.0f;
     if (yaw < -360.0f) yaw += 360.0f;
 
-    vec3 direction = vec3(cos(radians(yaw)) * cos(radians(pitch)), sin(radians(pitch)), sin(radians(yaw)) * cos(radians(pitch)));
-    this->front = normalize(direction);
+    //vec3 direction = vec3(cos(radians(yaw)) * cos(radians(pitch)), sin(radians(pitch)), sin(radians(yaw)) * cos(radians(pitch)));
+    this->front = normalize(vec3(cos(radians(yaw)) * cos(radians(pitch)), sin(radians(pitch)), sin(radians(yaw)) * cos(radians(pitch))));
+    return this->front;
 }
 
 void Camera::setLastCursorPosition(vec2 aValue) {

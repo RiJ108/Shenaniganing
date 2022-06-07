@@ -1,23 +1,31 @@
 #include "layout.hpp"
 
-void Layout::addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, string aName) {
+Button* Layout::getButtonPtr(string aButtonName) {
+	for (auto it = begin(buttons); it != end(buttons); it++) {
+		if(it->name == aButtonName){
+			return &*it;
+		}
+	}
+	return nullptr;
+}
+
+void Layout::addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, string aName, string aText) {
 	tmp = new Button;
 	tmp->position = aPos;
 	tmp->size = aSize;
 	tmp->onColor = aOnColor;
 	tmp->offColor = aOffColor;
 	tmp->name = aName;
+	tmp->text = aText;
 	tmp->setBoundary();
 	buttons.push_back(*tmp);
 };
 
 void Layout::resetButtonsStates() {
-	for (unsigned int i = 0; i < buttons.size(); i++) {
-		if (buttons.at(i).active = true) {
-			buttons.at(i).active = false;
-			updateBufferButtonColor(&buttons.at(i));
-		}
-		buttons.at(i).clicked = false;
+	for (auto it = begin(buttons); it != end(buttons); it++) {
+		it->active = false;
+		it->clicked = false;
+		updateBufferButtonColor(&*it);
 	}
 }
 
@@ -120,7 +128,7 @@ void Layout::setAndFillBuffers() {
 }
 
 Layout::~Layout() {
-	cout << __FUNCTION__ << endl;
+	cout << __FUNCTION__ << "\t" << name << endl;
 	free(tmp);
 	free(data);
 	glDeleteVertexArrays(1, &VAO);
