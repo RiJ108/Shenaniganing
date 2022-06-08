@@ -41,7 +41,7 @@ public:
 					position += chunkPosition * vec3(DIM-1);
 					setGC(gridcellPtr, position);
 					mCube.polygonise(*gridcellPtr, 
-						0.5f, 
+						0.5f,
 						&mesh->triangles);
 					for (int i = 0; i < 5 - mCube.nbrTriangle[mCube.cubeindex]; i++)
 						mesh->triangles.push_back(emptyTriangle);
