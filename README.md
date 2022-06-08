@@ -13,6 +13,7 @@ marching cube
 
 Crude implementation of a infinite navigation:
 ![Crude_infinite_nav](https://user-images.githubusercontent.com/58864879/172619610-29476ea9-52ac-4eb1-b1d3-2e9440655fdd.gif)
+
 Need to move the mesh generation to a compute shader or at least a independent thread in the futur.
 
 Marching cube implemantation without interpolation:
