@@ -71,29 +71,9 @@ BOOL Window::init() {
     //**TESTING**
     //________________________________________________________________________________________________________________________________________
     engine.initShaders();
-    /*engine.generateMeshTriangles();
-    engine.setMesh();*/
-    kernelSize = vec3(3, 3, 3);
-    offsets = 0.5f * (kernelSize - vec3(1));
-    genSurroundingChunks();
+    engine.genSurroundingChunks();
     player.position = vec3(0.0f, 0.0f, 0.0f);
     return true;
-}
-
-void Window::genSurroundingChunks() {
-    engine.activeWorldMesh.clear();
-    vector<Mesh*> tmp;
-    for (int i = 0; i < kernelSize[0]; i++) {
-        for (int j = 0; j < kernelSize[1]; j++) {
-            for (int k = 0; k < kernelSize[2]; k++) {
-                meshPtr = new Mesh();
-                engine.generateMeshTriangles(meshPtr, vec3(i, j, k) - offsets + currentChunkLocation);
-                engine.setMesh(meshPtr);
-                tmp.push_back(meshPtr);
-            }
-        }
-    }
-    engine.activeWorldMesh.push_back(tmp);
 }
 
 BOOL Window::loop() {
@@ -184,20 +164,10 @@ void Window::G() {
         //glViewport(0, 0, srcSize.x, srcSize.y);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (int i = 0; i < 3; i++) {
-            if (player.position[i] > 0)
-                tmpPos[i] = (int)(player.position[i] + (DIM - 1) / 2) / (DIM - 1);
-            else
-                tmpPos[i] = (int)(player.position[i] - (DIM - 1) / 2) / (DIM - 1);
-        }
-        if (tmpPos != currentChunkLocation) {
-            currentChunkLocation = tmpPos;
-            genSurroundingChunks();
-        }
-
         //glBindTexture(GL_TEXTURE_2D, depthMap);
         //engine.renderMesh(player, (float)srcSize.x / srcSize.y);
 
+        engine.updateSurrounding(player);
         engine.renderActiveMeshs(player, (float)srcSize.x / srcSize.y);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

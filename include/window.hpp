@@ -36,8 +36,6 @@ public:
 
     static void functionPtrTest(Window* aWindowPtr);
     static void exitCallBack(Window* aWindowPtr);
-    
-    void genSurroundingChunks();
 
     ~Window() {
         if(!layoutPtr)free(layoutPtr);
@@ -62,10 +60,6 @@ private:
     Engine engine;
     Entity player;
     void processKeyInputs();
-    vec3 currentChunkLocation = vec3(0.0f);
-    vec3 kernelSize;
-    vec3 offsets;
-    vec3 tmpPos;
 
     //**Window section
     GLFWwindow* wHandler;

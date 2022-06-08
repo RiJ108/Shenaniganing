@@ -12,6 +12,55 @@
 class Engine {
 public:
 	//______________________________________________________________________COMPUTATION
+	void updateSurrounding(Entity entity) {
+		vec3 newCP;
+		for (int i = 0; i < 3; i++) {
+			if (entity.position[i] > 0)
+				newCP[i] = (int)(entity.position[i] + (DIM - 1) / 2) / (DIM - 1);
+			else
+				newCP[i] = (int)(entity.position[i] - (DIM - 1) / 2) / (DIM - 1);
+		}
+		if (newCP != oldCP) {
+			vec3 move = newCP - oldCP;
+			oldCP = newCP;
+			vector<Mesh*> tmp;
+			int iB, jB, kB;
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					for (int k = 0; k < 3; k++) {
+						iB = i + move.x;
+						jB = j + move.y;
+						kB = k + move.z;
+						if (iB >= 0 && iB <= 2 && jB >= 0 && jB <= 2 && kB >= 0 && kB <= 2)
+							tmp.push_back(activeWorldMesh.at((iB * 3 * 3) + (jB * 3) + kB));
+						else
+							tmp.push_back(genChunk(vec3(i, j, k) - offsets + oldCP));
+					}
+				}
+			}
+			activeWorldMesh.clear();
+			activeWorldMesh = tmp;
+		}
+	}
+	void genSurroundingChunks() {
+		Mesh* meshPtr;
+		activeWorldMesh.clear();
+		for (int i = 0; i < kernelSize[0]; i++) {
+			for (int j = 0; j < kernelSize[1]; j++) {
+				for (int k = 0; k < kernelSize[2]; k++) {
+					meshPtr = genChunk(vec3(i, j, k) - offsets + oldCP);
+					activeWorldMesh.push_back(meshPtr);
+				}
+			}
+		}
+	}
+	Mesh* genChunk(vec3 position) {
+		Mesh* meshPtr;
+		meshPtr = new Mesh();
+		generateMeshTriangles(meshPtr, position);
+		setMesh(meshPtr);
+		return meshPtr;
+	}
 	void setGC(GRIDCELL* aGc, vec3 aPos) {
 		vec3 coordOffset[8] = { vec3(0.0f),
 								vec3(1.0f, 0.0f, 0.0f),
@@ -68,10 +117,8 @@ public:
 	}
 	void renderActiveMeshs(Entity entity, float ratio) {
 		for (int i = 0; i < activeWorldMesh.size(); i++) {
-			for (int j = 0; j < activeWorldMesh.at(i).size(); j++) {
-				float aColor = (float)(j + 1) / activeWorldMesh.at(i).size();
-				renderMesh(entity, ratio, activeWorldMesh.at(i).at(j), vec3(1.0f, aColor, 1 - aColor));
-			}
+			float aColor = (float)(i + 1) / activeWorldMesh.size();
+			renderMesh(entity, ratio, activeWorldMesh.at(i), vec3(1.0f, aColor, 1 - aColor));
 		}
 	}
 	void renderMesh(Camera pov, float ratio) { renderMesh(pov, ratio, &mesh); }
@@ -102,7 +149,7 @@ public:
 
 	//** mesh var
 	Mesh mesh;
-	vector<vector<Mesh*>> activeWorldMesh;
+	vector<Mesh*> activeWorldMesh;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
 	int seed = 69;
@@ -111,6 +158,9 @@ public:
 	TRIANGLE emptyTriangle;
 	float threshold = 0.50f;
 	float x_offset = DIM / 2.0f, y_offset = 0.0f, z_offset = DIM / 2.0f;
+	vec3 oldCP = vec3(0.0f);
+	vec3 kernelSize = vec3(3, 3, 3);
+	vec3 offsets = 0.5f * (kernelSize - vec3(1));
 	//** rendering var
 	Shader shader;
 	Shader pointShader;
