@@ -46,6 +46,8 @@ public:
 	string getName();
 	// Function that reset/set to false the "active" and "clicked" parameters of all the Button present in the "buttons" vector (vector<Button>)
 	void resetButtonsStates();
+	// Reset function
+	void reset();
 	// Function that update the color values of the given button in the buffer
 	void updateBufferButtonColor(Button* aButtonPtr);
 	~Layout();

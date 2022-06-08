@@ -59,12 +59,11 @@ public:
 	vec3 position = vec3(0.0f);
 	vec3 front = vec3(1.0f, 0.0f, 0.0f);
 	vec3 up = vec3(0.0f, 1.0f, 0.0f);
-	vec2 dim = vec2(2.0f, 0.5f);
+	vec2 capsuleDimensions = vec2(1.0f, 0.25f);
 	vec3 acc = vec3(0.0f);
 	vec3 vel = vec3(0.0f);
 	vec3 termV = vec3(10.0f);
     Camera pov;
-    vec2 capsuleDim = vec2(1.0, 0.25f);
 
 	float FOV = 100.0f;
 private:

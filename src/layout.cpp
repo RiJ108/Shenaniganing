@@ -1,5 +1,14 @@
 #include "layout.hpp"
 
+void Layout::reset() {
+	active = false;
+	for (auto it = begin(buttons); it != end(buttons); it++) {
+		it->active = false;
+		it->clicked = false;
+		updateBufferButtonColor(&*it);
+	}
+}
+
 Button* Layout::getButtonPtr(string aButtonName) {
 	for (auto it = begin(buttons); it != end(buttons); it++) {
 		if(it->name == aButtonName){

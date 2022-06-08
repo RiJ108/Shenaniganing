@@ -39,7 +39,6 @@ public:
 
     ~Window() {
         if(!layoutPtr)free(layoutPtr);
-        if(!buttonPtr)free(buttonPtr);
         if(!wHandler)free(wHandler);
     }
 
@@ -48,7 +47,6 @@ private:
     State actualState = State::mainMenu;
     State nextState = State::mainMenu;
     Layout* layoutPtr;
-    Button* buttonPtr;
     float textHeightPxl = 35.0f;
     void F();
     void M();
@@ -82,17 +80,6 @@ private:
     void mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods);
     static void mouse_button_callback_static(GLFWwindow* aWHandler, int button, int action, int mods) { getInstance().mouse_button_callback(aWHandler, button, action, mods); }
 
-    //**Text section
-    Shader shader_TXT;
-    GLuint VAO_TXT, VBO_TXT;
-    FT_Library ft;
-    FT_Face face;
-    map<GLchar, Character> Characters;
-    void initFT();
-    void renderText(Shader& shader, string text, float x, float y, float scale, vec3 color);
-
-    //**Layout section
+    //**Ui section
     UI ui;
-    void renderButton_sText(Button* button);
-    void checkUI();
 };

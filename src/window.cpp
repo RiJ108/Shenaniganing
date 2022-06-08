@@ -46,12 +46,9 @@ BOOL Window::init() {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        //**Init and load FreeType (load glyphes)
-        initFT();
-
         //**UI init
         ui.init(WINDOW_SIZE);
-        ui.setLayouts(Characters, srcMidPoint);
+        ui.setLayouts(srcMidPoint);
 
         //**Other inits..
 
@@ -100,7 +97,7 @@ BOOL Window::loop() {
 
         //**Data rendering
         glDisable(GL_DEPTH_TEST);
-        renderText(shader_TXT, build + " ms=" + to_string((int)(deltaTime * 1000)), 10.0f, 10.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
+        ui.renderText(build + " ms=" + to_string((int)(deltaTime * 1000)), 10.0f, 10.0f, 0.25f, vec3(0.5, 0.8f, 0.2f));
         glEnable(GL_DEPTH_TEST);
 
         //**Refresh buffers and polling
@@ -118,8 +115,7 @@ void Window::F() {
         layoutPtr = ui.getLayoutPtr("mainMenu");
         if (layoutPtr->getButtonPtr("Launch")->clicked) {
             nextState = State::inGame;
-            layoutPtr->resetButtonsStates();
-            layoutPtr->setActive(false);
+            layoutPtr->reset();
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             player.pov.setFirstMouse(true);
         }
@@ -136,7 +132,9 @@ void Window::F() {
             nextState = State::mainMenu;
             ui.getLayoutPtr("mainMenu")->setActive(true);
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            glfwSetCursorPos(wHandler, srcMidPoint.x ,srcMidPoint.y);
+            glfwSetCursorPos(wHandler, srcWidth / 2.0f, srcHeight / 2.0f);
+            cursorPosX = srcWidth / 2.0f;
+            cursorPosY = srcHeight / 2.0f;
         }
         break;
     }
@@ -150,27 +148,16 @@ void Window::G() {
     switch (actualState) {
     case State::mainMenu: {
         layoutPtr = ui.getActiveLayoutPtr();
-        //layoutPtr = getActiveLayoutPtr();
         if (layoutPtr == nullptr) {
             cout << __FUNCTION__ << "->###!! layoutPtr == nullptr !!###" << endl;
             return;
         }
 
-        ui.shader_UI.use();
-        glBindVertexArray(layoutPtr->getVAO());
-        glDrawArrays(GL_POINTS, 0, layoutPtr->getButtonsSize());
-        glBindVertexArray(0);
-        glDisable(GL_DEPTH_TEST);
-        
-        for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
-            buttonPtr = &layoutPtr->buttons.at(i);
-            renderButton_sText(buttonPtr);
-        }
-        glEnable(GL_DEPTH_TEST);
-
+        ui.renderLayout();
         //**Inputs processing
-        checkUI();
-        break; }
+        ui.checkLayouts(vec2(cursorPosX, cursorPosY));
+        break;
+    }
 
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -190,14 +177,14 @@ void Window::G() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
-        renderText(shader_TXT, "Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "position.y = " + to_string(player.position.y), 10.0f, 30.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "position.z = " + to_string(player.position.z), 10.0f, 20.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "front.x = " + to_string(player.front.x), 10.0f, 70.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "front.y = " + to_string(player.front.y), 10.0f, 60.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
-        renderText(shader_TXT, "front.z = " + to_string(player.front.z), 10.0f, 50.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("position.y = " + to_string(player.position.y), 10.0f, 30.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("position.z = " + to_string(player.position.z), 10.0f, 20.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("front.x = " + to_string(player.front.x), 10.0f, 70.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("front.y = " + to_string(player.front.y), 10.0f, 60.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("front.z = " + to_string(player.front.z), 10.0f, 50.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         break;
     }
 }
@@ -218,37 +205,6 @@ void Window::processKeyInputs() {
         player.keyEvent(340);
     if (glfwGetKey(wHandler, 82) == GLFW_PRESS)
         player.setDefault();
-}
-
-void Window::renderButton_sText(Button* buttonPtr) {
-    renderText(shader_TXT, buttonPtr->text, buttonPtr->textPosition.x, buttonPtr->textPosition.y, buttonPtr->textScale, vec3(1.0f));
-}
-
-void Window::checkUI() {
-    Layout* activeLayoutPtr;
-    Button* buttonPtr;
-    activeLayoutPtr = ui.getActiveLayoutPtr();
-    if (activeLayoutPtr == nullptr) {
-        cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
-        return;
-    }
-    for (unsigned int i = 0; i < activeLayoutPtr->getButtonsSize(); i++) {
-        buttonPtr = &activeLayoutPtr->buttons.at(i);
-        if (buttonPtr->isCursorPosIn(cursorPosX, cursorPosY)) {
-            if (!buttonPtr->active) {
-                //cout << "Cursor in " << buttonPtr->name << " button." << endl;
-                buttonPtr->active = true;
-                activeLayoutPtr->updateBufferButtonColor(buttonPtr);
-            }
-        }
-        else {
-            if (buttonPtr->active) {
-                //cout << "Cursor out " << buttonPtr->name << " button." << endl;
-                buttonPtr->active = false;
-                activeLayoutPtr->updateBufferButtonColor(buttonPtr);
-            }
-        }
-    }
 }
 
 void Window::functionPtrTest(Window* aWindowPtr) {
@@ -302,124 +258,4 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
         //windowPtr->pov.mouseMotion(vec2(xpos, ypos));
         windowPtr->player.mouseMotion(vec2(xpos, ypos));
     }
-}
-
-void Window::initFT() {
-    //**Initiate 2D shader
-    shader_TXT = Shader("resources/shaders/vShaderSourceTXT.glsl", "resources/shaders/fShaderSourceTXT.glsl");
-    mat4 proj = ortho(0.0f, static_cast<float>(WINDOW_SIZE.x), 0.0f, static_cast<float>(WINDOW_SIZE.y));
-    shader_TXT.use();
-    glUniformMatrix4fv(glGetUniformLocation(shader_TXT.id, "projection"), 1, GL_FALSE, value_ptr(proj));
-
-    if (FT_Init_FreeType(&ft)) {
-        cout << __FUNCTION__ << "->ERROR::FREETYPE: Could not init FreeType Library" << endl;
-        exit(EXIT_FAILURE);
-    }
-    if (FT_New_Face(ft, "resources/fonts/arial.ttf", 0, &face)) {
-        cout << __FUNCTION__ << "->ERROR::FREETYPE: Failed to load font" << endl;
-        exit(EXIT_FAILURE);
-    }
-    else {
-        // set size to load glyphs as
-        FT_Set_Pixel_Sizes(face, 0, 48);
-
-        // disable byte-alignment restriction
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        // load first 128 characters of ASCII set
-        for (unsigned char c = 0; c < 128; c++) {
-            // Load character glyph 
-            if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-                cout << __FUNCTION__ << "->ERROR::FREETYTPE: Failed to load Glyph" << endl;
-                continue;
-            }
-            // generate texture
-            unsigned int texture;
-            glGenTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RED,
-                face->glyph->bitmap.width,
-                face->glyph->bitmap.rows,
-                0,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                face->glyph->bitmap.buffer
-            );
-            // set texture options
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // now store character for later use
-            Character character = {
-                texture,
-                glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-                glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-                static_cast<unsigned int>(face->glyph->advance.x)
-            };
-            Characters.insert(std::pair<char, Character>(c, character));
-        }
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-    //**Destroy FreeType once we're finished
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-
-    //**Configure VAO/VBO for texture quads
-    glGenVertexArrays(1, &VAO_TXT);
-    glGenBuffers(1, &VBO_TXT);
-    glBindVertexArray(VAO_TXT);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_TXT);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void Window::renderText(Shader& shader, string text, float x, float y, float scale, vec3 color) {
-    // activate corresponding render state	
-    shader.use();
-    glUniform3f(glGetUniformLocation(shader.id, "textColor"), color.x, color.y, color.z);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAO_TXT);
-
-    // iterate through all characters
-    std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++)
-    {
-        Character ch = Characters[*c];
-
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
-        // update VBO for each character
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }
-        };
-        // render glyph texture over quad
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        // update content of VBO memory
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_TXT);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        // render quad
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
-    }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
