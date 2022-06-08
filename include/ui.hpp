@@ -80,18 +80,17 @@ public:
 			cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
 			return;
 		}
-		for (unsigned int i = 0; i < layoutPtr->getButtonsSize(); i++) {
-			buttonPtr = &layoutPtr->buttons.at(i);
-			if (buttonPtr->isCursorPosIn(cursorPos.x, cursorPos.y)) {
-				if (!buttonPtr->active) {
-					buttonPtr->active = true;
-					layoutPtr->updateBufferButtonColor(buttonPtr);
+		for (auto it = begin(layoutPtr->buttons); it != end(layoutPtr->buttons); it++) {
+			if (it->isCursorPosIn(cursorPos.x, cursorPos.y)) {
+				if (!it->active) {
+					it->active = true;
+					layoutPtr->updateBufferButtonColor(&*it);
 				}
 			}
 			else {
-				if (buttonPtr->active) {
-					buttonPtr->active = false;
-					layoutPtr->updateBufferButtonColor(buttonPtr);
+				if (it->active) {
+					it->active = false;
+					layoutPtr->updateBufferButtonColor(&*it);
 				}
 			}
 		}
@@ -205,11 +204,11 @@ public:
 			vec3(0.2f, 0.2f, 0.2f),
 			"Exit", "Exit");
 
-		for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
-			layoutPtr->buttons.at(i).index = i;
-			layoutPtr->buttons.at(i).setTextPixelLength(Characters);
-			layoutPtr->buttons.at(i).setTextPixelWidth(Characters);
-			layoutPtr->buttons.at(i).setTextPosition(srcMidPoint, layoutPtr->buttons.at(i).position);
+		int i = -1;
+		for (auto it = begin(layoutPtr->buttons); it != end(layoutPtr->buttons); it++) {
+			it->index = ++i;
+			it->setTextPixelSizes(Characters);
+			it->setTextPosition(srcMidPoint);
 		}
 
 		layoutPtr->setActive(true);

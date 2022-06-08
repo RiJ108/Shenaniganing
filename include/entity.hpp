@@ -22,6 +22,8 @@ public:
 
 	void updatePosition(float deltaTime) {
 		position += vel.x * deltaTime * front;
+        position -= vel.z * deltaTime * normalize(cross(vec3(0.0f, 1.0f, 0.0f), front));;
+        position.y += vel.y * deltaTime;
 		vel = vec3(0.0f);
 	};
 

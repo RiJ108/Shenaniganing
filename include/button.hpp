@@ -11,6 +11,7 @@ public:
 
 	bool active = false;
 	bool clicked = false;
+	bool locked = false;
 	int sizeOfData = 2 + 2 + 3;
 	string name = "defaultName";
 
@@ -24,26 +25,18 @@ public:
 
 	void (*functionPtr)(Window* aWindowPtr);
 
-	void setTextPosition(vec2 srcMidPoint, vec2 buttonPosition) {
+	void setTextPosition(vec2 srcMidPoint) {
 		textPosition = srcMidPoint;
 		textPosition -= textPixelSize * 0.5f * textScale;
-		textPosition += buttonPosition * srcMidPoint;
+		textPosition += position * srcMidPoint;
 	}
 
-	void setTextPixelLength(map<GLchar, Character> aCharMap) {
-		textPixelSize.x = 0.0f;
+	void setTextPixelSizes(map<GLchar, Character> aCharMap) {
+		textPixelSize = vec2(0.0f);
 		string::const_iterator c;
 		for (c = text.begin(); c != text.end(); c++) {
 			Character ch = aCharMap[*c];
 			textPixelSize.x += (ch.Advance * (1.0f / 64.0f));
-		}
-	}
-
-	void setTextPixelWidth(map<GLchar, Character> aCharMap) {
-		textPixelSize.y = 0.0f;
-		string::const_iterator c;
-		for (c = text.begin(); c != text.end(); c++) {
-			Character ch = aCharMap[*c];
 			if (textPixelSize.y < ch.Size.x)
 				textPixelSize.y = ch.Size.x;
 		}

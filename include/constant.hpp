@@ -1,8 +1,8 @@
 #pragma once
 
-#define DIM 50
-#define HEIGHT 25
-#define RES 2
+#define DIM 20
+#define HEIGHT 20
+#define RES 1
 #define STEP 1.0f/RES
 
 #define DIM_AUG DIM * RES

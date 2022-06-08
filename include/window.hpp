@@ -47,7 +47,6 @@ private:
     State actualState = State::mainMenu;
     State nextState = State::mainMenu;
     Layout* layoutPtr;
-    float textHeightPxl = 35.0f;
     void F();
     void M();
     void G();
@@ -56,6 +55,7 @@ private:
     unsigned int depthMapFBO;
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMap;
+    Mesh* meshPtr;
     Camera lightSourcePov;
     Engine engine;
     Entity player;
@@ -65,13 +65,13 @@ private:
     GLFWwindow* wHandler;
     GLFWmonitor* monitor;
     const GLFWvidmode* mode;
-    string build = "Shenaniganing build 0.1 dev";
-    ivec2 WINDOW_SIZE = ivec2(1280, 720);
-    int srcWidth = 1280, srcHeight = 720;
+    string build = "Shenaniganing build 0.2 dev";
+    vec2 srcSize = vec2(1280, 720);
+    vec2 srcMidPoint = srcSize * 0.5f;
+    //int srcWidth = 1280, srcHeight = 720;
     int fpsCap = 60;
     float deltaTime = 0.0f, lastFrame = 0.0f, currentFrame = 0.0f;		// Time management
     float cursorPosX = -1.0f, cursorPosY = -1.0f;
-    vec2 srcMidPoint = vec2(srcWidth / 2.0f, srcHeight / 2.0f);
     static void keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods);
     static void framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height);
     static Window& getInstance() { static Window instance; return instance; }

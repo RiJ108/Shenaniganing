@@ -17,7 +17,7 @@ BOOL Window::init() {
         //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
         //**Creating the window
-        wHandler = glfwCreateWindow(srcWidth, srcHeight, build.c_str(), NULL, NULL);
+        wHandler = glfwCreateWindow(srcSize.x, srcSize.y, build.c_str(), NULL, NULL);
         if (wHandler == NULL) {
             cout << __FUNCTION__ << "->Failed to create GLFW window" << endl;
             glfwTerminate();
@@ -47,10 +47,8 @@ BOOL Window::init() {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         //**UI init
-        ui.init(WINDOW_SIZE);
+        ui.init(srcSize);
         ui.setLayouts(srcMidPoint);
-
-        //**Other inits..
 
         //**Depth Texture
         glGenFramebuffers(1, &depthMapFBO);
@@ -73,8 +71,23 @@ BOOL Window::init() {
     //**TESTING**
     //________________________________________________________________________________________________________________________________________
     engine.initShaders();
-    engine.generateMeshTriangles();
-    engine.setMesh();
+    /*engine.generateMeshTriangles();
+    engine.setMesh();*/
+    vec3 kernelSize = vec3(9, 3, 9);
+    vec3 offsets = 0.5f * (kernelSize - vec3(1));
+    vector<Mesh*> tmp;
+    for (int i = 0; i < kernelSize[0]; i++) {
+        for (int j = 0; j < kernelSize[1]; j++) {
+            for (int k = 0; k < kernelSize[2]; k++) {
+                meshPtr = new Mesh();
+                engine.generateMeshTriangles(meshPtr, vec3(i, j, k) - offsets);
+                engine.setMesh(meshPtr);
+                tmp.push_back(meshPtr);
+            }
+        }
+    }
+    engine.activeWorldMesh.push_back(tmp);
+
     player.position = vec3(0.0f, 10.0f, 3.0f);
     return true;
 }
@@ -132,9 +145,9 @@ void Window::F() {
             nextState = State::mainMenu;
             ui.getLayoutPtr("mainMenu")->setActive(true);
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            glfwSetCursorPos(wHandler, srcWidth / 2.0f, srcHeight / 2.0f);
-            cursorPosX = srcWidth / 2.0f;
-            cursorPosY = srcHeight / 2.0f;
+            glfwSetCursorPos(wHandler, srcSize.x / 2.0f, srcSize.y / 2.0f);
+            cursorPosX = srcSize.x / 2.0f;
+            cursorPosY = srcSize.y / 2.0f;
         }
         break;
     }
@@ -147,14 +160,7 @@ void Window::M() {
 void Window::G() {
     switch (actualState) {
     case State::mainMenu: {
-        layoutPtr = ui.getActiveLayoutPtr();
-        if (layoutPtr == nullptr) {
-            cout << __FUNCTION__ << "->###!! layoutPtr == nullptr !!###" << endl;
-            return;
-        }
-
         ui.renderLayout();
-        //**Inputs processing
         ui.checkLayouts(vec2(cursorPosX, cursorPosY));
         break;
     }
@@ -170,15 +176,17 @@ void Window::G() {
 
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //2.Normal render
-        glViewport(0, 0, srcWidth, srcHeight);
+        //glViewport(0, 0, srcSize.x, srcSize.y);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        engine.renderMesh(player, (float)srcWidth / srcHeight);
+        //glBindTexture(GL_TEXTURE_2D, depthMap);
+        //engine.renderMesh(player, (float)srcSize.x / srcSize.y);
+
+        engine.renderActiveMeshs(player, (float)srcSize.x / srcSize.y);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          
-        ui.renderText("Press escape to return to main menu", 10.0f, srcHeight - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
-        ui.renderText("Press R to reset pov", 10.0f, srcHeight - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
+        ui.renderText("Press escape to return to main menu", 10.0f, (srcMidPoint.y * 2) - 25.0f, 0.5f, vec3(0.8f, 0.5f, 0.2f));
+        //ui.renderText("Press R to reset pov", 10.0f, (srcMidPoint.y * 2) - 45.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         ui.renderText("position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         ui.renderText("position.y = " + to_string(player.position.y), 10.0f, 30.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
         ui.renderText("position.z = " + to_string(player.position.z), 10.0f, 20.0f, 0.3f, vec3(0.8f, 0.5f, 0.2f));
@@ -223,8 +231,8 @@ void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int actio
 
 void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
-    windowPtr->srcWidth = width;
-    windowPtr->srcHeight = height;
+    windowPtr->srcSize.x = width;
+    windowPtr->srcSize.y = height;
     glViewport(0, 0, width, height);
 }
 
@@ -250,8 +258,8 @@ void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action
 
 void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
-    int width = windowPtr->srcWidth;
-    int height = windowPtr->srcHeight;
+    int width = windowPtr->srcSize.x;
+    int height = windowPtr->srcSize.y;
     windowPtr->cursorPosX = 2.0f * (xpos - (width / 2.0)) / width;
     windowPtr->cursorPosY = -2.0f * (ypos - (height / 2.0)) / height;
     if (windowPtr->actualState == State::inGame) {
