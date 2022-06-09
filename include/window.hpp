@@ -55,7 +55,6 @@ private:
     unsigned int depthMapFBO;
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMap;
-    Mesh* meshPtr;
     Camera lightSourcePov;
     Engine engine;
     Entity player;
@@ -68,7 +67,6 @@ private:
     string build = "Shenaniganing build 0.2 dev";
     vec2 srcSize = vec2(1280, 720);
     vec2 srcMidPoint = srcSize * 0.5f;
-    //int srcWidth = 1280, srcHeight = 720;
     int fpsCap = 60;
     float deltaTime = 0.0f, lastFrame = 0.0f, currentFrame = 0.0f;		// Time management
     float cursorPosX = -1.0f, cursorPosY = -1.0f;

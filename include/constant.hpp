@@ -1,6 +1,6 @@
 #pragma once
 
-#define DIM 15
+#define DIM 10
 #define HEIGHT DIM
 #define RES 1
 #define STEP 1.0f/RES

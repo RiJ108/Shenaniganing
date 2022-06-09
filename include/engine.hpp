@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ctime>
+
 #include "displays.hpp"
 #include "shader.hpp"
 #include "perlinNoise.hpp"
@@ -21,36 +23,18 @@ public:
 				newCP[i] = (int)(entity.position[i] - (DIM - 1) / 2) / (DIM - 1);
 		}
 		if (newCP != oldCP) {
-			vec3 move = newCP - oldCP;
 			oldCP = newCP;
-			vector<Mesh*> tmp;
-			int iB, jB, kB;
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					for (int k = 0; k < 3; k++) {
-						iB = i + move.x;
-						jB = j + move.y;
-						kB = k + move.z;
-						if (iB >= 0 && iB <= 2 && jB >= 0 && jB <= 2 && kB >= 0 && kB <= 2)
-							tmp.push_back(activeWorldMesh.at((iB * 3 * 3) + (jB * 3) + kB));
-						else
-							tmp.push_back(genChunk(vec3(i, j, k) - offsets + oldCP));
-					}
-				}
-			}
+			for (auto p : activeWorldMesh)
+				delete(p);
 			activeWorldMesh.clear();
-			activeWorldMesh = tmp;
+			genSurroundingChunks();
 		}
 	}
 	void genSurroundingChunks() {
-		Mesh* meshPtr;
-		activeWorldMesh.clear();
 		for (int i = 0; i < kernelSize[0]; i++) {
 			for (int j = 0; j < kernelSize[1]; j++) {
-				for (int k = 0; k < kernelSize[2]; k++) {
-					meshPtr = genChunk(vec3(i, j, k) - offsets + oldCP);
-					activeWorldMesh.push_back(meshPtr);
-				}
+				for (int k = 0; k < kernelSize[2]; k++)
+					activeWorldMesh.push_back(genChunk(vec3(i, j, k) - offsets + oldCP));
 			}
 		}
 	}
@@ -79,7 +63,6 @@ public:
 			aGc->apex[i].value = noiseValue;
 		}
 	}
-	void generateMeshTriangles() { generateMeshTriangles(&mesh); }
 	void generateMeshTriangles(Mesh* mesh) { generateMeshTriangles(mesh, vec3(0.0f)); };
 	void generateMeshTriangles(Mesh* mesh, vec3 chunkPosition) {
 		vec3 position;
@@ -98,7 +81,7 @@ public:
 			}
 		}
 	}
-	void setMesh() { setMesh(&mesh); } void setMesh(Mesh *mesh) {
+	void setMesh(Mesh *mesh) {
 		mesh->loadDataFromTriangles();
 		mesh->setBuffers();
 	}
@@ -121,7 +104,6 @@ public:
 			renderMesh(entity, ratio, activeWorldMesh.at(i), vec3(1.0f, aColor, 1 - aColor));
 		}
 	}
-	void renderMesh(Camera pov, float ratio) { renderMesh(pov, ratio, &mesh); }
 	void renderMesh(Camera pov, float ratio, Mesh* mesh) {
 		meshShader.use();
 		meshShader.setVec3("objectColor", vec3(1.0f, 1.0f, 1.0f));
@@ -133,7 +115,6 @@ public:
 
 		mesh->render();
 	}
-	void renderMesh(Entity entity, float ratio) { renderMesh(entity, ratio, &mesh); }
 	void renderMesh(Entity entity, float ratio, Mesh* mesh) { renderMesh(entity, ratio, mesh, vec3(1.0f)); }
 	void renderMesh(Entity entity, float ratio, Mesh* mesh, vec3 aObjectColor) {
 		meshShader.use();
@@ -148,12 +129,11 @@ public:
 	}
 
 	//** mesh var
-	Mesh mesh;
 	vector<Mesh*> activeWorldMesh;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
-	int seed = 69;
-	PerlinNoise perlin;
+	int seed = time(nullptr);
+	PerlinNoise perlin = PerlinNoise(seed);
 	MarchingCube mCube;
 	TRIANGLE emptyTriangle;
 	float threshold = 0.50f;

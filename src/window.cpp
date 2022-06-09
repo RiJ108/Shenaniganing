@@ -14,7 +14,6 @@ BOOL Window::init() {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
         //**Creating the window
         wHandler = glfwCreateWindow(srcSize.x, srcSize.y, build.c_str(), NULL, NULL);
@@ -50,29 +49,30 @@ BOOL Window::init() {
         ui.init(srcSize);
         ui.setLayouts(srcMidPoint);
 
-        //**Depth Texture
-        glGenFramebuffers(1, &depthMapFBO);
-
-        glGenTextures(1, &depthMap);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //**
+        engine.initShaders();
+        engine.genSurroundingChunks();
+        player.position = vec3(0.0f, 0.0f, 0.0f);
     }
     //________________________________________________________________________________________________________________________________________
     //**TESTING**
     //________________________________________________________________________________________________________________________________________
-    engine.initShaders();
-    engine.genSurroundingChunks();
-    player.position = vec3(0.0f, 0.0f, 0.0f);
+    //**Depth Texture
+    glGenFramebuffers(1, &depthMapFBO);
+
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return true;
 }
 
@@ -100,7 +100,6 @@ BOOL Window::loop() {
         glfwSwapBuffers(wHandler);
         glfwPollEvents();
     }
-
     glfwTerminate();
     return true;
 }
@@ -116,9 +115,8 @@ void Window::F() {
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             player.pov.setFirstMouse(true);
         }
-        else if (layoutPtr->getButtonPtr("Exit")->clicked) {
+        else if (layoutPtr->getButtonPtr("Exit")->clicked)
             glfwSetWindowShouldClose(wHandler, true);
-        }
         break;
 
     case State::inGame:
@@ -173,7 +171,6 @@ void Window::G() {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         
         ui.renderText("Press escape to return to main menu", 10.0f, (srcMidPoint.y * 2) - 25.0f, 0.5f, textColor);
-        //ui.renderText("Press R to reset pov", 10.0f, (srcMidPoint.y * 2) - 45.0f, 0.3f, textColor);
         ui.renderText("position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, textColor);
         ui.renderText("position.y = " + to_string(player.position.y), 10.0f, 30.0f, 0.3f, textColor);
         ui.renderText("position.z = " + to_string(player.position.z), 10.0f, 20.0f, 0.3f, textColor);
@@ -202,15 +199,6 @@ void Window::processKeyInputs() {
         player.setDefault();
 }
 
-void Window::functionPtrTest(Window* aWindowPtr) {
-    cout << __FUNCTION__ << endl;
-}
-
-void Window::exitCallBack(Window* aWindowPtr) {
-    cout << __FUNCTION__ << endl;
-    glfwSetWindowShouldClose(aWindowPtr->wHandler, true);
-}
-
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
     //cout << __FUNCTION__ << "->" << key << " is " << action << endl;
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
@@ -226,20 +214,12 @@ void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int hei
 void Window::mouse_button_callback(GLFWwindow* aWHandler, int button, int action, int mods) {
     Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
     Layout* activeLayoutPtr = windowPtr->ui.getActiveLayoutPtr();
-    if (activeLayoutPtr == nullptr) {
-        //cout << __FUNCTION__ << "->###!! activeLayoutPtr == nullptr !!###" << endl;
+    if (activeLayoutPtr == nullptr)
         return;
-    }
     Button* activeButtonPtr = activeLayoutPtr->getActiveButton();
     if (action == GLFW_PRESS) {
-        if (activeButtonPtr) {
-            //cout << __FUNCTION__ << " -> " << activeButtonPtr->name << " pressed." << endl;
-            //activeButtonPtr->functionPtr(windowPtr);
+        if (activeButtonPtr)
             activeButtonPtr->clicked = true;
-        }
-    }
-    else if (action == GLFW_RELEASE) {
-
     }
 }
 
@@ -249,8 +229,6 @@ void Window::mouse_callback(GLFWwindow* aWHandler, double xpos, double ypos) {
     int height = windowPtr->srcSize.y;
     windowPtr->cursorPosX = 2.0f * (xpos - (width / 2.0)) / width;
     windowPtr->cursorPosY = -2.0f * (ypos - (height / 2.0)) / height;
-    if (windowPtr->actualState == State::inGame) {
-        //windowPtr->pov.mouseMotion(vec2(xpos, ypos));
+    if (windowPtr->actualState == State::inGame)
         windowPtr->player.mouseMotion(vec2(xpos, ypos));
-    }
 }

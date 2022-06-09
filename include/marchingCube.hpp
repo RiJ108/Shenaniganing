@@ -57,6 +57,7 @@ public:
 			tmpTriangle->norm.z = norm.z;
 
 			triangles->push_back(*tmpTriangle);
+			delete(tmpTriangle);
 			ntriang++;
 		}
 
