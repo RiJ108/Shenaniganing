@@ -14,8 +14,8 @@ public:
     vector<TRIANGLE> triangles;
     ~Mesh() {
         //cout << __FUNCTION__ << " adress:" << this << endl;
-        //data.clear();
-        //triangles.clear();
+        data.clear();
+        triangles.clear();
         glDeleteBuffers(1, &VAO);
         glDeleteBuffers(1, &VBO);
     };

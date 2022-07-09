@@ -34,8 +34,8 @@ public:
     BOOL init();
     BOOL loop();
 
-    static void functionPtrTest(Window* aWindowPtr);
-    static void exitCallBack(Window* aWindowPtr);
+    //static void functionPtrTest(Window* aWindowPtr);
+    //static void exitCallBack(Window* aWindowPtr);
 
     ~Window() {
         if(!layoutPtr)free(layoutPtr);

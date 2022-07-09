@@ -21,10 +21,11 @@ public:
     };
 
 	void updatePosition(float deltaTime) {
-		position += vel.x * deltaTime * front;
-        position -= vel.z * deltaTime * normalize(cross(vec3(0.0f, 1.0f, 0.0f), front));;
+		position += vel.x * deltaTime * front * speeding;
+        position -= vel.z * deltaTime * normalize(cross(vec3(0.0f, 1.0f, 0.0f), front));
         position.y += vel.y * deltaTime;
 		vel = vec3(0.0f);
+        speeding = 1.0f;
 	};
 
 	void keyEvent(int keyCode) {
@@ -45,6 +46,10 @@ public:
             vel.y = termV.y;
             break;
         case 340:
+            //vel.y = -termV.y;
+            speeding = 2.0f;
+            break;
+        case 341:
             vel.y = -termV.y;
             break;
         default:
@@ -65,6 +70,7 @@ public:
 	vec3 acc = vec3(0.0f);
 	vec3 vel = vec3(0.0f);
 	vec3 termV = vec3(10.0f);
+    float speeding = 1.0f;
     Camera pov;
 
 	float FOV = 100.0f;

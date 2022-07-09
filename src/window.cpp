@@ -54,8 +54,7 @@ BOOL Window::init() {
         engine.genSurroundingChunks();
         player.position = vec3(0.0f, 0.0f, 0.0f);
     }
-    //________________________________________________________________________________________________________________________________________
-    //**TESTING**
+
     //________________________________________________________________________________________________________________________________________
     //**Depth Texture
     glGenFramebuffers(1, &depthMapFBO);
@@ -73,6 +72,7 @@ BOOL Window::init() {
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     return true;
 }
 
@@ -93,7 +93,7 @@ BOOL Window::loop() {
 
         //**Data rendering
         glDisable(GL_DEPTH_TEST);
-        ui.renderText(build + " ms=" + to_string((int)(1000*deltaTime)), 10.0f, 10.0f, 0.25f, textColor);
+        ui.renderText(build + " ms=" + to_string((int)(1000 * deltaTime)), 10.0f, 10.0f, 0.25f, textColor);
         glEnable(GL_DEPTH_TEST);
 
         //**Refresh buffers and polling
@@ -195,13 +195,15 @@ void Window::processKeyInputs() {
         player.keyEvent(32);
     if (glfwGetKey(wHandler, 340) == GLFW_PRESS)
         player.keyEvent(340);
+    if (glfwGetKey(wHandler, 341) == GLFW_PRESS)
+        player.keyEvent(341);
     if (glfwGetKey(wHandler, 82) == GLFW_PRESS)
         player.setDefault();
 }
 
 void Window::keyCallback(GLFWwindow* aWHandler, int key, int scancode, int action, int mods) {
     //cout << __FUNCTION__ << "->" << key << " is " << action << endl;
-    Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
+    //Window* windowPtr = (Window*)glfwGetWindowUserPointer(aWHandler);
 }
 
 void Window::framebuffer_size_callback(GLFWwindow* aWHandler, int width, int height) {

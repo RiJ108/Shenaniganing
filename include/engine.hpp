@@ -2,6 +2,12 @@
 
 #include <ctime>
 
+#include <mutex>
+#include <thread>
+#include <condition_variable>
+
+#include <cmath>
+
 #include "displays.hpp"
 #include "shader.hpp"
 #include "perlinNoise.hpp"
@@ -23,11 +29,42 @@ public:
 				newCP[i] = (int)(entity.position[i] - (DIM - 1) / 2) / (DIM - 1);
 		}
 		if (newCP != oldCP) {
+			moveVec = newCP - oldCP;
+			//Display::dispLn(moveVec);
+			int offset = 0;
+			for (int i = 0; i < 3; i++)
+				offset += pow(kernelSize[i],2-i) * moveVec[i];
+			int index = 0;
+
+			vector<pair<int, int>>a;
+
+			for (int i = 0; i < kernelSize[0]; i++) {
+				for (int j = 0; j < kernelSize[1]; j++) {
+					for (int k = 0; k < kernelSize[2]; k++) {
+						if ((moveVec.x != 0 && (moveVec.x + i) == 1) || (moveVec.y != 0 && (moveVec.y + j) == 1) || (moveVec.z != 0 && (moveVec.z + k) == 1)) {}
+						else a.push_back(make_pair(index-offset, index));
+						index++;
+					}
+				}
+			}
 			oldCP = newCP;
-			for (auto p : activeWorldMesh)
-				delete(p);
-			activeWorldMesh.clear();
-			genSurroundingChunks();
+
+			sort(a.begin(), a.end());
+			vector<pair<int, int>>::iterator it;
+			ivec3 pos;
+			int buff = 0; bool found;
+			for (int i = 0; i < index; i++) {
+				it = ranges::find(a, i, &pair<int, int>::first);
+				found = it != a.end();
+				if (!found) {
+					pos.x = i / (pow(kernelSize[0], 2));
+					pos.y = (i - pos.x * (pow(kernelSize[0], 2))) / kernelSize[0];
+					pos.z = (i - pos.x * (pow(kernelSize[0], 2)) - pos.y * kernelSize[0]);
+					iwmPtr->push_back(genChunk(vec3(pos) - offsets + oldCP));
+				}
+				else iwmPtr->push_back(awmPtr->at((*it).second));
+			}
+			*awmPtr = *iwmPtr;
 		}
 	}
 	void genSurroundingChunks() {
@@ -99,9 +136,9 @@ public:
 		meshShader.use();
 	}
 	void renderActiveMeshs(Entity entity, float ratio) {
-		for (int i = 0; i < activeWorldMesh.size(); i++) {
-			float aColor = (float)(i + 1) / activeWorldMesh.size();
-			renderMesh(entity, ratio, activeWorldMesh.at(i), vec3(1.0f, aColor, 1 - aColor));
+		for (int i = 0; i < awmPtr->size(); i++) {
+			float aColor = (float)(i + 1) / awmPtr->size();
+			renderMesh(entity, ratio, awmPtr->at(i), vec3(aColor, 1-aColor, -aColor));
 		}
 	}
 	void renderMesh(Camera pov, float ratio, Mesh* mesh) {
@@ -129,17 +166,20 @@ public:
 	}
 
 	//** mesh var
-	vector<Mesh*> activeWorldMesh;
+	vector<Mesh*> activeWorldMesh, activeWorldMesh_tmp;
+	vector<Mesh*> *awmPtr = &activeWorldMesh, *iwmPtr = &activeWorldMesh_tmp;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
+	vec3 moveVec;
+
 	int seed = time(nullptr);
 	PerlinNoise perlin = PerlinNoise(seed);
 	MarchingCube mCube;
 	TRIANGLE emptyTriangle;
 	float threshold = 0.50f;
-	float x_offset = DIM / 2.0f, y_offset = 0.0f, z_offset = DIM / 2.0f;
+	float x_offset = DIM / 2.0f, y_offset = DIM / 2.0f, z_offset = DIM / 2.0f;
 	vec3 oldCP = vec3(0.0f);
-	vec3 kernelSize = vec3(3, 3, 3);
+	vec3 kernelSize = vec3(3.0f);
 	vec3 offsets = 0.5f * (kernelSize - vec3(1));
 	//** rendering var
 	Shader shader;
