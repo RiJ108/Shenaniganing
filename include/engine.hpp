@@ -23,15 +23,13 @@ public:
 	void updateSurrounding(Entity entity) {
 		vec3 newCP;
 		for (int i = 0; i < 3; i++) {
-			if (entity.position[i] > 0)
-				newCP[i] = (int)(entity.position[i] + (DIM - 1) / 2) / (DIM - 1);
-			else
-				newCP[i] = (int)(entity.position[i] - (DIM - 1) / 2) / (DIM - 1);
+			if (entity.position[i] > 0) newCP[i] = (int)(entity.position[i] + (DIM - 1) / 2) / (DIM - 1);
+			else newCP[i] = (int)(entity.position[i] - (DIM - 1) / 2) / (DIM - 1);
 		}
 		if (newCP != oldCP) {
 			moveVec = newCP - oldCP;
 			//Display::dispLn(moveVec);
-			int offset = 0;
+			/*int offset = 0;
 			for (int i = 0; i < 3; i++)
 				offset += pow(kernelSize[i],2-i) * moveVec[i];
 			int index = 0;
@@ -46,10 +44,9 @@ public:
 						index++;
 					}
 				}
-			}
+			}*/
 			oldCP = newCP;
-
-			sort(a.begin(), a.end());
+			/*sort(a.begin(), a.end());
 			vector<pair<int, int>>::iterator it;
 			ivec3 pos;
 			int buff = 0; bool found;
@@ -64,17 +61,44 @@ public:
 				}
 				else iwmPtr->push_back(awmPtr->at((*it).second));
 			}
-			*awmPtr = *iwmPtr;
-		}
-	}
-	void genSurroundingChunks() {
-		for (int i = 0; i < kernelSize[0]; i++) {
-			for (int j = 0; j < kernelSize[1]; j++) {
-				for (int k = 0; k < kernelSize[2]; k++)
-					activeWorldMesh.push_back(genChunk(vec3(i, j, k) - offsets + oldCP));
+			*awmPtr = *iwmPtr;*/
+
+			int index = 0;
+			for (int i = 0; i < kernelSize[0]; i++) {
+				for (int j = 0; j < kernelSize[1]; j++) {
+					for (int k = 0; k < kernelSize[2]; k++) {
+						Mesh* tmp = activeWorldMesh.at(index);
+						generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
+						tmp->loadDataFromTriangles();
+						tmp->setBuffers();
+						tmp->fillBuffers();
+						tmp->clears();
+						index++;
+					}
+				}
 			}
 		}
 	}
+
+	void genSurroundingChunks() {
+		for (int i = 0; i < kernelSize[0]; i++) {
+			for (int j = 0; j < kernelSize[1]; j++) {
+				for (int k = 0; k < kernelSize[2]; k++) {
+					activeWorldMesh.push_back(genChunk(vec3(i, j, k) - offsets + oldCP));
+				}
+			}
+		}
+	}
+
+	shared_ptr<Mesh*> genChunk_(vec3 position) {
+		Mesh* meshPtr;
+		meshPtr = new Mesh();
+		generateMeshTriangles(meshPtr, position);
+		setMesh(meshPtr);
+		auto sp = make_shared<Mesh*>(meshPtr);
+		return sp;
+	}
+
 	Mesh* genChunk(vec3 position) {
 		Mesh* meshPtr;
 		meshPtr = new Mesh();
@@ -82,6 +106,7 @@ public:
 		setMesh(meshPtr);
 		return meshPtr;
 	}
+
 	void setGC(GRIDCELL* aGc, vec3 aPos) {
 		vec3 coordOffset[8] = { vec3(0.0f),
 								vec3(1.0f, 0.0f, 0.0f),
@@ -120,7 +145,10 @@ public:
 	}
 	void setMesh(Mesh *mesh) {
 		mesh->loadDataFromTriangles();
+		mesh->genBuffers();
 		mesh->setBuffers();
+		mesh->fillBuffers();
+		mesh->clears();
 	}
 	vec3 capsuleMeshCollision(vec2 capsuleDim, Mesh *mesh) {
 
@@ -166,6 +194,7 @@ public:
 	}
 
 	//** mesh var
+	vector<shared_ptr<Mesh*>> aWM_;
 	vector<Mesh*> activeWorldMesh, activeWorldMesh_tmp;
 	vector<Mesh*> *awmPtr = &activeWorldMesh, *iwmPtr = &activeWorldMesh_tmp;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
