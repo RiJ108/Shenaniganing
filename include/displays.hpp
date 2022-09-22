@@ -28,7 +28,7 @@ public:
 	}
 
 	static void disp(ivec2 values) {
-		cout << "[ " << values.x << ", " << values.y << "] ";
+		cout << "[" << values.x << ", " << values.y << "] ";
 	}
 	static void dispLn(ivec2 values) {
 		disp(values);
@@ -36,7 +36,7 @@ public:
 	}
 
 	static void disp(ivec3 values) {
-		cout << "[ " << values.x << ", " << values.y << ", " << values.z << "] ";
+		cout << "[" << values.x << ", " << values.y << ", " << values.z << "] ";
 	}
 	static void dispLn(ivec3 values) {
 		disp(values);
@@ -44,7 +44,7 @@ public:
 	}
 
 	static void disp(vec2 values) {
-		cout << "[ " << values.x << ", " << values.y << "] ";
+		cout << "[" << values.x << ", " << values.y << "] ";
 	}
 	static void dispLn(vec2 values) {
 		disp(values);
@@ -52,7 +52,7 @@ public:
 	}
 
 	static void disp(vec3 values) {
-		cout << "[ " << values.x << ", " << values.y << ", " << values.z << "] ";
+		cout << "[" << values.x << ", " << values.y << ", " << values.z << "] ";
 	}
 	static void dispLn(vec3 values) {
 		disp(values);
@@ -60,7 +60,7 @@ public:
 	}
 
 	static void disp(vec4 values) {
-		cout << "[ " << values.x << ", " << values.y << ", " << values.z << ", " << values.w << "] ";
+		cout << "[" << values.x << ", " << values.y << ", " << values.z << ", " << values.w << "] ";
 	}
 	static void dispLn(vec4 values) {
 		disp(values);

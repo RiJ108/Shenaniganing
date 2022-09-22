@@ -50,6 +50,13 @@ public:
         glBindVertexArray(0);
     }
 
+    void fillBuffers(vector<float> passedData) {
+        glBindVertexArray(VAO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * passedData.size(), &passedData[0]);
+        glBindVertexArray(0);
+    }
+
     void fillBuffers() {
         glBindVertexArray(VAO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
@@ -60,7 +67,7 @@ public:
     void clearBuffers() {
         glBindVertexArray(VAO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * data.size(), nullptr);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, nullptr);
         glBindVertexArray(0);
     }
 

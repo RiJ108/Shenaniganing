@@ -114,6 +114,9 @@ void Window::F() {
             layoutPtr->reset();
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             player.pov.setFirstMouse(true);
+            //ft = async(&Engine::foo, &engine);
+            //engine.g0F = async(&Engine::generateSurroundingChunks, &engine, vec3(0.0f));
+            cout << "aWM ptr is " << &engine.activeWorldMesh << endl;
         }
         else if (layoutPtr->getButtonPtr("Exit")->clicked)
             glfwSetWindowShouldClose(wHandler, true);
@@ -143,6 +146,7 @@ void Window::M() {
 void Window::G() {
     switch (actualState) {
     case State::mainMenu: {
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         ui.renderLayout();
         ui.checkLayouts(vec2(cursorPosX, cursorPosY));
         break;
@@ -150,26 +154,10 @@ void Window::G() {
 
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        //1.Depth map rendering
-        //glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        //glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        //glClear(GL_DEPTH_BUFFER_BIT);
-
-        //engine.renderMeshForDepth(vec3(-25.0f, 50.0f, -25.0f), player.position, player.FOV, (float)SHADOW_WIDTH / SHADOW_HEIGHT);
-
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //2.Normal render
-        //glViewport(0, 0, srcSize.x, srcSize.y);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //glBindTexture(GL_TEXTURE_2D, depthMap);
-        //engine.renderMesh(player, (float)srcSize.x / srcSize.y);
-
+        //**************************************************************************
         engine.updateSurrounding(player);
         engine.renderActiveMeshs(player, (float)srcSize.x / srcSize.y);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         ui.renderText("Press escape to return to main menu", 10.0f, (srcMidPoint.y * 2) - 25.0f, 0.5f, textColor);
         ui.renderText("position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, textColor);
         ui.renderText("position.y = " + to_string(player.position.y), 10.0f, 30.0f, 0.3f, textColor);

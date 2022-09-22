@@ -38,9 +38,11 @@ public:
     //static void exitCallBack(Window* aWindowPtr);
 
     ~Window() {
-        if(!layoutPtr)free(layoutPtr);
-        if(!wHandler)free(wHandler);
+        if (!layoutPtr)free(layoutPtr);
+        if (!wHandler)free(wHandler);
     }
+
+    std::future<int> ft;
 
 private:
     //**FSM section
@@ -55,6 +57,7 @@ private:
     unsigned int depthMapFBO;
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMap;
+
     Camera lightSourcePov;
     Engine engine;
     Entity player;

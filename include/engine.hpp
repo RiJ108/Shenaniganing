@@ -1,12 +1,8 @@
 #pragma once
 
 #include <ctime>
-
-#include <mutex>
-#include <thread>
-#include <condition_variable>
-
 #include <cmath>
+#include <future>
 
 #include "displays.hpp"
 #include "shader.hpp"
@@ -19,7 +15,39 @@
 
 class Engine {
 public:
+	~Engine() {
+
+	}
+
 	//______________________________________________________________________COMPUTATION
+	int foo() {
+		cout << __FUNCTION__ << " called..." << endl;
+		Sleep(2 * 1000);
+		cout << __FUNCTION__ << " finished." << endl;
+		return 0;
+	}
+
+	int generateSurroundingChunks(vector<Mesh*> aWM) {
+		cout << __FUNCTION__ << " called..." << endl;
+		cout << __FUNCTION__ << " aWM ptr is " << &activeWorldMesh << endl;
+		clock_t stt = clock(); int index = 0;
+		for (int i = 0; i < kernelSize[0]; i++) {
+			for (int j = 0; j < kernelSize[1]; j++) {
+				for (int k = 0; k < kernelSize[2]; k++) {
+					Mesh* tmp = activeWorldMesh.at(index);
+					tmp->clears();
+					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
+					tmp->loadDataFromTriangles();
+					//tmp->setBuffers();
+					//tmp->fillBuffers();
+					index++;
+				}
+			}
+		}
+		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
+		return 0;
+	}
+
 	void updateSurrounding(Entity entity) {
 		vec3 newCP;
 		for (int i = 0; i < 3; i++) {
@@ -28,59 +56,84 @@ public:
 		}
 		if (newCP != oldCP) {
 			moveVec = newCP - oldCP;
+			//***************************************
 			//Display::dispLn(moveVec);
-			/*int offset = 0;
-			for (int i = 0; i < 3; i++)
-				offset += pow(kernelSize[i],2-i) * moveVec[i];
-			int index = 0;
+			//int offset = 0;
+			//for (int i = 0; i < 3; i++)
+			//	offset += pow(kernelSize[i],2-i) * moveVec[i];
+			//int index = 0;
 
-			vector<pair<int, int>>a;
-
-			for (int i = 0; i < kernelSize[0]; i++) {
-				for (int j = 0; j < kernelSize[1]; j++) {
-					for (int k = 0; k < kernelSize[2]; k++) {
-						if ((moveVec.x != 0 && (moveVec.x + i) == 1) || (moveVec.y != 0 && (moveVec.y + j) == 1) || (moveVec.z != 0 && (moveVec.z + k) == 1)) {}
-						else a.push_back(make_pair(index-offset, index));
-						index++;
-					}
-				}
-			}*/
+			//vector<pair<int, int>>a;
+			//for (int i = 0; i < kernelSize[0]; i++) {
+			//	for (int j = 0; j < kernelSize[1]; j++) {
+			//		for (int k = 0; k < kernelSize[2]; k++) {
+			//			if ((moveVec.x != 0 && (moveVec.x + i) == 1) || (moveVec.y != 0 && (moveVec.y + j) == 1) || (moveVec.z != 0 && (moveVec.z + k) == 1)) {}
+			//			else a.push_back(make_pair(index-offset, index));
+			//			index++;
+			//		}
+			//	}
+			//}
+			//***************************************
 			oldCP = newCP;
-			/*sort(a.begin(), a.end());
-			vector<pair<int, int>>::iterator it;
-			ivec3 pos;
-			int buff = 0; bool found;
-			for (int i = 0; i < index; i++) {
-				it = ranges::find(a, i, &pair<int, int>::first);
-				found = it != a.end();
-				if (!found) {
-					pos.x = i / (pow(kernelSize[0], 2));
-					pos.y = (i - pos.x * (pow(kernelSize[0], 2))) / kernelSize[0];
-					pos.z = (i - pos.x * (pow(kernelSize[0], 2)) - pos.y * kernelSize[0]);
-					iwmPtr->push_back(genChunk(vec3(pos) - offsets + oldCP));
-				}
-				else iwmPtr->push_back(awmPtr->at((*it).second));
-			}
-			*awmPtr = *iwmPtr;*/
-
-			int index = 0;
-			for (int i = 0; i < kernelSize[0]; i++) {
-				for (int j = 0; j < kernelSize[1]; j++) {
-					for (int k = 0; k < kernelSize[2]; k++) {
-						Mesh* tmp = activeWorldMesh.at(index);
-						generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
-						tmp->loadDataFromTriangles();
-						tmp->setBuffers();
-						tmp->fillBuffers();
-						tmp->clears();
-						index++;
-					}
-				}
+			//sort(a.begin(), a.end());
+			//vector<pair<int, int>>::iterator it;
+			//for (int i = 0; i < index; i++) {
+			//	it = ranges::find(a, i, &pair<int, int>::second);
+			//	if (it != a.end()) {
+			//		cout << i << " -> To get from [" << it->first << "]" << endl;
+			//		activeWorldMesh.at(i)->data = activeWorldMesh.at(it->first)->data;
+			//		activeWorldMesh.at(i)->setBuffers();
+			//		activeWorldMesh.at(i)->fillBuffers();
+			//	}
+			//}
+			//ivec3 pos;
+			//for (int i = 0; i < index; i++) {
+			//	it = ranges::find(a, i, &pair<int, int>::second);
+			//	if (!(it != a.end())) {
+			//		cout << i << " -> To gen at pos ";
+			//		pos.x = i / (pow(kernelSize[0], 2));
+			//		pos.y = (i - pos.x * (pow(kernelSize[0], 2))) / kernelSize[0];
+			//		pos.z = (i - pos.x * (pow(kernelSize[0], 2)) - pos.y * kernelSize[0]);
+			//		Display::disp(vec3(pos) - offsets + oldCP);
+			//		cout << endl;
+			//		Mesh* tmp = activeWorldMesh.at(i);
+			//		tmp->clears();
+			//		generateMeshTriangles(tmp, vec3(pos) + oldCP);
+			//		tmp->loadDataFromTriangles();
+			//		tmp->setBuffers();
+			//		tmp->fillBuffers();
+			//	}
+			//}
+			//***************************************
+			g0F = async(&Engine::generateSurroundingChunks, this, activeWorldMesh);
+			g0F.wait();
+			for (Mesh* p : activeWorldMesh) {
+				p->setBuffers();
+				p->fillBuffers();
 			}
 		}
 	}
 
+	void genSurroundingChunks(vector<Mesh*> aWM) {
+		int index = 0; clock_t stt = clock();
+		for (int i = 0; i < kernelSize[0]; i++) {
+			for (int j = 0; j < kernelSize[1]; j++) {
+				for (int k = 0; k < kernelSize[2]; k++) {
+					Mesh* tmp = aWM.at(index);
+					tmp->clears();
+					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
+					tmp->loadDataFromTriangles();
+					tmp->setBuffers();
+					tmp->fillBuffers();
+					index++;
+				}
+			}
+		}
+		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
+	}
+
 	void genSurroundingChunks() {
+		clock_t stt = clock();
 		for (int i = 0; i < kernelSize[0]; i++) {
 			for (int j = 0; j < kernelSize[1]; j++) {
 				for (int k = 0; k < kernelSize[2]; k++) {
@@ -88,6 +141,7 @@ public:
 				}
 			}
 		}
+		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
 	}
 
 	shared_ptr<Mesh*> genChunk_(vec3 position) {
@@ -156,13 +210,10 @@ public:
 	//______________________________________________________________________BUFFERS/SHADERS SETTING
 	void initShaders() {
 		pointShader = Shader("resources/shaders/vShaderSourcePoint.glsl", "resources/shaders/fShaderSourcePoint.glsl");
-		//meshShader = Shader("resources/shaders/vShaderSource3D_OLD.glsl", "resources/shaders/fShaderSource3D_OLD.glsl");
 		meshShader = Shader("resources/shaders/vShaderSource3D.glsl", "resources/shaders/fShaderSource3D.glsl");
+		shadowShader = Shader("resources/shaders/vShaderSourceShadow.glsl", "resources/shaders/fShaderSourceShadow.glsl");
 	}
 	//______________________________________________________________________RENDERS
-	void renderMeshForDepth(vec3 position, vec3 front, float fov, float ratio) {
-		meshShader.use();
-	}
 	void renderActiveMeshs(Entity entity, float ratio) {
 		for (int i = 0; i < awmPtr->size(); i++) {
 			float aColor = (float)(i + 1) / awmPtr->size();
@@ -185,7 +236,7 @@ public:
 		meshShader.use();
 		meshShader.setVec3("objectColor", aObjectColor);
 		meshShader.setVec3("lightColor", vec3(1.0f, 1.0f, 0.9f));
-		meshShader.setVec3("lightPos", vec3(-25.0f, 50.0f, -25.0f));
+		meshShader.setVec3("lightPos", lightPos);
 		meshShader.setMat4("view", entity.lookAt());
 		meshShader.setMat4("projection", perspective(radians(entity.FOV), ratio, 0.1f, 10000.0f));
 		meshShader.setMat4("model", mat4(1.0f));
@@ -194,12 +245,12 @@ public:
 	}
 
 	//** mesh var
-	vector<shared_ptr<Mesh*>> aWM_;
 	vector<Mesh*> activeWorldMesh, activeWorldMesh_tmp;
 	vector<Mesh*> *awmPtr = &activeWorldMesh, *iwmPtr = &activeWorldMesh_tmp;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
 	vec3 moveVec;
+	future<int> g0F;
 
 	int seed = time(nullptr);
 	PerlinNoise perlin = PerlinNoise(seed);
@@ -214,4 +265,6 @@ public:
 	Shader shader;
 	Shader pointShader;
 	Shader meshShader;
+	Shader shadowShader;
+	vec3 lightPos = vec3(-25.0f, 50.0f, -25.0f);
 };
