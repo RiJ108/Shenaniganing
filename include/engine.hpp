@@ -20,16 +20,8 @@ public:
 	}
 
 	//______________________________________________________________________COMPUTATION
-	int foo() {
-		cout << __FUNCTION__ << " called..." << endl;
-		Sleep(2 * 1000);
-		cout << __FUNCTION__ << " finished." << endl;
-		return 0;
-	}
-
 	int generateSurroundingChunks(vector<Mesh*> aWM) {
 		cout << __FUNCTION__ << " called..." << endl;
-		cout << __FUNCTION__ << " aWM ptr is " << &activeWorldMesh << endl;
 		clock_t stt = clock(); int index = 0;
 		for (int i = 0; i < kernelSize[0]; i++) {
 			for (int j = 0; j < kernelSize[1]; j++) {
@@ -38,13 +30,12 @@ public:
 					tmp->clears();
 					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
 					tmp->loadDataFromTriangles();
-					//tmp->setBuffers();
-					//tmp->fillBuffers();
 					index++;
 				}
 			}
 		}
 		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
+		genFlag = true;
 		return 0;
 	}
 
@@ -105,12 +96,15 @@ public:
 			//	}
 			//}
 			//***************************************
-			g0F = async(&Engine::generateSurroundingChunks, this, activeWorldMesh);
-			g0F.wait();
+			g0F = async(std::launch::async, &Engine::generateSurroundingChunks, this, activeWorldMesh);
+		}
+		if (genFlag && g0F.valid()) {
+			cout << __FUNCTION__ << " UPDATING aWM's buffers " << endl;
 			for (Mesh* p : activeWorldMesh) {
 				p->setBuffers();
 				p->fillBuffers();
 			}
+			genFlag = false;
 		}
 	}
 
@@ -251,6 +245,7 @@ public:
 	//** gen var
 	vec3 moveVec;
 	future<int> g0F;
+	bool genFlag = false;
 
 	int seed = time(nullptr);
 	PerlinNoise perlin = PerlinNoise(seed);
