@@ -14,7 +14,6 @@ public:
     vector<float> data;
     vector<TRIANGLE> triangles;
     ~Mesh() {
-        //cout << __FUNCTION__ << " adress:" << this << endl;
         data.clear();
         triangles.clear();
         glDeleteBuffers(1, &VAO);
@@ -49,6 +48,13 @@ public:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
         glBindVertexArray(0);
+    }
+
+    void refillBuffers() {
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * data.size(), &data[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void fillBuffers(vector<float> passedData) {

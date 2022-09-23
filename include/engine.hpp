@@ -20,25 +20,6 @@ public:
 	}
 
 	//______________________________________________________________________COMPUTATION
-	int generateSurroundingChunks(vector<Mesh*> aWM) {
-		cout << __FUNCTION__ << " called..." << endl;
-		clock_t stt = clock(); int index = 0;
-		for (int i = 0; i < kernelSize[0]; i++) {
-			for (int j = 0; j < kernelSize[1]; j++) {
-				for (int k = 0; k < kernelSize[2]; k++) {
-					Mesh* tmp = activeWorldMesh.at(index);
-					tmp->clears();
-					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
-					tmp->loadDataFromTriangles();
-					index++;
-				}
-			}
-		}
-		genFlag = true;
-		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
-		return 0;
-	}
-
 	void updateSurrounding(Entity entity) {
 		vec3 newCP;
 		for (int i = 0; i < 3; i++) {
@@ -96,33 +77,34 @@ public:
 			//	}
 			//}
 			//***************************************
-			g0F = async(std::launch::async, &Engine::generateSurroundingChunks, this, activeWorldMesh);
+			cout << "\n__\n";
+			async(std::launch::async, &Engine::generateSurroundingChunks, this, activeWorldMesh);
 		}
 		if (genFlag) {
 			cout << __FUNCTION__ << " UPDATING aWM's buffers " << endl;
-			for (Mesh* p : activeWorldMesh) {
-				p->setBuffers();
-				p->fillBuffers();
-			}
+			clock_t stt = clock();
+			for (Mesh* p : activeWorldMesh)
+				p->refillBuffers();
 			genFlag = false;
+			cout << __FUNCTION__ << " UPDATE finished in " << difftime(clock(), stt) << "ms" << endl;
 		}
 	}
 
-	void genSurroundingChunks(vector<Mesh*> aWM) {
-		int index = 0; clock_t stt = clock();
+	void generateSurroundingChunks(vector<Mesh*> aWM) {
+		cout << __FUNCTION__ << " launched_" << endl;
+		clock_t stt = clock(); int index = 0;
 		for (int i = 0; i < kernelSize[0]; i++) {
 			for (int j = 0; j < kernelSize[1]; j++) {
 				for (int k = 0; k < kernelSize[2]; k++) {
-					Mesh* tmp = aWM.at(index);
+					Mesh* tmp = activeWorldMesh.at(index);
 					tmp->clears();
 					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
 					tmp->loadDataFromTriangles();
-					tmp->setBuffers();
-					tmp->fillBuffers();
 					index++;
 				}
 			}
 		}
+		genFlag = true;
 		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
 	}
 
@@ -136,15 +118,6 @@ public:
 			}
 		}
 		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
-	}
-
-	shared_ptr<Mesh*> genChunk_(vec3 position) {
-		Mesh* meshPtr;
-		meshPtr = new Mesh();
-		generateMeshTriangles(meshPtr, position);
-		setMesh(meshPtr);
-		auto sp = make_shared<Mesh*>(meshPtr);
-		return sp;
 	}
 
 	Mesh* genChunk(vec3 position) {
@@ -180,9 +153,9 @@ public:
 			for (unsigned int y = 0; y < HEIGHT_AUG - 1; y++) {
 				for (unsigned int z = 0; z < DIM_AUG - 1; z++) {
 					position = vec3(x * STEP - x_offset, y * STEP - y_offset, z * STEP - z_offset);
-					position += chunkPosition * vec3(DIM-1);
+					position += chunkPosition * vec3(DIM - 1);
 					setGC(gridcellPtr, position);
-					mCube.polygonise(*gridcellPtr, 
+					mCube.polygonise(*gridcellPtr,
 						0.5f,
 						&mesh->triangles);
 					for (int i = 0; i < 5 - mCube.nbrTriangle[mCube.cubeindex]; i++)
@@ -191,14 +164,14 @@ public:
 			}
 		}
 	}
-	void setMesh(Mesh *mesh) {
+	void setMesh(Mesh* mesh) {
 		mesh->loadDataFromTriangles();
 		mesh->genBuffers();
 		mesh->setBuffers();
 		mesh->fillBuffers();
 		mesh->clears();
 	}
-	vec3 capsuleMeshCollision(vec2 capsuleDim, Mesh *mesh) {
+	vec3 capsuleMeshCollision(vec2 capsuleDim, Mesh* mesh) {
 
 	};
 	//______________________________________________________________________BUFFERS/SHADERS SETTING
@@ -211,7 +184,7 @@ public:
 	void renderActiveMeshs(Entity entity, float ratio) {
 		for (int i = 0; i < awmPtr->size(); i++) {
 			float aColor = (float)(i + 1) / awmPtr->size();
-			renderMesh(entity, ratio, awmPtr->at(i), vec3(aColor, 1-aColor, -aColor));
+			renderMesh(entity, ratio, awmPtr->at(i), vec3(aColor, 1 - aColor, -aColor));
 		}
 	}
 	void renderMesh(Camera pov, float ratio, Mesh* mesh) {
@@ -240,12 +213,10 @@ public:
 
 	//** mesh var
 	vector<Mesh*> activeWorldMesh, activeWorldMesh_tmp;
-	vector<Mesh*> *awmPtr = &activeWorldMesh, *iwmPtr = &activeWorldMesh_tmp;
+	vector<Mesh*>* awmPtr = &activeWorldMesh, * iwmPtr = &activeWorldMesh_tmp;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
-	vector<int> finishVec;
 	vec3 moveVec;
-	future<int> g0F;
 	bool genFlag = false;
 
 	int seed = time(nullptr);
@@ -255,7 +226,7 @@ public:
 	float threshold = 0.50f;
 	float x_offset = DIM / 2.0f, y_offset = DIM / 2.0f, z_offset = DIM / 2.0f;
 	vec3 oldCP = vec3(0.0f);
-	vec3 kernelSize = vec3(5.0f);
+	vec3 kernelSize = vec3(3.0f);
 	vec3 offsets = 0.5f * (kernelSize - vec3(1));
 	//** rendering var
 	Shader shader;

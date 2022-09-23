@@ -114,9 +114,6 @@ void Window::F() {
             layoutPtr->reset();
             glfwSetInputMode(wHandler, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             player.pov.setFirstMouse(true);
-            //ft = async(&Engine::foo, &engine);
-            //engine.g0F = async(&Engine::generateSurroundingChunks, &engine, vec3(0.0f));
-            cout << "aWM ptr is " << &engine.activeWorldMesh << endl;
         }
         else if (layoutPtr->getButtonPtr("Exit")->clicked)
             glfwSetWindowShouldClose(wHandler, true);

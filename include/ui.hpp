@@ -78,16 +78,18 @@ public:
 			return;
 		}
 		for (auto it = begin(layoutPtr->buttons); it != end(layoutPtr->buttons); it++) {
-			if (it->isCursorPosIn(cursorPos.x, cursorPos.y)) {
-				if (!it->active) {
-					it->active = true;
-					layoutPtr->updateBufferButtonColor(&*it);
+			if (!it->locked) {
+				if (it->isCursorPosIn(cursorPos.x, cursorPos.y)) {
+					if (!it->active) {
+						it->active = true;
+						layoutPtr->updateBufferButtonColor(&*it);
+					}
 				}
-			}
-			else {
-				if (it->active) {
-					it->active = false;
-					layoutPtr->updateBufferButtonColor(&*it);
+				else {
+					if (it->active) {
+						it->active = false;
+						layoutPtr->updateBufferButtonColor(&*it);
+					}
 				}
 			}
 		}
