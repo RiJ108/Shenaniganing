@@ -34,8 +34,8 @@ public:
 				}
 			}
 		}
-		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
 		genFlag = true;
+		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
 		return 0;
 	}
 
@@ -98,7 +98,7 @@ public:
 			//***************************************
 			g0F = async(std::launch::async, &Engine::generateSurroundingChunks, this, activeWorldMesh);
 		}
-		if (genFlag && g0F.valid()) {
+		if (genFlag) {
 			cout << __FUNCTION__ << " UPDATING aWM's buffers " << endl;
 			for (Mesh* p : activeWorldMesh) {
 				p->setBuffers();
@@ -243,6 +243,7 @@ public:
 	vector<Mesh*> *awmPtr = &activeWorldMesh, *iwmPtr = &activeWorldMesh_tmp;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
+	vector<int> finishVec;
 	vec3 moveVec;
 	future<int> g0F;
 	bool genFlag = false;
@@ -254,7 +255,7 @@ public:
 	float threshold = 0.50f;
 	float x_offset = DIM / 2.0f, y_offset = DIM / 2.0f, z_offset = DIM / 2.0f;
 	vec3 oldCP = vec3(0.0f);
-	vec3 kernelSize = vec3(3.0f);
+	vec3 kernelSize = vec3(5.0f);
 	vec3 offsets = 0.5f * (kernelSize - vec3(1));
 	//** rendering var
 	Shader shader;
