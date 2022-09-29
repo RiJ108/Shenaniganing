@@ -34,15 +34,10 @@ public:
     BOOL init();
     BOOL loop();
 
-    //static void functionPtrTest(Window* aWindowPtr);
-    //static void exitCallBack(Window* aWindowPtr);
-
     ~Window() {
         if (!layoutPtr)free(layoutPtr);
         if (!wHandler)free(wHandler);
     }
-
-    std::future<int> ft;
 
 private:
     //**FSM section

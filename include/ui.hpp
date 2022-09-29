@@ -14,19 +14,9 @@ public:
 	Layout* layoutPtr;
 	Button* buttonPtr;
 	void renderLayout() {
-		shader_UI.use();
 		layoutPtr = getActiveLayoutPtr();
-		if (layoutPtr != nullptr) {
-			glBindVertexArray(layoutPtr->getVAO());
-			glDrawArrays(GL_POINTS, 0, layoutPtr->getButtonsSize());
-			glBindVertexArray(0);
-			glDisable(GL_DEPTH_TEST);
-			for (unsigned int i = 0; i < layoutPtr->buttons.size(); i++) {
-				buttonPtr = &layoutPtr->buttons.at(i);
-				renderText(buttonPtr->text, buttonPtr->textPosition.x, buttonPtr->textPosition.y, buttonPtr->textScale, vec3(1.0f));
-			}
-			glEnable(GL_DEPTH_TEST);
-		}
+		if (layoutPtr != nullptr)
+			layoutPtr->render(shader_UI, shader_TXT, VAO_TXT, VBO_TXT, Characters);
 	};
 	void renderText(string text, float x, float y, float scale, vec3 color) {
 		// activate corresponding render state	

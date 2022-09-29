@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\camera.cpp" />
+    <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\glad.cpp" />
     <ClCompile Include="src\layout.cpp" />
     <ClCompile Include="src\mobject.cpp" />

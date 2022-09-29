@@ -16,6 +16,12 @@ public:
 	// parameter 5: the name/text of the button (string)
 	// return void
 	void addButton(vec2 aPos, vec2 aSize, vec3 aOnColor, vec3 aOffColor, string aName, string aText);
+	//
+	void renderText(Shader shader_TXT, GLuint VAO, GLuint VBO, map<GLchar, Character> Characters, string text, float x, float y, float scale, vec3 color);
+	//
+	void render(Shader shader_UI, Shader shader_TXT, GLuint VAO_TXT, GLuint VBO_TXT, map<GLchar, Character> Characters);
+	//
+	vector<Button> getButtons();
 	// Fill the "data" variable (float*) containing the informations to pass to the shader for rendering the buttons of the layout
 	void allocData();
 	// Return the pointer of the "button" which as is active parameter set to true
@@ -44,8 +50,6 @@ public:
 	void setName(string aName);
 	// Return as a string the value of the "name" parameter of the layout
 	string getName();
-	// Function that reset/set to false the "active" and "clicked" parameters of all the Button present in the "buttons" vector (vector<Button>)
-	void resetButtonsStates();
 	// Reset function
 	void reset();
 	// Function that update the color values of the given button in the buffer
@@ -56,7 +60,7 @@ public:
 	string name = "layoutDefaultName";
 	bool active = false;
 	Button* tmp;
-	float* data;
+	vector<float> dataVec;
 	int indice;
 	GLuint VAO, VBO;
 

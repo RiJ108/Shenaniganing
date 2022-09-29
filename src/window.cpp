@@ -152,8 +152,8 @@ void Window::G() {
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         //**************************************************************************
-        engine.updateSurrounding(player);
-        engine.renderActiveMeshs(player, (float)srcSize.x / srcSize.y);
+        engine.updateSurrounding(player, wHandler);
+        engine.renderMeshes(player, (float)srcSize.x / srcSize.y, engine.activeWorldMesh);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         ui.renderText("Press escape to return to main menu", 10.0f, (srcMidPoint.y * 2) - 25.0f, 0.5f, textColor);
         ui.renderText("position.x = " + to_string(player.position.x), 10.0f, 40.0f, 0.3f, textColor);

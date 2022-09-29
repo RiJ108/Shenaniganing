@@ -11,6 +11,7 @@ class Mesh {
 public:
     unsigned int VAO, VBO;
     int nbrTriangles = 0;
+    bool busy = false;
     vector<float> data;
     vector<TRIANGLE> triangles;
     ~Mesh() {
@@ -42,7 +43,7 @@ public:
     void setBuffers() {
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(1);
@@ -52,13 +53,13 @@ public:
 
     void refillBuffers() {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * data.size(), &data[0]);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void fillBuffers(vector<float> passedData) {
-        glBindVertexArray(VAO);
+        glBindVertexArray(VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * passedData.size(), &passedData[0]);
         glBindVertexArray(0);
     }
@@ -68,9 +69,8 @@ public:
     }
 
     void clearBuffers() {
-        glBindVertexArray(VAO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_STATIC_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, nullptr);
+        glBindVertexArray(VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL);
         glBindVertexArray(0);
     }
 
