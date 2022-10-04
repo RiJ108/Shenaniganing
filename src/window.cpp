@@ -11,8 +11,8 @@ BOOL Window::init() {
         else cout << __FUNCTION__ << "->GLFW initialized." << endl;
 
         //**Setting window
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         //**Creating the window
@@ -44,6 +44,7 @@ BOOL Window::init() {
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        cout << "OpenGL version " << glGetString(GL_VERSION) << endl;
 
         //**UI init
         ui.init(srcSize);
@@ -152,7 +153,7 @@ void Window::G() {
     case State::inGame:
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         //**************************************************************************
-        engine.updateSurrounding(player, wHandler);
+        engine.updateSurrounding(player);
         engine.renderMeshes(player, (float)srcSize.x / srcSize.y, engine.activeWorldMesh);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         ui.renderText("Press escape to return to main menu", 10.0f, (srcMidPoint.y * 2) - 25.0f, 0.5f, textColor);

@@ -1,18 +1,11 @@
 #include <engine.hpp>
 
 void Engine::tFunction() {
-	cout << __FUNCTION__ << endl;
-	for (Mesh* p : activeWorldMesh) {
-		p->busy = true;
-		/*void* ptr = glMapNamedBuffer(p->VBO, GL_WRITE_ONLY);
-
-		if(glUnmapNamedBuffer(p->VBO))*/
-			p->busy = false;
-	}
-	genFlag = false;
+	for (Mesh* p : activeWorldMesh)
+		memcpy(p->bufferPtr, &p->data[0], sizeof(float) * p->data.size());
 };
 
-void Engine::updateSurrounding(Entity entity, GLFWwindow* wHandler) {
+void Engine::updateSurrounding(Entity entity) {
 	vec3 newCP;
 	for (int i = 0; i < 3; i++) {
 		if (entity.position[i] > 0) newCP[i] = (int)(entity.position[i] + (DIM - 1) / 2) / (DIM - 1);
@@ -22,51 +15,28 @@ void Engine::updateSurrounding(Entity entity, GLFWwindow* wHandler) {
 		moveVec = newCP - oldCP;
 		oldCP = newCP;
 		cout << "\n__\n";
-		async(std::launch::async, &Engine::generateSurroundingChunks, this, activeWorldMesh);
-	}
-	if (genFlag) {
-		cout << __FUNCTION__ << " UPDATING aWM's buffers " << endl;
-		clock_t stt = clock();
-		//async(std::launch::async, &Engine::tFunction, this);
-		for (Mesh* p : activeWorldMesh) {
-			void* ptr = glMapNamedBuffer(p->VBO, GL_WRITE_ONLY);
-			memcpy(ptr, &p->data[0], sizeof(float) * p->data.size());
-			glUnmapNamedBuffer(p->VBO);
-		}
-		genFlag = false;
-		cout << __FUNCTION__ << " UPDATE finished in " << difftime(clock(), stt) << "ms" << endl;
+		async(std::launch::async, &Engine::generateSurroundingChunks, this);
 	}
 }
 
-void Engine::refreshAWMBuffers() {
-	for (Mesh* p : activeWorldMesh) {
-		glBindBuffer(GL_ARRAY_BUFFER, p->VBO);
-		void* ptr = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		cout << ptr << endl;
-		memcpy(ptr,
-			&p->data[0],
-			sizeof(p->data));
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-	}
-}
-
-void Engine::generateSurroundingChunks(vector<Mesh*> aWM) {
-		cout << __FUNCTION__ << " launched_" << endl;
+void Engine::generateSurroundingChunks() {
 		clock_t stt = clock(); int index = 0;
 		for (int i = 0; i < kernelSize[0]; i++) {
 			for (int j = 0; j < kernelSize[1]; j++) {
 				for (int k = 0; k < kernelSize[2]; k++) {
 					Mesh* tmp = activeWorldMesh.at(index);
+					tmp->busy = true;
 					tmp->clears();
 					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
 					tmp->loadDataFromTriangles();
+					tmp->refreshBufferData();
+					tmp->busy = false;
 					index++;
 				}
 			}
 		}
-		it = activeWorldMesh.begin();
-		genFlag = true;
-		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
+		//async(std::launch::async, &Engine::tFunction, this);
+		cout << __FUNCTION__ << "->Finished in " << difftime(clock(), stt) << "ms." << endl;
 	}
 
 void Engine::genSurroundingChunks() {
@@ -78,7 +48,7 @@ void Engine::genSurroundingChunks() {
 				}
 			}
 		}
-		cout << __FUNCTION__ << " finished in " << difftime(clock(), stt) << "ms." << endl;
+		cout << __FUNCTION__ << "->Finished in " << difftime(clock(), stt) << "ms." << endl;
 	}
 
 Mesh* Engine::genChunk(vec3 position) {
@@ -86,6 +56,8 @@ Mesh* Engine::genChunk(vec3 position) {
 		meshPtr = new Mesh();
 		generateMeshTriangles(meshPtr, position);
 		setMesh(meshPtr);
+		glBindBuffer(GL_ARRAY_BUFFER, meshPtr->VBO);
+		meshPtr->bufferPtr = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 		return meshPtr;
 	}
 

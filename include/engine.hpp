@@ -17,9 +17,8 @@ class Engine {
 public:
 	//______________________________________________________________________COMPUTATION
 	void tFunction();
-	void refreshAWMBuffers();
-	void updateSurrounding(Entity entity, GLFWwindow* wHandler);
-	void generateSurroundingChunks(vector<Mesh*> aWM);
+	void updateSurrounding(Entity entity);
+	void generateSurroundingChunks();
 	void genSurroundingChunks();
 	Mesh* genChunk(vec3 position);
 	void setGC(GRIDCELL* aGc, vec3 aPos);
@@ -38,7 +37,6 @@ public:
 	vector<Mesh*> activeWorldMesh;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
-	vector<Mesh*>::iterator it;
 	vec3 moveVec;
 	bool genFlag = false;
 
