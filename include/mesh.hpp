@@ -9,10 +9,10 @@ using namespace std;
 
 class Mesh {
 public:
-    void* bufferPtr;
-    unsigned int VAO, VBO;
+    void *bufferPtr, *bufferPtrb;
+    unsigned int VAO, VBO, VAOb, VBOb;
     int nbrTriangles = 0;
-    bool busy = false;
+    bool busy = false, needSwap = false;
     vector<float> data;
     vector<TRIANGLE> triangles;
     ~Mesh() {
@@ -38,21 +38,46 @@ public:
 
     void genBuffers() {
         glGenVertexArrays(1, &VAO);
+        glGenVertexArrays(1, &VAOb);
         glGenBuffers(1, &VBO);
+        glGenBuffers(1, &VBOb);
     }
 
     void refreshBufferData() {
         memcpy(bufferPtr, &data[0], sizeof(float) * data.size());
     }
 
+    void fillSecondBufferData() {
+        memcpy(bufferPtrb, &data[0], sizeof(float) * data.size());
+    }
+
+    void swapBuffers() {
+        int tmp = VAO;
+        VAO = VAOb;
+        VAOb = tmp;
+
+        tmp = VBO;
+        VBO = VBOb;
+        VBOb = tmp;
+
+        void* tmpb = bufferPtr;
+        bufferPtr = bufferPtrb;
+        bufferPtrb = tmpb;
+    }
+
     void setBuffers() {
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
         glBufferStorage(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-        //glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL, GL_DYNAMIC_DRAW);
-        //cout << glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT) << endl;
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glBindVertexArray(0);
 
+        glBindVertexArray(VAOb);
+        glBindBuffer(GL_ARRAY_BUFFER, VBOb);
+        glBufferStorage(GL_ARRAY_BUFFER, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(1);

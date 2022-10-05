@@ -16,7 +16,16 @@
 class Engine {
 public:
 	//______________________________________________________________________COMPUTATION
-	void tFunction();
+	void launchAndForget() {
+		thread thb = thread(&Engine::surroundingGenLoop, this);
+		thb.detach();
+
+		thread th = thread(&Engine::bufferSwapLoop, this);
+		th.detach();
+	};
+	void bufferSwapLoop();
+	void genSur();
+	void surroundingGenLoop();
 	void updateSurrounding(Entity entity);
 	void generateSurroundingChunks();
 	void genSurroundingChunks();
@@ -37,6 +46,7 @@ public:
 	vector<Mesh*> activeWorldMesh;
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
+	bool updateNeeded = false;
 	vec3 moveVec;
 	bool genFlag = false;
 

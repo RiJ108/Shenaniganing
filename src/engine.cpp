@@ -1,9 +1,48 @@
 #include <engine.hpp>
 
-void Engine::tFunction() {
-	for (Mesh* p : activeWorldMesh)
-		memcpy(p->bufferPtr, &p->data[0], sizeof(float) * p->data.size());
+void Engine::bufferSwapLoop() {
+	cout << __FUNCTION__ << "->Launched" << endl;
+	while (true) {
+		for (const auto m : activeWorldMesh) {
+			if (m->needSwap) {
+				//cout << __FUNCTION__ << "->Swaping buffers of " << m << endl;
+				m->swapBuffers();
+				m->needSwap = false;
+				m->busy = false;
+			}
+		}
+	}
 };
+
+void Engine::surroundingGenLoop() {
+	cout << __FUNCTION__ << "->Launched" << endl;
+	int index;
+	while (true) {
+		if (updateNeeded == 1) {
+			genSur();
+		}
+	}
+};
+
+void Engine::genSur() {
+	cout << __FUNCTION__ << "->" << updateNeeded << endl;
+	int index = 0;
+	for (int i = 0; i < kernelSize[0]; i++) {
+		for (int j = 0; j < kernelSize[1]; j++) {
+			for (int k = 0; k < kernelSize[2]; k++) {
+				Mesh* tmp = activeWorldMesh.at(index);
+				tmp->busy = true;
+				tmp->clears();
+				generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
+				tmp->loadDataFromTriangles();
+				tmp->fillSecondBufferData();
+				tmp->needSwap = true;
+				index++;
+			}
+		}
+	}
+	updateNeeded = false;
+}
 
 void Engine::updateSurrounding(Entity entity) {
 	vec3 newCP;
@@ -12,10 +51,11 @@ void Engine::updateSurrounding(Entity entity) {
 		else newCP[i] = (int)(entity.position[i] - (DIM - 1) / 2) / (DIM - 1);
 	}
 	if (newCP != oldCP) {
-		moveVec = newCP - oldCP;
+		//moveVec = newCP - oldCP;
 		oldCP = newCP;
-		cout << "\n__\n";
-		async(std::launch::async, &Engine::generateSurroundingChunks, this);
+		updateNeeded = true;
+		/*thread thb = thread(&Engine::genSur, this);
+		thb.detach();*/
 	}
 }
 
@@ -29,8 +69,11 @@ void Engine::generateSurroundingChunks() {
 					tmp->clears();
 					generateMeshTriangles(tmp, vec3(i, j, k) - offsets + oldCP);
 					tmp->loadDataFromTriangles();
-					tmp->refreshBufferData();
-					tmp->busy = false;
+					//tmp->refreshBufferData();
+					tmp->fillSecondBufferData();
+					//tmp->swapBuffers();
+					//tmp->busy = false;
+					tmp->needSwap = true;
 					index++;
 				}
 			}
@@ -58,6 +101,8 @@ Mesh* Engine::genChunk(vec3 position) {
 		setMesh(meshPtr);
 		glBindBuffer(GL_ARRAY_BUFFER, meshPtr->VBO);
 		meshPtr->bufferPtr = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		glBindBuffer(GL_ARRAY_BUFFER, meshPtr->VBOb);
+		meshPtr->bufferPtrb = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 		return meshPtr;
 	}
 
