@@ -62,7 +62,7 @@ private:
     GLFWwindow* wHandler;
     GLFWmonitor* monitor;
     const GLFWvidmode* mode;
-    string build = "Shenaniganing build 0.2 dev-" + to_string(time(0));
+    string build = "Shenaniganing build 0.22 dev-" + to_string(time(0));
     vec2 srcSize = vec2(1280, 720);
     vec2 srcMidPoint = srcSize * 0.5f;
     int fpsCap = 60;

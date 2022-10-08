@@ -11,29 +11,13 @@ class Mesh {
 public:
     void *bufferPtr, *bufferPtrb;
     unsigned int VAO, VBO, VAOb, VBOb;
-    int nbrTriangles = 0;
+    int nbrTriangles = 0, nbrTrianglesb = 0;
     bool busy = false, needSwap = false;
-    vector<float> data;
-    vector<TRIANGLE> triangles;
     ~Mesh() {
-        data.clear();
-        triangles.clear();
         glDeleteBuffers(1, &VAO);
         glDeleteBuffers(1, &VBO);
-    }
-
-    void loadDataFromTriangles() {
-        for (unsigned int i = 0; i < triangles.size(); i++) {
-            for (int j = 0; j < 3; j++) {
-                data.push_back(triangles.at(i).points[j].x);
-                data.push_back(triangles.at(i).points[j].y);
-                data.push_back(triangles.at(i).points[j].z);
-                data.push_back(triangles.at(i).norm.x);
-                data.push_back(triangles.at(i).norm.y);
-                data.push_back(triangles.at(i).norm.z);
-            }
-        }
-        nbrTriangles = data.size() / 6;
+        glDeleteBuffers(1, &VAOb);
+        glDeleteBuffers(1, &VBOb);
     }
 
     void genBuffers() {
@@ -43,12 +27,14 @@ public:
         glGenBuffers(1, &VBOb);
     }
 
-    void refreshBufferData() {
+    void fillPrimaireBufferData(vector<float> data) {
         memcpy(bufferPtr, &data[0], sizeof(float) * data.size());
+        nbrTriangles = data.size() / 6;
     }
 
-    void fillSecondBufferData() {
+    void fillSecondBufferData(vector<float> data) {
         memcpy(bufferPtrb, &data[0], sizeof(float) * data.size());
+        nbrTrianglesb = data.size() / 6;
     }
 
     void swapBuffers() {
@@ -63,6 +49,8 @@ public:
         void* tmpb = bufferPtr;
         bufferPtr = bufferPtrb;
         bufferPtrb = tmpb;
+
+        nbrTriangles = nbrTrianglesb;
     }
 
     void setBuffers() {
@@ -85,19 +73,7 @@ public:
         glBindVertexArray(0);
     }
 
-    void refillBuffers() {
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * data.size(), &data[0]);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-
-    void fillBuffers(vector<float> passedData) {
-        memcpy(glMapNamedBuffer(VBO, GL_WRITE_ONLY), &passedData[0], sizeof(float) * passedData.size());
-        glUnmapNamedBuffer(VBO);
-    }
-
-    void fillBuffers() {
+    void fillBuffers(vector<float> data) {
         memcpy(glMapNamedBuffer(VBO, GL_WRITE_ONLY), &data[0], sizeof(float) * data.size());
         glUnmapNamedBuffer(VBO);
     }
@@ -106,11 +82,6 @@ public:
         glBindVertexArray(VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, NULL);
         glBindVertexArray(0);
-    }
-
-    void clears() {
-        data.clear();
-        triangles.clear();
     }
 
     void render() {

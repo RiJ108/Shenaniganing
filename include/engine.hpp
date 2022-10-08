@@ -28,11 +28,11 @@ public:
 	void surroundingGenLoop();
 	void updateSurrounding(Entity entity);
 	void generateSurroundingChunks();
-	void genSurroundingChunks();
+	void generateSurroundingChunksIC();
 	Mesh* genChunk(vec3 position);
 	void setGC(GRIDCELL* aGc, vec3 aPos);
-	void generateMeshTriangles(Mesh* mesh);
-	void generateMeshTriangles(Mesh* mesh, vec3 chunkPosition);
+	vector<TRIANGLE> getTriangles(vec3 aPosition);
+	vector<float> getData(vector<TRIANGLE> triangles);
 	void setMesh(Mesh* mesh);
 	//______________________________________________________________________BUFFERS/SHADERS SETTING
 	void initShaders();
