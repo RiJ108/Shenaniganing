@@ -12,7 +12,15 @@ public:
     void *bufferPtr, *bufferPtrb;
     unsigned int VAO, VBO, VAOb, VBOb;
     int nbrTriangles = 0, nbrTrianglesb = 0;
+    vec3 color = vec3(0.8f);
     bool busy = false, needSwap = false;
+
+    void printMemoryUsage() {
+        cout << this << endl;
+        cout << "Buffers's ptr : " << sizeof(bufferPtr) << ", " << sizeof(bufferPtrb) << endl;
+        cout << "Buffers : " << sizeof(VAO) << ", " << sizeof(VAOb) << ", " << sizeof(VBO) << ", " << sizeof(VBOb) << endl;
+    };
+
     ~Mesh() {
         glDeleteBuffers(1, &VAO);
         glDeleteBuffers(1, &VBO);
@@ -27,7 +35,7 @@ public:
         glGenBuffers(1, &VBOb);
     }
 
-    void fillPrimaireBufferData(vector<float> data) {
+    void fillFirstBufferData(vector<float> data) {
         memcpy(bufferPtr, &data[0], sizeof(float) * data.size());
         nbrTriangles = data.size() / 6;
     }

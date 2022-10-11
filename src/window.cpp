@@ -52,6 +52,7 @@ BOOL Window::init() {
 
         //**
         engine.initShaders();
+        engine.uFunction();
         engine.generateSurroundingChunksIC();
         engine.launchAndForget();
         player.position = vec3(0.0f, 0.0f, 0.0f);

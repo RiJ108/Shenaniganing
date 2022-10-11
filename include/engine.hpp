@@ -16,15 +16,11 @@
 class Engine {
 public:
 	//______________________________________________________________________COMPUTATION
-	void launchAndForget() {
-		thread thb = thread(&Engine::surroundingGenLoop, this);
-		thb.detach();
-
-		thread th = thread(&Engine::bufferSwapLoop, this);
-		th.detach();
-	};
+	void launchAndForget();
+	bool inKernel(ivec3 aCoord);
+	void uFunction();
 	void bufferSwapLoop();
-	void genSur();
+	vector<float> getTrianglesData(vec3 aPosition);
 	void surroundingGenLoop();
 	void updateSurrounding(Entity entity);
 	void generateSurroundingChunks();
@@ -47,18 +43,29 @@ public:
 	GRIDCELL* gridcellPtr = new GRIDCELL;
 	//** gen var
 	bool updateNeeded = false;
+	bool tFlag = false;
 	vec3 moveVec;
 	bool genFlag = false;
 
+	vector<ivec3> kernelCoords;
 	int seed = time(nullptr);
-	PerlinNoise perlin = PerlinNoise(seed);
+	PerlinNoise perlin = PerlinNoise(69);
 	MarchingCube mCube;
 	TRIANGLE emptyTriangle;
 	float threshold = 0.50f;
 	float x_offset = DIM / 2.0f, y_offset = DIM / 2.0f, z_offset = DIM / 2.0f;
 	vec3 oldCP = vec3(0.0f);
-	vec3 kernelSize = vec3(5.0f);
+	vec3 kernelSize = vec3(9.0f);
 	vec3 offsets = 0.5f * (kernelSize - vec3(1));
+	vec3 coordOffset[8] = { vec3(0.0f),
+						vec3(1.0f, 0.0f, 0.0f),
+						vec3(1.0f, 0.0f, 1.0f),
+						vec3(0.0f, 0.0f, 1.0f),
+						vec3(0.0f, 1.0f, 0.0f),
+						vec3(1.0f, 1.0f, 0.0f),
+						vec3(1.0f, 1.0f, 1.0f),
+						vec3(0.0f, 1.0f, 1.0f) };
+
 	//** rendering var
 	Shader shader;
 	Shader pointShader;

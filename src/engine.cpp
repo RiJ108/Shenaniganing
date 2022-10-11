@@ -1,5 +1,40 @@
 #include <engine.hpp>
-
+void Engine::launchAndForget() {
+	thread thb = thread(&Engine::surroundingGenLoop, this); thb.detach();
+	thread th = thread(&Engine::bufferSwapLoop, this); th.detach();
+	//thread thKernelCoordInit = thread(&Engine::uFunction, this); thKernelCoordInit.detach();
+};
+bool Engine::inKernel(ivec3 aCoord) {
+	if (aCoord.x < oldCP.x - offsets.x + kernelSize.x && aCoord.x > oldCP.x - offsets.x - kernelSize.x) {
+		if (aCoord.y < oldCP.y - offsets.y + kernelSize.y && aCoord.y > oldCP.y - offsets.y - kernelSize.y) {
+			if (aCoord.z < oldCP.z - offsets.z + kernelSize.z && aCoord.z > oldCP.z - offsets.z - kernelSize.z) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		return false;
+	}
+};
+void Engine::uFunction() {
+	cout << __FUNCTION__ << "->Launched" << endl;
+	for (int i = 0; i < kernelSize[0]; i++) {
+		for (int j = 0; j < kernelSize[1]; j++) {
+			for (int k = 0; k < kernelSize[2]; k++) {
+				kernelCoords.push_back(vec3(i, j, k) - offsets + oldCP);
+			}
+		}
+	}
+};
+vector<float> Engine::getTrianglesData(vec3 aPosition) {
+	return getData(getTriangles(aPosition));
+};
 void Engine::updateSurrounding(Entity entity) {
 	vec3 newCP;
 	for (int i = 0; i < 3; i++) {
@@ -27,13 +62,12 @@ void Engine::surroundingGenLoop() {
 	cout << __FUNCTION__ << "->Launched" << endl;
 	int index;
 	while (true) {
-		if (updateNeeded == 1) {
+		if (updateNeeded == 1)
 			generateSurroundingChunks();
-		}
 	}
 };
 void Engine::generateSurroundingChunksIC() {
-	clock_t stt = clock(); Mesh* tmp; vector<float> data;
+	clock_t stt = clock(); Mesh* tmp; vector<float> data; ivec3 chnkPos;
 	for (int i = 0; i < kernelSize[0]; i++) {
 		for (int j = 0; j < kernelSize[1]; j++) {
 			for (int k = 0; k < kernelSize[2]; k++) {
@@ -46,7 +80,8 @@ void Engine::generateSurroundingChunksIC() {
 				glBindBuffer(GL_ARRAY_BUFFER, tmp->VBOb);
 				tmp->bufferPtrb = glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(float) * 6 * 3 * 5 * CUBE_LIMIT, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 				//**
-				tmp->fillPrimaireBufferData(getData(getTriangles(vec3(i, j, k) - offsets + oldCP)));
+				cout << inKernel(vec3(i, j, k) - offsets + oldCP) << endl;
+				tmp->fillFirstBufferData(getData(getTriangles(vec3(i, j, k) - offsets + oldCP)));
 				//**
 				activeWorldMesh.push_back(tmp);
 			}
@@ -87,14 +122,6 @@ vector<float> Engine::getData(vector<TRIANGLE> triangles) {
 	return data;
 };
 void Engine::setGC(GRIDCELL* aGc, vec3 aPos) {
-	vec3 coordOffset[8] = { vec3(0.0f),
-							vec3(1.0f, 0.0f, 0.0f),
-							vec3(1.0f, 0.0f, 1.0f),
-							vec3(0.0f, 0.0f, 1.0f),
-							vec3(0.0f, 1.0f, 0.0f),
-							vec3(1.0f, 1.0f, 0.0f),
-							vec3(1.0f, 1.0f, 1.0f),
-							vec3(0.0f, 1.0f, 1.0f) };
 	vec3 pOffset;
 	float noiseValue;
 	for (int i = 0; i < 8; i++) {
@@ -113,8 +140,6 @@ vector<TRIANGLE> Engine::getTriangles(vec3 aPosition) {
 				position += aPosition * vec3(DIM - 1);
 				setGC(gridcellPtr, position);
 				mCube.polygonise(*gridcellPtr, 0.5f, &triangles);
-				for (int i = 0; i < 5 - mCube.nbrTriangle[mCube.cubeindex]; i++)
-					triangles.push_back(emptyTriangle);
 			}
 		}
 	}
@@ -127,10 +152,8 @@ void Engine::initShaders() {
 };
 void Engine::renderMeshes(Entity entity, float ratio, vector<Mesh*> meshes) {
 	for (int i = 0; i < meshes.size(); i++) {
-		if (!meshes.at(i)->busy) {
-			float aColor = (float)(i + 1) / meshes.size();
-			renderMesh(entity, ratio, meshes.at(i), vec3(aColor, 1 - aColor, -aColor));
-		}
+		if (!meshes.at(i)->busy)
+			renderMesh(entity, ratio, meshes.at(i), meshes.at(i)->color);
 	}
 };
 void Engine::renderMesh(Camera pov, float ratio, Mesh* mesh) {
